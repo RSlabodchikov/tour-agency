@@ -10,7 +10,7 @@ public class ClientMenu implements Menu {
 
     private User user;
 
-    public ClientMenu(User user) {
+    ClientMenu(User user) {
         this.user = user;
     }
 
@@ -31,6 +31,9 @@ public class ClientMenu implements Menu {
             String action;
             try {
                 printTextMenu();
+                if (!scanner.hasNextInt()) {
+                    throw new InputMismatchException("Enter int number, please!!!");
+                }
                 switch (scanner.nextInt()) {
                     case 1:
                         action = "booking";
@@ -48,7 +51,7 @@ public class ClientMenu implements Menu {
                 }
                 Menu menu = new MenuSearch().getMenuByAction(user, action);
                 menu.printMenu();
-            } catch (Exception e) {
+            } catch (InputMismatchException e) {
                 System.out.println(e.getMessage());
             }
 

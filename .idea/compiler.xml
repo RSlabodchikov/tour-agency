@@ -12,10 +12,10 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="console" target="1.5" />
-      <module name="dao" target="1.5" />
-      <module name="services" target="1.5" />
-      <module name="touragency" target="1.5" />
+      <module name="console" target="8" />
+      <module name="dao" target="8" />
+      <module name="services" target="8" />
+      <module name="touragency" target="8" />
     </bytecodeTargetLevel>
   </component>
 </project>

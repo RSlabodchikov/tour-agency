@@ -14,8 +14,6 @@ class MenuSearch {
             case CLIENT:
                 menu = new ClientMenu(user);
                 break;
-            default:
-                break;
         }
         return menu;
     }
@@ -30,4 +28,5 @@ class MenuSearch {
         }
         return menu;
     }
+
 }

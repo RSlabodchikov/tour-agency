@@ -1,24 +1,19 @@
 package com.netcracker.mano.touragency.impl;
 
-import com.netcracker.mano.touragency.dao.BookingDAO;
 import com.netcracker.mano.touragency.dao.CreditCardDAO;
-import com.netcracker.mano.touragency.dao.Impl.BookingDAOImpl;
 import com.netcracker.mano.touragency.dao.Impl.CreditCardDAOImpl;
-import com.netcracker.mano.touragency.dao.Impl.TourDAOImpl;
-import com.netcracker.mano.touragency.dao.TourDAO;
 import com.netcracker.mano.touragency.entity.CreditCard;
-import com.netcracker.mano.touragency.interfaces.ClientService;
+import com.netcracker.mano.touragency.interfaces.CreditCardService;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-public class ClientServiceImpl implements ClientService {
+public class CreditCardServiceImpl implements CreditCardService {
     private Random random = new Random();
     private CreditCardDAO creditCardDAO = new CreditCardDAOImpl();
-    private BookingDAO bookingDAO = new BookingDAOImpl();
-    private TourDAO tourDAO = new TourDAOImpl();
 
     @Override
     public List<CreditCard> getAllClientCards(Long userId) {
@@ -30,7 +25,7 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
-    public Optional<CreditCard> getCardById(Long clientId, Long cardId) {
+    public Optional<CreditCard> getById(Long clientId, Long cardId) {
         return getAllClientCards(clientId)
                 .stream()
                 .filter(a -> a.getId() == cardId)
@@ -38,7 +33,7 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
-    public void createCard(Double balance, Long id) {
+    public void create(Double balance, Long id) {
         CreditCard card = new CreditCard();
         card.setBalance(balance);
         card.setUserId(id);
@@ -47,7 +42,27 @@ public class ClientServiceImpl implements ClientService {
     }
 
     @Override
-    public void deleteCard(Long cardId) {
-        creditCardDAO.delete(cardId);
+    public void delete(Long cardId, Long clientId) {
+        if (getById(clientId, cardId).isPresent()) {
+            creditCardDAO.delete(cardId);
+        }
+
+    }
+
+    @Override
+    public CreditCard updateBalance(Long cardId, Double balance, Long userId) {
+        Optional<CreditCard> card = getById(userId, cardId);
+        if (card.isPresent()) {
+            card.get().setBalance(card.get().getBalance() + balance);
+            return creditCardDAO.update(card.get());
+        }
+        return null;
+    }
+
+    @Override
+    public Optional<CreditCard> getByGreatestBalance(Long userId) {
+        return getAllClientCards(userId)
+                .stream()
+                .max(Comparator.comparing(CreditCard::getBalance));
     }
 }

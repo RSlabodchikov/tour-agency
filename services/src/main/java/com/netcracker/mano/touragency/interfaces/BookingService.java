@@ -1,4 +1,4 @@
 package com.netcracker.mano.touragency.interfaces;
 
-public interface AdminService {
+public interface BookingService {
 }

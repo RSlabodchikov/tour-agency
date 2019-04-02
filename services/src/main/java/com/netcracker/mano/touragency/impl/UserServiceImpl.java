@@ -20,4 +20,14 @@ public class UserServiceImpl implements UserService {
     public User signIn(Credentials credentials) {
         return userDAO.findUserByCredentials(credentials);
     }
+
+    @Override
+    public void update(User user) {
+        userDAO.update(user);
+    }
+
+    @Override
+    public User findById(Long id) {
+        return userDAO.getById(id);
+    }
 }
