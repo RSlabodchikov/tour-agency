@@ -1,0 +1,1 @@
+[{"id":1,"type":"User","credentials":{"login":"admin","password":"admin"},"name":"admin","surname":"admin","role":"ADMIN"},{"id":2,"type":"User","credentials":{"login":"login","password":"call"},"name":"roma","surname":"dobryak","role":"CLIENT"},{"id":3,"type":"User","credentials":{"login":"romaha","password":"kakaha"},"name":"roma","surname":"surname","role":"CLIENT"}]
