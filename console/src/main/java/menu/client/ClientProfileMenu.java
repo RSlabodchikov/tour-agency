@@ -1,19 +1,20 @@
-package menu;
+package menu.client;
 
 import com.netcracker.mano.touragency.entity.User;
 import com.netcracker.mano.touragency.impl.UserServiceImpl;
 import com.netcracker.mano.touragency.interfaces.UserService;
+import menu.Menu;
 import org.apache.commons.codec.binary.Base64;
 
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
-public class ProfileMenu implements Menu {
+public class ClientProfileMenu implements Menu {
     private User user;
 
     private UserService service = new UserServiceImpl();
 
-    ProfileMenu(User user) {
+    public ClientProfileMenu(User user) {
         this.user = user;
     }
 

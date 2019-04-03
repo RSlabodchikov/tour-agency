@@ -1,19 +1,20 @@
-package menu;
+package menu.client;
 
 import com.netcracker.mano.touragency.entity.CreditCard;
 import com.netcracker.mano.touragency.entity.User;
 import com.netcracker.mano.touragency.impl.CreditCardServiceImpl;
 import com.netcracker.mano.touragency.interfaces.CreditCardService;
+import menu.Menu;
 
 import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
 
-public class CreditCardMenu implements Menu {
+public class ClientCreditCardMenu implements Menu {
     private User user;
     private CreditCardService service = new CreditCardServiceImpl();
 
-    CreditCardMenu(User user) {
+   public  ClientCreditCardMenu(User user) {
         this.user = user;
     }
 

@@ -1,60 +1,53 @@
-package menu;
-
+package menu.admin;
 
 import com.netcracker.mano.touragency.entity.User;
+import menu.Menu;
+import utils.Constants;
 
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
-public class ClientMenu implements Menu {
-
+public class AdminMenu implements Menu {
     private User user;
 
-    ClientMenu(User user) {
+    public AdminMenu(User user) {
         this.user = user;
     }
 
     @Override
     public void printTextMenu() {
-        System.out.println("1)Bookings");
-        System.out.println("2)Credit cards");
-        System.out.println("3)Profile");
-        System.out.println("0)Back to main menu");
+        System.out.println("1)Users");
+        System.out.println("2)Tours");
+        System.out.println("0)Log out");
     }
-
 
     @Override
     public void printMenu() {
         Scanner scanner = new Scanner(System.in);
 
         while (true) {
+            printTextMenu();
             String action;
             try {
-                printTextMenu();
                 if (!scanner.hasNextInt()) {
-                    throw new InputMismatchException("Enter int number, please!!!");
+                    throw new InputMismatchException("Please enter int, not string !!!");
                 }
                 switch (scanner.nextInt()) {
                     case 1:
-                        action = "booking";
+                        action = Constants.USERS;
                         break;
                     case 2:
-                        action = "credit card";
-                        break;
-                    case 3:
-                        action = "profile";
+                        action = Constants.TOURS;
                         break;
                     case 0:
                         return;
                     default:
-                        throw new InputMismatchException("Wrong choice! Try again, please!!!");
+                        break;
                 }
-                Menu menu = new MenuSearch().getMenuByAction(user, action);
-                menu.printMenu();
             } catch (InputMismatchException e) {
                 System.out.println(e.getMessage());
             }
-
         }
+
     }
 }

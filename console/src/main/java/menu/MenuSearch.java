@@ -2,11 +2,17 @@ package menu;
 
 
 import com.netcracker.mano.touragency.entity.User;
+import menu.admin.AdminMenu;
+import menu.client.ClientBookingMenu;
+import menu.client.ClientCreditCardMenu;
+import menu.client.ClientMenu;
+import menu.client.ClientProfileMenu;
+import utils.Constants;
 
-class MenuSearch {
+public class MenuSearch {
     private Menu menu;
 
-    Menu getMenuByRole(User user) {
+    public Menu getMenuByRole(User user) {
         switch (user.getRole()) {
             case ADMIN:
                 menu = new AdminMenu(user);
@@ -18,13 +24,13 @@ class MenuSearch {
         return menu;
     }
 
-    Menu getMenuByAction(User user, String action) {
-        if ("booking".compareTo(action) == 0) {
-            menu = new BookingMenu(user);
-        } else if ("credit card".compareTo(action) == 0) {
-            menu = new CreditCardMenu(user);
-        } else if ("profile".compareTo(action) == 0) {
-            menu = new ProfileMenu(user);
+    public Menu getMenuByAction(User user, String action) {
+        if (Constants.BOOKING.compareTo(action) == 0) {
+            menu = new ClientBookingMenu(user);
+        } else if (Constants.CREDIT_CARDS.compareTo(action) == 0) {
+            menu = new ClientCreditCardMenu(user);
+        } else if (Constants.PROFILE.compareTo(action) == 0) {
+            menu = new ClientProfileMenu(user);
         }
         return menu;
     }

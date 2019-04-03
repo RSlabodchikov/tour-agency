@@ -1,12 +1,13 @@
-package menu;
+package menu.client;
 
 import com.netcracker.mano.touragency.entity.User;
+import menu.Menu;
 
-public class BookingMenu implements Menu {
+public class ClientBookingMenu implements Menu {
 
     private User user;
 
-    BookingMenu(User user) {
+    public ClientBookingMenu(User user) {
         this.user = user;
     }
 

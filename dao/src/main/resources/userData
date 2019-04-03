@@ -1,1 +1,1 @@
-[{"id":1,"type":"User","credentials":{"login":"roma","password":"a2lsbA=="},"name":"romaha","surname":"chebyraha","role":"ADMIN"},{"id":2,"type":"User","credentials":{"login":"login","password":"Y2FsbA=="},"name":"roma","surname":"the_best","role":"CLIENT"}]
+[{"id":1,"type":"User","credentials":{"login":"roma","password":"a2lsbA=="},"name":"romaha","surname":"chebyraha","role":"CLIENT"},{"id":2,"type":"User","credentials":{"login":"admin","password":"Y2FsbA=="},"name":"roma","surname":"the_best","role":"ADMIN"}]
