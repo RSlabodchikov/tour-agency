@@ -3,6 +3,8 @@ package menu;
 
 import com.netcracker.mano.touragency.entity.User;
 import menu.admin.AdminMenu;
+import menu.admin.AdminTourMenu;
+import menu.admin.AdminUserMenu;
 import menu.client.ClientBookingMenu;
 import menu.client.ClientCreditCardMenu;
 import menu.client.ClientMenu;
@@ -24,7 +26,7 @@ public class MenuSearch {
         return menu;
     }
 
-    public Menu getMenuByAction(User user, String action) {
+    public Menu getUserMenuByAction(User user, String action) {
         if (Constants.BOOKING.compareTo(action) == 0) {
             menu = new ClientBookingMenu(user);
         } else if (Constants.CREDIT_CARDS.compareTo(action) == 0) {
@@ -32,6 +34,13 @@ public class MenuSearch {
         } else if (Constants.PROFILE.compareTo(action) == 0) {
             menu = new ClientProfileMenu(user);
         }
+        return menu;
+    }
+
+    public Menu getAdminMenuByAction(String action) {
+        if (Constants.TOURS.compareTo(action) == 0) {
+            menu = new AdminTourMenu();
+        } else menu = new AdminUserMenu();
         return menu;
     }
 

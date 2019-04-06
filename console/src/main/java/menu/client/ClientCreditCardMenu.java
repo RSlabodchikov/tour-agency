@@ -1,13 +1,11 @@
 package menu.client;
 
-import com.netcracker.mano.touragency.entity.CreditCard;
 import com.netcracker.mano.touragency.entity.User;
 import com.netcracker.mano.touragency.impl.CreditCardServiceImpl;
 import com.netcracker.mano.touragency.interfaces.CreditCardService;
 import menu.Menu;
 
 import java.util.InputMismatchException;
-import java.util.List;
 import java.util.Scanner;
 
 public class ClientCreditCardMenu implements Menu {
@@ -40,7 +38,7 @@ public class ClientCreditCardMenu implements Menu {
                 }
                 switch (scanner.nextInt()) {
                     case 1:
-                        showAllCards();
+                        service.getAllClientCards(user.getId()).forEach(System.out::println);
                         break;
                     case 2:
                         System.out.println("Enter card id :");
@@ -75,11 +73,6 @@ public class ClientCreditCardMenu implements Menu {
         }
     }
 
-    private void showAllCards() {
-        List<CreditCard> cards = service.getAllClientCards(user.getId());
-
-        System.out.println(cards);
-    }
 
     private void getCardBalance(Long id) {
         if (service.getById(user.getId(), id).isPresent()) {

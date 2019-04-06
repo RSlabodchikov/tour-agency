@@ -41,12 +41,20 @@ public class ClientProfileMenu implements Menu {
                         System.out.println(user);
                         break;
                     case 2:
-                        System.out.println("Enter new password :");
+                        System.out.println("Enter old password :");
+
                         String password = scanner.next();
                         Base64 base64 = new Base64();
                         String encodedPassword = new String(base64.encode(password.getBytes()));
-                        user.getCredentials().setPassword(encodedPassword);
-                        service.update(user);
+                        if (user.getCredentials().getPassword().equals(encodedPassword)) {
+                            System.out.println("Enter new password :");
+                            password = scanner.next();
+                            encodedPassword = new String(base64.encode(password.getBytes()));
+                            user.getCredentials().setPassword(encodedPassword);
+                            service.update(user);
+                        } else {
+                            System.out.println("Incorrect password.");
+                        }
                         break;
                     case 3:
                         System.out.println("Enter new name :");

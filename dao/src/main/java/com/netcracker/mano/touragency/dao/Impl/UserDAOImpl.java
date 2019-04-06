@@ -21,4 +21,13 @@ public class UserDAOImpl extends CrudDAOImpl<User> implements UserDAO {
                 .findFirst();
         return user.orElse(null);
     }
+
+    @Override
+    public Boolean checkUserIfExist(String login) {
+        Optional<User> user = super.getAll()
+                .stream()
+                .filter(a -> login.equals(a.getCredentials().getLogin()))
+                .findFirst();
+        return user.isPresent();
+    }
 }

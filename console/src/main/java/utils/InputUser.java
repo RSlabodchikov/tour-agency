@@ -24,6 +24,7 @@ public class InputUser {
 
     public static User createUser() {
         User user = new User();
+        user.setIsBlocked(false);
         Scanner scanner = new Scanner(System.in);
         Credentials credentials = authorizeUser();
         System.out.println("Enter your name:");

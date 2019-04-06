@@ -10,6 +10,7 @@ public class User extends BaseEntity {
     private String name;
     private String surname;
     private Role role;
+    private Boolean isBlocked;
 
     public User() {
         super();
@@ -22,7 +23,7 @@ public class User extends BaseEntity {
                 "credentials=" + credentials +
                 ", name='" + name + '\'' +
                 ", surname='" + surname + '\'' +
-                ", role=" + role +
+                ", isBlocked=" + isBlocked +
                 ", id=" + id +
                 '}';
     }

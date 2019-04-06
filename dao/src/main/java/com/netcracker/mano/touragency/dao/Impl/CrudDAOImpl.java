@@ -17,16 +17,12 @@ public class CrudDAOImpl<T extends BaseEntity> implements CrudDAO<T> {
 
     private static ObjectMapper mapper = new ObjectMapper();
 
-    static {
-        mapper.registerSubtypes(User.class, Booking.class, CreditCard.class, Tour.class);
-    }
-
     private Map<Long, T> map = new HashMap<>();
     private String filename;
 
     CrudDAOImpl(String filename) {
         this.filename = filename;
-
+        mapper.registerSubtypes(User.class, Booking.class, CreditCard.class, Tour.class);
         mapper.configure(JsonParser.Feature.AUTO_CLOSE_SOURCE, true);
         try {
             File file = new File(this.filename);
@@ -51,7 +47,6 @@ public class CrudDAOImpl<T extends BaseEntity> implements CrudDAO<T> {
 
     @Override
     public T getById(long id) {
-
         return map.get(id);
     }
 

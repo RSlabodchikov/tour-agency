@@ -2,6 +2,7 @@ package menu.admin;
 
 import com.netcracker.mano.touragency.entity.User;
 import menu.Menu;
+import menu.MenuSearch;
 import utils.Constants;
 
 import java.util.InputMismatchException;
@@ -26,9 +27,14 @@ public class AdminMenu implements Menu {
         Scanner scanner = new Scanner(System.in);
 
         while (true) {
-            printTextMenu();
             String action;
+            printTextMenu();
             try {
+                if (!scanner.hasNextInt()) {
+                    throw new InputMismatchException("Enter int number, please!!!");
+                }
+
+
                 if (!scanner.hasNextInt()) {
                     throw new InputMismatchException("Please enter int, not string !!!");
                 }
@@ -42,8 +48,10 @@ public class AdminMenu implements Menu {
                     case 0:
                         return;
                     default:
-                        break;
+                        throw new InputMismatchException("Wrong choice! Try again, please!!!");
                 }
+                Menu menu = new MenuSearch().getAdminMenuByAction(action);
+                menu.printMenu();
             } catch (InputMismatchException e) {
                 System.out.println(e.getMessage());
             }

@@ -9,6 +9,4 @@ public class CreditCardDAOImpl extends CrudDAOImpl<CreditCard> implements Credit
     public CreditCardDAOImpl() {
         super(CARD_FILENAME);
     }
-
-
 }

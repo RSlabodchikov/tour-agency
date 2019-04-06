@@ -52,7 +52,7 @@ public class ClientMenu implements Menu {
                     default:
                         throw new InputMismatchException("Wrong choice! Try again, please!!!");
                 }
-                Menu menu = new MenuSearch().getMenuByAction(user, action);
+                Menu menu = new MenuSearch().getUserMenuByAction(user, action);
                 menu.printMenu();
             } catch (InputMismatchException e) {
                 System.out.println(e.getMessage());

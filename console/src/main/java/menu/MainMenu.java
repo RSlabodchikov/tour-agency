@@ -36,7 +36,7 @@ public class MainMenu implements Menu {
                         break;
                     case 2:
                         user = InputUser.createUser();
-                        service.registration(user);
+                        user = service.registration(user);
                         break;
                     case 0:
                         System.exit(0);
@@ -44,9 +44,13 @@ public class MainMenu implements Menu {
                     default:
                         throw new InputMismatchException("Wrong choice! Try again, please!");
                 }
-                if (user != null) {
+                if (user != null && user.getIsBlocked()) {
+                    System.out.println("Your are blocked by admin  :(");
+                } else if (user != null) {
                     Menu menu = new MenuSearch().getMenuByRole(user);
                     menu.printMenu();
+                } else {
+                    System.out.println("Incorrect login or pass...");
                 }
 
             } catch (InputMismatchException e) {
