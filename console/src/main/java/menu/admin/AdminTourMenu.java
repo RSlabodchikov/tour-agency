@@ -10,7 +10,7 @@ import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class AdminTourMenu implements Menu {
-    private TourService service = new TourServiceImpl();
+    private TourService service = TourServiceImpl.getInstance();
     private Scanner scanner = new Scanner(System.in);
 
     @Override

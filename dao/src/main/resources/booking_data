@@ -1,1 +1,0 @@
-[{"id":1,"type":"Booking","numberOfClients":2,"totalPrice":800.0,"userId":6,"tourId":1},{"id":2,"type":"Booking","numberOfClients":5,"totalPrice":2000.0,"userId":6,"tourId":1},{"id":3,"type":"Booking","numberOfClients":1,"totalPrice":400.0,"userId":10,"tourId":1}]

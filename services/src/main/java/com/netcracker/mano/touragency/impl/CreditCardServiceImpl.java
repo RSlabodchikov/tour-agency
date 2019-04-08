@@ -15,6 +15,18 @@ public class CreditCardServiceImpl implements CreditCardService {
     private Random random = new Random();
     private CreditCardDAO creditCardDAO = new CreditCardDAOImpl();
 
+    private static CreditCardServiceImpl instance;
+
+    private CreditCardServiceImpl() {
+    }
+
+    public static CreditCardServiceImpl getInstance() {
+        if (instance == null) {
+            instance = new CreditCardServiceImpl();
+        }
+        return instance;
+    }
+
     @Override
     public List<CreditCard> getAllClientCards(Long userId) {
         return creditCardDAO.getAll()
@@ -34,6 +46,7 @@ public class CreditCardServiceImpl implements CreditCardService {
 
     @Override
     public void create(Double balance, Long id) {
+        if (balance < 0) return;
         CreditCard card = new CreditCard();
         card.setBalance(balance);
         card.setUserId(id);

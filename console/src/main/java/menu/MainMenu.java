@@ -25,7 +25,7 @@ public class MainMenu implements Menu {
             Scanner scanner = new Scanner(System.in);
             try {
                 User user = null;
-                UserService service = new UserServiceImpl();
+                UserService service = UserServiceImpl.getInstance();
                 if (!scanner.hasNextInt()) {
                     throw new InputMismatchException("Enter int number, please!!!");
                 }

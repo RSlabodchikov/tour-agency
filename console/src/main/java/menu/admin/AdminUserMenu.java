@@ -11,7 +11,7 @@ import java.util.Scanner;
 
 public class AdminUserMenu implements Menu {
 
-    private UserService service = new UserServiceImpl();
+    private UserService service = UserServiceImpl.getInstance();
 
     @Override
     public void printTextMenu() {

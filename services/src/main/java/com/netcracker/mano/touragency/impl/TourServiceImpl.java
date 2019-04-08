@@ -10,6 +10,18 @@ import java.util.List;
 public class TourServiceImpl implements TourService {
     private TourDAO tourDAO = new TourDAOImpl();
 
+    private static TourServiceImpl instance;
+
+    private TourServiceImpl() {
+    }
+
+    public static TourServiceImpl getInstance() {
+        if (instance == null) {
+            instance = new TourServiceImpl();
+        }
+        return instance;
+    }
+
     @Override
     public Tour getById(Long id) {
         return tourDAO.getById(id);

@@ -12,7 +12,7 @@ import java.util.Scanner;
 public class ClientProfileMenu implements Menu {
     private User user;
 
-    private UserService service = new UserServiceImpl();
+    private UserService service = UserServiceImpl.getInstance();
 
     public ClientProfileMenu(User user) {
         this.user = user;

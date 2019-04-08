@@ -15,19 +15,31 @@ import java.util.stream.Collectors;
 
 public class BookingServiceImpl implements BookingService {
 
+    private static BookingServiceImpl instance;
+
+    public static BookingServiceImpl getInstance() {
+        if (instance == null) {
+            instance = new BookingServiceImpl();
+        }
+        return instance;
+    }
+
+    private BookingServiceImpl() {
+    }
+
     private BookingDAO bookingDAO = new BookingDAOImpl();
 
     @Override
     public Booking createBooking(Booking booking) {
         if (booking.getNumberOfClients() < 0) return null;
-        TourService tourService = new TourServiceImpl();
+        TourService tourService = TourServiceImpl.getInstance();
         Tour tour = tourService.getById(booking.getTourId());
         if (tour == null || tour.getNumberOfClients() < booking.getNumberOfClients()) {
             return null;
         }
         double totalPrice = tour.getPrice() * booking.getNumberOfClients();
         booking.setTotalPrice(totalPrice);
-        CreditCardService creditCardService = new CreditCardServiceImpl();
+        CreditCardService creditCardService = CreditCardServiceImpl.getInstance();
         CreditCard card = creditCardService.getByGreatestBalance(booking.getUserId()).orElse(null);
         if (card == null || card.getBalance() < totalPrice) {
             return null;

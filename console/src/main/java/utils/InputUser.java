@@ -3,7 +3,6 @@ package utils;
 import com.netcracker.mano.touragency.entity.Credentials;
 import com.netcracker.mano.touragency.entity.Role;
 import com.netcracker.mano.touragency.entity.User;
-import org.apache.commons.codec.binary.Base64;
 
 import java.util.Scanner;
 
@@ -16,9 +15,7 @@ public class InputUser {
         credentials.setLogin(scanner.nextLine());
         System.out.println("Enter your password:");
         String password = scanner.nextLine();
-        Base64 base64 = new Base64();
-        String encodedPassword = new String(base64.encode(password.getBytes()));
-        credentials.setPassword(encodedPassword);
+        credentials.setPassword(password);
         return credentials;
     }
 

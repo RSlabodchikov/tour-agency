@@ -15,7 +15,7 @@ public class ClientBookingMenu implements Menu {
 
     private User user;
 
-    private BookingService service = new BookingServiceImpl();
+    private BookingService service = BookingServiceImpl.getInstance();
 
     public ClientBookingMenu(User user) {
 
@@ -73,7 +73,7 @@ public class ClientBookingMenu implements Menu {
         Booking booking = new Booking();
         booking.setUserId(user.getId());
         Scanner scanner = new Scanner(System.in);
-        TourService tourService = new TourServiceImpl();
+        TourService tourService = TourServiceImpl.getInstance();
         tourService.getAll().forEach(System.out::println);
         System.out.println("Choose id of tour to create booking : ");
         booking.setTourId(scanner.nextInt());

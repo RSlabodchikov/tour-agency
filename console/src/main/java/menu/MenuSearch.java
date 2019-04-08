@@ -14,7 +14,7 @@ import utils.Constants;
 public class MenuSearch {
     private Menu menu;
 
-    public Menu getMenuByRole(User user) {
+    Menu getMenuByRole(User user) {
         switch (user.getRole()) {
             case ADMIN:
                 menu = new AdminMenu(user);

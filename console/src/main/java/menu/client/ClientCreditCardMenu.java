@@ -10,7 +10,7 @@ import java.util.Scanner;
 
 public class ClientCreditCardMenu implements Menu {
     private User user;
-    private CreditCardService service = new CreditCardServiceImpl();
+    private CreditCardService service = CreditCardServiceImpl.getInstance();
 
    public  ClientCreditCardMenu(User user) {
         this.user = user;
