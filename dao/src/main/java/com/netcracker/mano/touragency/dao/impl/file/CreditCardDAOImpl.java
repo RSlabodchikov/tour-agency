@@ -1,4 +1,4 @@
-package com.netcracker.mano.touragency.dao.Impl;
+package com.netcracker.mano.touragency.dao.impl.file;
 
 import com.netcracker.mano.touragency.dao.CreditCardDAO;
 import com.netcracker.mano.touragency.entity.CreditCard;

@@ -4,7 +4,6 @@ import com.netcracker.mano.touragency.entity.User;
 import com.netcracker.mano.touragency.impl.UserServiceImpl;
 import com.netcracker.mano.touragency.interfaces.UserService;
 import menu.Menu;
-import org.apache.commons.codec.binary.Base64;
 
 import java.util.InputMismatchException;
 import java.util.Scanner;
@@ -42,19 +41,10 @@ public class ClientProfileMenu implements Menu {
                         break;
                     case 2:
                         System.out.println("Enter old password :");
-
-                        String password = scanner.next();
-                        Base64 base64 = new Base64();
-                        String encodedPassword = new String(base64.encode(password.getBytes()));
-                        if (user.getCredentials().getPassword().equals(encodedPassword)) {
-                            System.out.println("Enter new password :");
-                            password = scanner.next();
-                            encodedPassword = new String(base64.encode(password.getBytes()));
-                            user.getCredentials().setPassword(encodedPassword);
-                            service.update(user);
-                        } else {
-                            System.out.println("Incorrect password.");
-                        }
+                        String oldPassword = scanner.next();
+                        System.out.println("Enter new password :");
+                        String newPassword = scanner.next();
+                        service.changePassword(user.getCredentials().getLogin(), oldPassword, newPassword);
                         break;
                     case 3:
                         System.out.println("Enter new name :");

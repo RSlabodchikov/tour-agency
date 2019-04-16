@@ -1,4 +1,4 @@
-package com.netcracker.mano.touragency.LocalDateFormat;
+package com.netcracker.mano.touragency.locale.date.format;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;

@@ -1,29 +1,33 @@
 package com.netcracker.mano.touragency.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.*;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 @AllArgsConstructor
+@ToString
+@NoArgsConstructor
 public class Booking extends BaseEntity {
     private int numberOfClients;
     private double totalPrice;
     private long userId;
     private long tourId;
 
-    public Booking() {
-        super();
-        super.type = "Booking";
+
+    public void extractResult(ResultSet resultSet) throws SQLException {
+        id = resultSet.getLong(1);
+        numberOfClients = resultSet.getByte(2);
+        totalPrice = resultSet.getLong(3);
+        userId = resultSet.getLong(4);
+        tourId = resultSet.getLong(5);
     }
 
-    @Override
-    public String toString() {
-        return "Booking{" +
-                "numberOfClients=" + numberOfClients +
-                ", totalPrice=" + totalPrice +
-                ", userId=" + userId +
-                ", tourId=" + tourId +
-                ", id=" + id +
-                '}';
+    public void setStatementParams(PreparedStatement preparedStatement) throws SQLException {
+        preparedStatement.setLong(1, numberOfClients);
+        preparedStatement.setDouble(2, totalPrice);
     }
 }

@@ -1,11 +1,12 @@
 package menu.admin;
 
+import com.netcracker.mano.touragency.entity.Category;
 import com.netcracker.mano.touragency.entity.Tour;
 import com.netcracker.mano.touragency.impl.TourServiceImpl;
 import com.netcracker.mano.touragency.interfaces.TourService;
 import menu.Menu;
-import utils.InputTour;
 
+import java.time.LocalDate;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
@@ -33,12 +34,13 @@ public class AdminTourMenu implements Menu {
                 if (!scanner.hasNextInt()) {
                     throw new InputMismatchException("Please enter number, not string!!!");
                 }
+
                 switch (scanner.nextInt()) {
                     case 1:
                         service.getAll().forEach(System.out::println);
                         break;
                     case 2:
-                        System.out.println("Enter id of tour to delete");
+                        System.out.println("Enter id of tour :");
                         service.getById(scanner.nextLong());
                         break;
                     case 3:
@@ -49,7 +51,7 @@ public class AdminTourMenu implements Menu {
                         changeTour();
                         break;
                     case 5:
-                        service.create(InputTour.createTour());
+                        service.create(createTour());
                         break;
                     case 0:
                         return;
@@ -63,7 +65,7 @@ public class AdminTourMenu implements Menu {
     }
 
     private void changeTour() {
-        System.out.println("Enter id of tour to delete :");
+        System.out.println("Enter id of tour to change :");
         Tour tour = service.getById(scanner.nextLong());
         if (tour == null) {
             System.out.println("Cannot find tour :(");
@@ -91,5 +93,45 @@ public class AdminTourMenu implements Menu {
         } catch (NullPointerException e) {
             e.printStackTrace();
         }
+    }
+
+    private Tour createTour() {
+        Scanner scanner = new Scanner(System.in);
+        Tour tour = new Tour();
+        System.out.println("Enter settlement month and day:");
+        int m = scanner.nextInt();
+        int d = scanner.nextInt();
+        tour.setSettlementDate(LocalDate.of(2019, m, d));
+        System.out.println("Enter eviction month and day:");
+        m = scanner.nextInt();
+        d = scanner.nextInt();
+        tour.setEvictionDate(LocalDate.of(2019, m, d));
+        System.out.println("Enter country name of tour : ");
+        tour.setCountry(scanner.next());
+        System.out.println("Enter tour description : ");
+        tour.setDescription(scanner.next());
+
+        System.out.println("Choose category of tour(1 - family, 2 - sport, 3 - weekend, 4 - gastronomic :");
+        switch (scanner.nextInt()) {
+            case 1:
+                tour.setCategory(Category.FAMILY);
+                break;
+            case 2:
+                tour.setCategory(Category.SPORT);
+                break;
+            case 3:
+                tour.setCategory(Category.WEEKEND);
+                break;
+            case 4:
+                tour.setCategory(Category.GASTRONOMIC);
+                break;
+            default:
+                tour.setCategory(Category.GENERAL);
+        }
+        System.out.println("Set tour price :");
+        tour.setPrice(scanner.nextDouble());
+        System.out.println("Enter number of clients in tour :");
+        tour.setNumberOfClients(scanner.nextInt());
+        return tour;
     }
 }

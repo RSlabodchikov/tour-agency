@@ -1,10 +1,11 @@
 package com.netcracker.mano.touragency.impl;
 
 import com.netcracker.mano.touragency.dao.CreditCardDAO;
-import com.netcracker.mano.touragency.dao.Impl.CreditCardDAOImpl;
+import com.netcracker.mano.touragency.dao.impl.jdbc.CreditCardDAOImplJDBC;
 import com.netcracker.mano.touragency.entity.CreditCard;
 import com.netcracker.mano.touragency.interfaces.CreditCardService;
 
+import java.math.BigInteger;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -13,7 +14,7 @@ import java.util.stream.Collectors;
 
 public class CreditCardServiceImpl implements CreditCardService {
     private Random random = new Random();
-    private CreditCardDAO creditCardDAO = new CreditCardDAOImpl();
+    private CreditCardDAO creditCardDAO = CreditCardDAOImplJDBC.getInstance();
 
     private static CreditCardServiceImpl instance;
 
@@ -50,7 +51,7 @@ public class CreditCardServiceImpl implements CreditCardService {
         CreditCard card = new CreditCard();
         card.setBalance(balance);
         card.setUserId(id);
-        card.setNumber(random.nextLong());
+        card.setNumber(BigInteger.valueOf((Math.abs(random.nextLong()))));
         creditCardDAO.add(card);
     }
 

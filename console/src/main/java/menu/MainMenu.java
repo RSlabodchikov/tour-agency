@@ -50,7 +50,7 @@ public class MainMenu implements Menu {
                     Menu menu = new MenuSearch().getMenuByRole(user);
                     menu.printMenu();
                 } else {
-                    System.out.println("Incorrect login or pass...");
+                    System.out.println("Incorrect params...");
                 }
 
             } catch (InputMismatchException e) {

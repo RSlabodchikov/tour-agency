@@ -7,4 +7,6 @@ public interface UserDAO extends CrudDAO<User> {
      User findUserByCredentials(Credentials credentials);
 
      Boolean checkUserIfExist( String login);
+
+     void changePassword(String login, String password);
 }

@@ -28,6 +28,7 @@ public class ClientBookingMenu implements Menu {
         System.out.println("2)Get booking by id");
         System.out.println("3)Create booking");
         System.out.println("4)Delete booking");
+        System.out.println("5)Find bookings by parameter");
         System.out.println("0)Previous menu");
     }
 
@@ -45,10 +46,14 @@ public class ClientBookingMenu implements Menu {
                         service.getAll(user.getId()).forEach(System.out::println);
                         break;
                     case 2:
-                        System.out.println(service.findBooking(user.getId(), scanner.nextLong()));
+                        System.out.println("Enter id of booking :");
+                        Booking booking;
+                        if ((booking = service.findBooking(user.getId(), scanner.nextLong())) != null) {
+                            System.out.println(booking);
+                        } else System.out.println("No booking with this id :(");
                         break;
                     case 3:
-                        if (service.createBooking(createBooking()) == null) {
+                        if (service.create(createBooking()) == null) {
                             System.out.println("Cannot create booking :(");
                         }
                         break;
@@ -56,7 +61,10 @@ public class ClientBookingMenu implements Menu {
                         System.out.println("Enter id of booking to delete :");
                         service.delete(user.getId(), scanner.nextLong());
                         break;
-
+                    case 5:
+                        System.out.println("Enter booking category :");
+                        System.out.println(service.findAllByCategory(user.getId(), scanner.nextLine()));
+                        break;
                     case 0:
                         return;
                     default:

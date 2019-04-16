@@ -17,7 +17,7 @@ public class MenuSearch {
     Menu getMenuByRole(User user) {
         switch (user.getRole()) {
             case ADMIN:
-                menu = new AdminMenu(user);
+                menu = new AdminMenu();
                 break;
             case CLIENT:
                 menu = new ClientMenu(user);

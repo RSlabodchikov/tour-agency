@@ -1,14 +1,14 @@
 package com.netcracker.mano.touragency.impl;
 
-import com.netcracker.mano.touragency.dao.Impl.TourDAOImpl;
 import com.netcracker.mano.touragency.dao.TourDAO;
+import com.netcracker.mano.touragency.dao.impl.jdbc.TourDAOImplJDBC;
 import com.netcracker.mano.touragency.entity.Tour;
 import com.netcracker.mano.touragency.interfaces.TourService;
 
 import java.util.List;
 
 public class TourServiceImpl implements TourService {
-    private TourDAO tourDAO = new TourDAOImpl();
+    private TourDAO tourDAO = TourDAOImplJDBC.getInstance();
 
     private static TourServiceImpl instance;
 
@@ -29,6 +29,10 @@ public class TourServiceImpl implements TourService {
 
     @Override
     public Tour create(Tour tour) {
+        if (tour.getSettlementDate().compareTo(tour.getEvictionDate()) > 0
+                || tour.getNumberOfClients() > Byte.MAX_VALUE) {
+            return null;
+        }
         return tourDAO.add(tour);
     }
 

@@ -1,7 +1,7 @@
 package com.netcracker.mano.touragency.impl;
 
-import com.netcracker.mano.touragency.dao.Impl.UserDAOImpl;
 import com.netcracker.mano.touragency.dao.UserDAO;
+import com.netcracker.mano.touragency.dao.impl.jdbc.UserDAOImplJDBC;
 import com.netcracker.mano.touragency.entity.Credentials;
 import com.netcracker.mano.touragency.entity.User;
 import com.netcracker.mano.touragency.interfaces.UserService;
@@ -10,6 +10,7 @@ import javax.xml.bind.DatatypeConverter;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
+
 
 public class UserServiceImpl implements UserService {
     private static UserServiceImpl instance;
@@ -25,7 +26,7 @@ public class UserServiceImpl implements UserService {
     }
 
 
-    private UserDAO userDAO = new UserDAOImpl();
+    private UserDAO userDAO = UserDAOImplJDBC.getInstance();
 
     @Override
     public User registration(User user) {
@@ -86,5 +87,25 @@ public class UserServiceImpl implements UserService {
             user.setIsBlocked(false);
             update(user);
         }
+    }
+
+    @Override
+    public void changePassword(String login, String oldPassword, String newPassword) {
+
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            md.update(oldPassword.getBytes());
+            oldPassword = DatatypeConverter.printHexBinary(md.digest()).toUpperCase();
+            if (userDAO.findUserByCredentials(new Credentials(login, oldPassword)) == null) {
+                return;
+            }
+            md.update(newPassword.getBytes());
+            String hash = DatatypeConverter.printHexBinary(md.digest()).toUpperCase();
+            userDAO.changePassword(login, hash);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+
+
     }
 }

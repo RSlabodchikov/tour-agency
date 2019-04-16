@@ -21,4 +21,6 @@ public interface UserService {
 
     void unblockUser(Long id);
 
+    void changePassword(String login, String oldPassword, String newPassword);
+
 }

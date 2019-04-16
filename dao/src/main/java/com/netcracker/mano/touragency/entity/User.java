@@ -1,10 +1,16 @@
 package com.netcracker.mano.touragency.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.*;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 @Data
 @AllArgsConstructor
+@ToString
+@NoArgsConstructor
+@EqualsAndHashCode(callSuper = false)
 public class User extends BaseEntity {
     private Credentials credentials;
     private String name;
@@ -12,19 +18,23 @@ public class User extends BaseEntity {
     private Role role;
     private Boolean isBlocked;
 
-    public User() {
-        super();
-        super.type = "User";
+
+
+
+
+    public void extractResult(ResultSet resultSet) throws SQLException {
+        setId(resultSet.getLong(1));
+        setName(resultSet.getString(2));
+        setSurname(resultSet.getString(3));
+        setIsBlocked(resultSet.getBoolean(4));
+        setRole(Role.valueOf(resultSet.getString(5)));
     }
 
-    @Override
-    public String toString() {
-        return "User{" +
-                "credentials=" + credentials +
-                ", name='" + name + '\'' +
-                ", surname='" + surname + '\'' +
-                ", isBlocked=" + isBlocked +
-                ", id=" + id +
-                '}';
+    public void setStatementParams(PreparedStatement preparedStatement) throws SQLException {
+        preparedStatement.setString(1, name);
+        preparedStatement.setString(2, surname);
+        preparedStatement.setBoolean(3, isBlocked);
+        preparedStatement.setString(4, role.toString());
+        preparedStatement.setLong(5, credentials.getId());
     }
 }

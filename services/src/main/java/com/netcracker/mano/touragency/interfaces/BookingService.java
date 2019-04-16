@@ -5,7 +5,7 @@ import com.netcracker.mano.touragency.entity.Booking;
 import java.util.List;
 
 public interface BookingService {
-    Booking createBooking(Booking booking);
+    Booking create(Booking booking);
 
     void delete(Long userId, Long bookingId);
 
@@ -14,4 +14,6 @@ public interface BookingService {
     Booking updateBooking(Booking booking);
 
     Booking findBooking(Long userId, Long id);
+
+    List<Booking> findAllByCategory(Long userId, String category);
 }

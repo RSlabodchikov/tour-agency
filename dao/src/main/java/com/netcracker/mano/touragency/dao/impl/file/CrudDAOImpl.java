@@ -1,4 +1,4 @@
-package com.netcracker.mano.touragency.dao.Impl;
+package com.netcracker.mano.touragency.dao.impl.file;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.type.TypeReference;

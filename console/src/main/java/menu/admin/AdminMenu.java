@@ -1,6 +1,5 @@
 package menu.admin;
 
-import com.netcracker.mano.touragency.entity.User;
 import menu.Menu;
 import menu.MenuSearch;
 import utils.Constants;
@@ -9,12 +8,6 @@ import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class AdminMenu implements Menu {
-    private User user;
-
-    public AdminMenu(User user) {
-        this.user = user;
-    }
-
     @Override
     public void printTextMenu() {
         System.out.println("1)Users");
@@ -31,12 +24,8 @@ public class AdminMenu implements Menu {
             printTextMenu();
             try {
                 if (!scanner.hasNextInt()) {
+                    scanner.nextLine();
                     throw new InputMismatchException("Enter int number, please!!!");
-                }
-
-
-                if (!scanner.hasNextInt()) {
-                    throw new InputMismatchException("Please enter int, not string !!!");
                 }
                 switch (scanner.nextInt()) {
                     case 1:

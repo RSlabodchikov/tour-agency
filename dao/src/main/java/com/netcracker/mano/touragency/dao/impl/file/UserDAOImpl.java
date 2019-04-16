@@ -1,4 +1,4 @@
-package com.netcracker.mano.touragency.dao.Impl;
+package com.netcracker.mano.touragency.dao.impl.file;
 
 import com.netcracker.mano.touragency.dao.UserDAO;
 import com.netcracker.mano.touragency.entity.Credentials;
@@ -29,5 +29,10 @@ public class UserDAOImpl extends CrudDAOImpl<User> implements UserDAO {
                 .filter(a -> login.equals(a.getCredentials().getLogin()))
                 .findFirst();
         return user.isPresent();
+    }
+
+    @Override
+    public void changePassword(String login, String password) {
+
     }
 }

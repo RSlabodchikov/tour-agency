@@ -1,7 +1,7 @@
 package com.netcracker.mano.touragency.impl;
 
 import com.netcracker.mano.touragency.dao.BookingDAO;
-import com.netcracker.mano.touragency.dao.Impl.BookingDAOImpl;
+import com.netcracker.mano.touragency.dao.impl.jdbc.BookingDAOImplJDBC;
 import com.netcracker.mano.touragency.entity.Booking;
 import com.netcracker.mano.touragency.entity.CreditCard;
 import com.netcracker.mano.touragency.entity.Tour;
@@ -27,10 +27,10 @@ public class BookingServiceImpl implements BookingService {
     private BookingServiceImpl() {
     }
 
-    private BookingDAO bookingDAO = new BookingDAOImpl();
+    private BookingDAO bookingDAO = BookingDAOImplJDBC.getInstance();
 
     @Override
-    public Booking createBooking(Booking booking) {
+    public Booking create(Booking booking) {
         if (booking.getNumberOfClients() < 0) return null;
         TourService tourService = TourServiceImpl.getInstance();
         Tour tour = tourService.getById(booking.getTourId());
@@ -79,5 +79,12 @@ public class BookingServiceImpl implements BookingService {
                 .filter(a -> a.getId() == id)
                 .findFirst();
         return booking.orElse(null);
+    }
+
+    public List<Booking> findAllByCategory(Long userId, String category) {
+        return bookingDAO.getAllByCategory(category)
+                .stream()
+                .filter(a -> a.getUserId() == userId)
+                .collect(Collectors.toList());
     }
 }

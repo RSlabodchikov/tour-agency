@@ -1,5 +1,6 @@
 package menu.client;
 
+import com.netcracker.mano.touragency.entity.CreditCard;
 import com.netcracker.mano.touragency.entity.User;
 import com.netcracker.mano.touragency.impl.CreditCardServiceImpl;
 import com.netcracker.mano.touragency.interfaces.CreditCardService;
@@ -12,7 +13,7 @@ public class ClientCreditCardMenu implements Menu {
     private User user;
     private CreditCardService service = CreditCardServiceImpl.getInstance();
 
-   public  ClientCreditCardMenu(User user) {
+    public ClientCreditCardMenu(User user) {
         this.user = user;
     }
 
@@ -53,7 +54,10 @@ public class ClientCreditCardMenu implements Menu {
                         service.delete(scanner.nextLong(), user.getId());
                         break;
                     case 5:
-                        System.out.println(service.getByGreatestBalance(user.getId()));
+                        CreditCard card = service.getByGreatestBalance(user.getId()).orElse(null);
+                        if (card != null) {
+                            System.out.println(card);
+                        } else System.out.println("Cannot find card with this id :(");
                         break;
                     case 6:
                         System.out.println("Enter money to add : ");
@@ -76,7 +80,7 @@ public class ClientCreditCardMenu implements Menu {
 
     private void getCardBalance(Long id) {
         if (service.getById(user.getId(), id).isPresent()) {
-            System.out.println(service.getById(user.getId(), id));
+            System.out.println(service.getById(user.getId(), id).orElse(null));
         }
     }
 
@@ -84,4 +88,6 @@ public class ClientCreditCardMenu implements Menu {
     private void createCard(Double balance) {
         service.create(balance, user.getId());
     }
+
+
 }

@@ -9,7 +9,7 @@ import java.io.Serializable;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes({
         @JsonSubTypes.Type(value = Booking.class, name = "Booking"),
         @JsonSubTypes.Type(value = User.class, name = "User"),
@@ -18,5 +18,4 @@ import java.io.Serializable;
 )
 public abstract class BaseEntity implements Serializable {
     protected long id;
-    protected String type;
 }

@@ -16,8 +16,8 @@ public class AdminUserMenu implements Menu {
     @Override
     public void printTextMenu() {
         System.out.println("1)Get all users");
-        System.out.println("2)Block user by id and reason");
-        System.out.println("3)Unblock user by id");
+        System.out.println("2)Block user");
+        System.out.println("3)Unblock user");
         System.out.println("4)Create user");
         System.out.println("5)Get user by id");
         System.out.println("0)Move to previous menu");
