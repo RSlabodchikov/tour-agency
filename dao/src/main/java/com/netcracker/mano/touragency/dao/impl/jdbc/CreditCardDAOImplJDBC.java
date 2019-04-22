@@ -32,7 +32,7 @@ public class CreditCardDAOImplJDBC extends CrudDAOJImplJDBC implements CreditCar
     public CreditCard getById(long id) throws EntityNotFoundException {
         CreditCard card = new CreditCard();
         try {
-            connection = connectionPool.getConnection();
+            connection = ConnectionPool.getConnection();
             preparedStatement = connection.prepareStatement(CreditCardsScripts.SELECT_BY_ID);
             preparedStatement.setLong(1, id);
             resultSet = preparedStatement.executeQuery();
@@ -51,7 +51,7 @@ public class CreditCardDAOImplJDBC extends CrudDAOJImplJDBC implements CreditCar
     @Override
     public CreditCard add(CreditCard entity) throws CannotCreateEntityException {
         try {
-            connection = connectionPool.getConnection();
+            connection = ConnectionPool.getConnection();
             preparedStatement = connection.prepareStatement(CreditCardsScripts.CREATE, Statement.RETURN_GENERATED_KEYS);
             entity.setStatementParams(preparedStatement);
             preparedStatement.execute();
@@ -69,9 +69,9 @@ public class CreditCardDAOImplJDBC extends CrudDAOJImplJDBC implements CreditCar
     }
 
     @Override
-    public CreditCard update(CreditCard entity)  throws CannotUpdateEntityException {
+    public CreditCard update(CreditCard entity) throws CannotUpdateEntityException {
         try {
-            connection = connectionPool.getConnection();
+            connection = ConnectionPool.getConnection();
             preparedStatement = connection.prepareStatement(CreditCardsScripts.UPDATE, Statement.RETURN_GENERATED_KEYS);
             entity.setStatementParams(preparedStatement);
             preparedStatement.setLong(4, entity.getId());
@@ -92,7 +92,7 @@ public class CreditCardDAOImplJDBC extends CrudDAOJImplJDBC implements CreditCar
     @Override
     public void delete(long id) {
         try {
-            connection = connectionPool.getConnection();
+            connection = ConnectionPool.getConnection();
             preparedStatement = connection.prepareStatement(CreditCardsScripts.DELETE);
             preparedStatement.setLong(1, id);
             preparedStatement.execute();
@@ -107,7 +107,7 @@ public class CreditCardDAOImplJDBC extends CrudDAOJImplJDBC implements CreditCar
     public List<CreditCard> getAll() {
         List<CreditCard> cards = new ArrayList<>();
         try {
-            connection = connectionPool.getConnection();
+            connection = ConnectionPool.getConnection();
             preparedStatement = connection.prepareStatement(CreditCardsScripts.SELECT_ALL);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
@@ -121,5 +121,28 @@ public class CreditCardDAOImplJDBC extends CrudDAOJImplJDBC implements CreditCar
             closeConnection();
         }
         return cards;
+    }
+
+    @Override
+    public List<CreditCard> getAllClientCards(Long clientId) throws EntityNotFoundException {
+        List<CreditCard> clientCards = new ArrayList<>();
+        try {
+            connection = ConnectionPool.getConnection();
+            preparedStatement = connection.prepareStatement(CreditCardsScripts.SELECT_BY_USER_ID);
+            preparedStatement.setLong(1, clientId);
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                CreditCard card = new CreditCard();
+                card.extractResult(resultSet);
+                clientCards.add(card);
+            }
+        } catch (SQLException e) {
+            log.error(e.getSQLState());
+            throw new EntityNotFoundException();
+        } finally {
+            closeConnection();
+        }
+        if (clientCards.size() == 0) throw new EntityNotFoundException();
+        return clientCards;
     }
 }

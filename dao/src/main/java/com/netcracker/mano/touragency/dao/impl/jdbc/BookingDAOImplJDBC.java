@@ -32,7 +32,7 @@ public class BookingDAOImplJDBC extends CrudDAOJImplJDBC implements BookingDAO {
     public Booking getById(long id) throws EntityNotFoundException {
         Booking booking = new Booking();
         try {
-            connection = connectionPool.getConnection();
+            connection = ConnectionPool.getConnection();
             preparedStatement = connection.prepareStatement(BookingScripts.SELECT_BY_ID);
             preparedStatement.setLong(1, id);
             resultSet = preparedStatement.executeQuery();
@@ -51,7 +51,7 @@ public class BookingDAOImplJDBC extends CrudDAOJImplJDBC implements BookingDAO {
     @Override
     public Booking add(Booking entity) throws CannotCreateEntityException {
         try {
-            connection = connectionPool.getConnection();
+            connection = ConnectionPool.getConnection();
             preparedStatement = connection.prepareStatement(BookingScripts.CREATE, Statement.RETURN_GENERATED_KEYS);
             entity.setStatementParams(preparedStatement);
             preparedStatement.setLong(3, entity.getUserId());
@@ -73,7 +73,7 @@ public class BookingDAOImplJDBC extends CrudDAOJImplJDBC implements BookingDAO {
     @Override
     public Booking update(Booking entity) throws CannotUpdateEntityException {
         try {
-            connection = connectionPool.getConnection();
+            connection = ConnectionPool.getConnection();
             preparedStatement = connection.prepareStatement(BookingScripts.UPDATE, Statement.RETURN_GENERATED_KEYS);
             entity.setStatementParams(preparedStatement);
             preparedStatement.setLong(3, entity.getId());
@@ -94,7 +94,7 @@ public class BookingDAOImplJDBC extends CrudDAOJImplJDBC implements BookingDAO {
     @Override
     public void delete(long id) {
         try {
-            connection = connectionPool.getConnection();
+            connection = ConnectionPool.getConnection();
             preparedStatement = connection.prepareStatement(BookingScripts.DELETE);
             preparedStatement.setLong(1, id);
             preparedStatement.execute();
@@ -110,7 +110,7 @@ public class BookingDAOImplJDBC extends CrudDAOJImplJDBC implements BookingDAO {
     public List<Booking> getAll() {
         List<Booking> bookings = new ArrayList<>();
         try {
-            connection = connectionPool.getConnection();
+            connection = ConnectionPool.getConnection();
             preparedStatement = connection.prepareStatement(BookingScripts.SELECT_ALL);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
@@ -130,7 +130,7 @@ public class BookingDAOImplJDBC extends CrudDAOJImplJDBC implements BookingDAO {
     public List<Booking> getAllByCategory(String category) {
         List<Booking> bookings = new ArrayList<>();
         try {
-            connection = connectionPool.getConnection();
+            connection = ConnectionPool.getConnection();
             preparedStatement = connection.prepareStatement(BookingScripts.SELECT_BY_CATEGORY);
             preparedStatement.setString(1, category);
             resultSet = preparedStatement.executeQuery();

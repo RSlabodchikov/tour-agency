@@ -37,7 +37,7 @@ public class UserDAOImplJDBC extends CrudDAOJImplJDBC implements UserDAO {
         User user = new User();
         Credentials credentials = new Credentials();
         try {
-            connection = connectionPool.getConnection();
+            connection = ConnectionPool.getConnection();
             preparedStatement = connection.prepareStatement(UserScripts.SELECT_BY_ID);
             preparedStatement.setLong(1, id);
             resultSet = preparedStatement.executeQuery();
@@ -60,7 +60,7 @@ public class UserDAOImplJDBC extends CrudDAOJImplJDBC implements UserDAO {
     public User findUserByCredentials(Credentials credentials) throws AuthorizationException {
         User user = new User();
         try {
-            connection = connectionPool.getConnection();
+            connection = ConnectionPool.getConnection();
             connection.setAutoCommit(false);
             preparedStatement = connection.prepareStatement(UserScripts.SELECT_BY_CREDENTIALS);
             credentials.setStatementParams(preparedStatement);
@@ -88,7 +88,7 @@ public class UserDAOImplJDBC extends CrudDAOJImplJDBC implements UserDAO {
     public Credentials findCredentialsByLogin(String login) throws EntityNotFoundException {
         Credentials credentials = new Credentials();
         try {
-            connection = connectionPool.getConnection();
+            connection = ConnectionPool.getConnection();
             preparedStatement = connection.prepareStatement(CredentialsScripts.SELECT_BY_LOGIN);
             preparedStatement.setString(1, login);
             resultSet = preparedStatement.executeQuery();
@@ -107,7 +107,7 @@ public class UserDAOImplJDBC extends CrudDAOJImplJDBC implements UserDAO {
     @Override
     public User add(User entity) throws CannotCreateEntityException {
         try {
-            connection = connectionPool.getConnection();
+            connection = ConnectionPool.getConnection();
             connection.setAutoCommit(false);
             preparedStatement = connection.prepareStatement(CredentialsScripts.INSERT,
                     Statement.RETURN_GENERATED_KEYS);
@@ -149,7 +149,7 @@ public class UserDAOImplJDBC extends CrudDAOJImplJDBC implements UserDAO {
     @Override
     public User update(User entity) throws CannotUpdateEntityException {
         try {
-            connection = connectionPool.getConnection();
+            connection = ConnectionPool.getConnection();
             preparedStatement = connection.prepareStatement(UserScripts.UPDATE, Statement.RETURN_GENERATED_KEYS);
             entity.setStatementParams(preparedStatement);
             preparedStatement.setLong(6, entity.getId());
@@ -170,7 +170,7 @@ public class UserDAOImplJDBC extends CrudDAOJImplJDBC implements UserDAO {
     @Override
     public void changePassword(String login, String password) {
         try {
-            connection = connectionPool.getConnection();
+            connection = ConnectionPool.getConnection();
             preparedStatement = connection.prepareStatement(CredentialsScripts.UPDATE);
             preparedStatement.setString(1, password);
             preparedStatement.setString(2, login);
@@ -185,7 +185,7 @@ public class UserDAOImplJDBC extends CrudDAOJImplJDBC implements UserDAO {
     @Override
     public void delete(long id) {
         try {
-            connection = connectionPool.getConnection();
+            connection = ConnectionPool.getConnection();
             preparedStatement = connection.prepareStatement(CredentialsScripts.DELETE);
             preparedStatement.setLong(1, id);
             preparedStatement.execute();
@@ -202,7 +202,7 @@ public class UserDAOImplJDBC extends CrudDAOJImplJDBC implements UserDAO {
         List<User> users = new ArrayList<>();
 
         try {
-            connection = connectionPool.getConnection();
+            connection = ConnectionPool.getConnection();
             preparedStatement = connection.prepareStatement(UserScripts.SELECT_ALL);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {

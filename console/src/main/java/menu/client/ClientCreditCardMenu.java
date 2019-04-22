@@ -48,7 +48,7 @@ public class ClientCreditCardMenu implements Menu {
                         break;
                     case 2:
                         System.out.println("Enter card id :");
-                        getCardBalance(scanner.nextLong());
+                        System.out.println(service.getById(user.getId(), scanner.nextLong()).getBalance());
                         break;
                     case 3:
                         System.out.println("Enter initial balance of card :  ");
@@ -59,7 +59,7 @@ public class ClientCreditCardMenu implements Menu {
                         service.delete(scanner.nextLong(), user.getId());
                         break;
                     case 5:
-                        System.out.println(service.getByGreatestBalance(user.getId()).orElse(null));
+                        System.out.println(service.getByGreatestBalance(user.getId()));
                         break;
                     case 6:
                         System.out.println("Enter money to add : ");
@@ -88,11 +88,5 @@ public class ClientCreditCardMenu implements Menu {
         }
     }
 
-
-    private void getCardBalance(Long id) throws EntityNotFoundException {
-        if (service.getById(user.getId(), id).isPresent()) {
-            System.out.println(service.getById(user.getId(), id).orElse(null));
-        }
-    }
 
 }

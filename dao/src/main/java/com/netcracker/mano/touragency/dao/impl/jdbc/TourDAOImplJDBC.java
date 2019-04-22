@@ -32,7 +32,7 @@ public class TourDAOImplJDBC extends CrudDAOJImplJDBC implements TourDAO {
     public Tour getById(long id) throws EntityNotFoundException {
         Tour tour = new Tour();
         try {
-            connection = connectionPool.getConnection();
+            connection = ConnectionPool.getConnection();
             preparedStatement = connection.prepareStatement(TourScripts.SELECT_BY_ID);
             preparedStatement.setLong(1, id);
             resultSet = preparedStatement.executeQuery();
@@ -51,7 +51,7 @@ public class TourDAOImplJDBC extends CrudDAOJImplJDBC implements TourDAO {
     @Override
     public Tour add(Tour entity) throws CannotCreateEntityException {
         try {
-            connection = connectionPool.getConnection();
+            connection = ConnectionPool.getConnection();
             connection.setAutoCommit(false);
             long category_id;
             preparedStatement = connection.prepareStatement(TourScripts.GET_CATEGORY_ID);
@@ -88,7 +88,7 @@ public class TourDAOImplJDBC extends CrudDAOJImplJDBC implements TourDAO {
     @Override
     public Tour update(Tour entity) throws CannotUpdateEntityException {
         try {
-            connection = connectionPool.getConnection();
+            connection = ConnectionPool.getConnection();
             preparedStatement = connection.prepareStatement(TourScripts.UPDATE, Statement.RETURN_GENERATED_KEYS);
             entity.setStatementParamsToChange(preparedStatement);
             preparedStatement.execute();
@@ -108,7 +108,7 @@ public class TourDAOImplJDBC extends CrudDAOJImplJDBC implements TourDAO {
     @Override
     public void delete(long id) {
         try {
-            connection = connectionPool.getConnection();
+            connection = ConnectionPool.getConnection();
             preparedStatement = connection.prepareStatement(TourScripts.DELETE);
             preparedStatement.execute();
         } catch (SQLException e) {
@@ -122,7 +122,7 @@ public class TourDAOImplJDBC extends CrudDAOJImplJDBC implements TourDAO {
     public List<Tour> getAll() {
         List<Tour> tours = new ArrayList<>();
         try {
-            connection = connectionPool.getConnection();
+            connection = ConnectionPool.getConnection();
             preparedStatement = connection.prepareStatement(TourScripts.SELECT_ALL);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {

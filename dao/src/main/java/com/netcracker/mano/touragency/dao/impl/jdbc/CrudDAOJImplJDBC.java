@@ -6,9 +6,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 class CrudDAOJImplJDBC {
-
-    ConnectionPool connectionPool = ConnectionPool.getInstance();
-
     Connection connection;
     PreparedStatement preparedStatement;
     ResultSet resultSet;
@@ -30,7 +27,7 @@ class CrudDAOJImplJDBC {
         }
 
         if (connection != null) {
-            connectionPool.returnConnection(connection);
+            ConnectionPool.returnConnection(connection);
         }
 
     }

@@ -6,18 +6,19 @@ import com.netcracker.mano.touragency.exceptions.CannotUpdateEntityException;
 import com.netcracker.mano.touragency.exceptions.EntityNotFoundException;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface CreditCardService {
-    List<CreditCard> getAllClientCards(Long userId);
+    List<CreditCard> getAllClientCards(Long userId) throws EntityNotFoundException;
 
-    Optional<CreditCard> getById(Long clientId, Long cardId) throws EntityNotFoundException;
+    CreditCard getById(Long clientId, Long cardId) throws EntityNotFoundException;
 
     CreditCard create(Double balance, Long id) throws CannotCreateEntityException;
 
-    void delete(Long cardId, Long clientId);
+    void delete(Long cardId, Long clientId) throws EntityNotFoundException;
 
-    CreditCard updateBalance(Long cardId, Double balance, Long userId) throws CannotUpdateEntityException;
+    CreditCard updateBalance(Long cardId, Double balance, Long userId) throws CannotUpdateEntityException, EntityNotFoundException;
 
-    Optional<CreditCard> getByGreatestBalance(Long userId);
+    CreditCard getByGreatestBalance(Long userId) throws EntityNotFoundException;
+
+
 }

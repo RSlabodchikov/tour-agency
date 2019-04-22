@@ -9,20 +9,10 @@ import java.sql.SQLException;
 import java.util.Vector;
 
 @Slf4j
-class ConnectionPool {
-    private static ConnectionPool instance;
+public class ConnectionPool {
+    private static Vector<Connection> connectionPool = new Vector<>();
 
-    public static ConnectionPool getInstance() {
-        if (instance == null) {
-            instance = new ConnectionPool();
-        }
-        return instance;
-    }
-
-
-    private Vector<Connection> connectionPool = new Vector<>();
-
-    private ConnectionPool() {
+    public ConnectionPool() {
         initialize();
     }
 
@@ -57,7 +47,7 @@ class ConnectionPool {
         return connectionPool.size() >= 10;
     }
 
-    synchronized Connection getConnection() {
+    static Connection getConnection() {
         Connection connection = null;
         if (connectionPool.size() > 0) {
             connection = connectionPool.firstElement();
@@ -66,7 +56,7 @@ class ConnectionPool {
         return connection;
     }
 
-    synchronized void returnConnection(Connection connection) {
+    static void returnConnection(Connection connection) {
         connectionPool.addElement(connection);
     }
 }

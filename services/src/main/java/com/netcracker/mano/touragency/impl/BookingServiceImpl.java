@@ -47,17 +47,18 @@ public class BookingServiceImpl implements BookingService {
         }
         double totalPrice = tour.getPrice() * booking.getNumberOfClients();
         booking.setTotalPrice(totalPrice);
-        CreditCardService creditCardService = CreditCardServiceImpl.getInstance();
-        CreditCard card = creditCardService.getByGreatestBalance(booking.getUserId()).orElse(null);
-        if (card == null || card.getBalance() < totalPrice) {
-            throw new CannotCreateEntityException();
-        }
-        double remainder = card.getBalance() - booking.getTotalPrice();
         try {
+            CreditCardService creditCardService = CreditCardServiceImpl.getInstance();
+            CreditCard card = creditCardService.getByGreatestBalance(booking.getUserId());
+            if (card == null || card.getBalance() < totalPrice) {
+                throw new CannotCreateEntityException();
+            }
+            double remainder = card.getBalance() - booking.getTotalPrice();
+
             creditCardService.updateBalance(card.getId(), remainder, booking.getUserId());
             tour.setNumberOfClients(tour.getNumberOfClients() - booking.getNumberOfClients());
             tourService.update(tour);
-        } catch (CannotUpdateEntityException e) {
+        } catch (CannotUpdateEntityException | EntityNotFoundException e) {
             throw new CannotCreateEntityException();
         }
         bookingDAO.add(booking);
