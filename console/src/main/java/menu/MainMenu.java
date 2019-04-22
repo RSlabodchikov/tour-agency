@@ -1,13 +1,17 @@
 package menu;
 
 import com.netcracker.mano.touragency.entity.User;
+import com.netcracker.mano.touragency.exceptions.AuthorizationException;
+import com.netcracker.mano.touragency.exceptions.RegistrationException;
 import com.netcracker.mano.touragency.impl.UserServiceImpl;
 import com.netcracker.mano.touragency.interfaces.UserService;
+import lombok.extern.slf4j.Slf4j;
 import utils.InputUser;
 
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
+@Slf4j
 public class MainMenu implements Menu {
 
     @Override
@@ -36,7 +40,7 @@ public class MainMenu implements Menu {
                         break;
                     case 2:
                         user = InputUser.createUser();
-                        user = service.registration(user);
+                        user = service.register(user);
                         break;
                     case 0:
                         System.exit(0);
@@ -44,17 +48,21 @@ public class MainMenu implements Menu {
                     default:
                         throw new InputMismatchException("Wrong choice! Try again, please!");
                 }
-                if (user != null && user.getIsBlocked()) {
+                if (user.getIsBlocked()) {
                     System.out.println("Your are blocked by admin  :(");
-                } else if (user != null) {
+                } else {
                     Menu menu = new MenuSearch().getMenuByRole(user);
                     menu.printMenu();
-                } else {
-                    System.out.println("Incorrect params...");
                 }
 
+            } catch (RegistrationException regExc) {
+                System.out.println("Cannot register user with this params ");
+                log.error("Cannot create user", regExc);
             } catch (InputMismatchException e) {
                 System.out.println(e.getMessage());
+            } catch (AuthorizationException authExc) {
+                System.out.println("Wrong login or password");
+                log.error("Authorization problem", authExc);
             }
 
 

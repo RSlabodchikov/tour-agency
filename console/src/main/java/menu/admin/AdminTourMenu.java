@@ -2,14 +2,20 @@ package menu.admin;
 
 import com.netcracker.mano.touragency.entity.Category;
 import com.netcracker.mano.touragency.entity.Tour;
+import com.netcracker.mano.touragency.exceptions.CannotCreateEntityException;
+import com.netcracker.mano.touragency.exceptions.CannotUpdateEntityException;
+import com.netcracker.mano.touragency.exceptions.EntityNotFoundException;
 import com.netcracker.mano.touragency.impl.TourServiceImpl;
 import com.netcracker.mano.touragency.interfaces.TourService;
+import lombok.extern.slf4j.Slf4j;
 import menu.Menu;
 
 import java.time.LocalDate;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
+
+@Slf4j
 public class AdminTourMenu implements Menu {
     private TourService service = TourServiceImpl.getInstance();
     private Scanner scanner = new Scanner(System.in);
@@ -51,7 +57,7 @@ public class AdminTourMenu implements Menu {
                         changeTour();
                         break;
                     case 5:
-                        service.create(createTour());
+                        System.out.println(service.create(createTour()));
                         break;
                     case 0:
                         return;
@@ -60,22 +66,29 @@ public class AdminTourMenu implements Menu {
                 }
             } catch (InputMismatchException e) {
                 System.out.println(e.getMessage());
+            } catch (CannotCreateEntityException e) {
+                System.out.println("Cannot create tour");
+                log.error("Can't create tour entity", e);
+            } catch (EntityNotFoundException e){
+                System.out.println("Cannot find tour");
+                log.error("Cannot find tour entity", e);
             }
         }
     }
 
     private void changeTour() {
         System.out.println("Enter id of tour to change :");
-        Tour tour = service.getById(scanner.nextLong());
-        if (tour == null) {
-            System.out.println("Cannot find tour :(");
-            return;
-        }
-        System.out.println(tour);
-        System.out.println("1)Number of clients in tour");
-        System.out.println("2)Price of tour");
-        System.out.println("Choose  the field to change :");
         try {
+            Tour tour = service.getById(scanner.nextLong());
+            if (tour == null) {
+                System.out.println("Cannot find tour :(");
+                return;
+            }
+            System.out.println(tour);
+            System.out.println("1)Number of clients in tour");
+            System.out.println("2)Price of tour");
+            System.out.println("Choose  the field to change :");
+
             switch (scanner.nextInt()) {
                 case 1:
                     System.out.println("Enter new number of clients :");
@@ -92,6 +105,12 @@ public class AdminTourMenu implements Menu {
             service.update(tour);
         } catch (NullPointerException e) {
             e.printStackTrace();
+        } catch (CannotUpdateEntityException e) {
+            System.out.println("Cannot update tour");
+            log.error("Cannot update tour entity", e);
+        } catch (EntityNotFoundException e) {
+            System.out.println("Cannot find tour");
+            log.error("Tour entity not found", e);
         }
     }
 

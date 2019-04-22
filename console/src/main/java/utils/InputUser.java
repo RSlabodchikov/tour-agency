@@ -1,7 +1,6 @@
 package utils;
 
 import com.netcracker.mano.touragency.entity.Credentials;
-import com.netcracker.mano.touragency.entity.Role;
 import com.netcracker.mano.touragency.entity.User;
 
 import java.util.Scanner;
@@ -29,7 +28,6 @@ public class InputUser {
         System.out.println("Enter your surname:");
         user.setSurname(scanner.nextLine());
         user.setCredentials(credentials);
-        user.setRole(Role.CLIENT);
         return user;
     }
 }

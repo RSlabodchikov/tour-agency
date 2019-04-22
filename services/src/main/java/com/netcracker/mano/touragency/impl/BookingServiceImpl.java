@@ -5,6 +5,9 @@ import com.netcracker.mano.touragency.dao.impl.jdbc.BookingDAOImplJDBC;
 import com.netcracker.mano.touragency.entity.Booking;
 import com.netcracker.mano.touragency.entity.CreditCard;
 import com.netcracker.mano.touragency.entity.Tour;
+import com.netcracker.mano.touragency.exceptions.CannotCreateEntityException;
+import com.netcracker.mano.touragency.exceptions.CannotUpdateEntityException;
+import com.netcracker.mano.touragency.exceptions.EntityNotFoundException;
 import com.netcracker.mano.touragency.interfaces.BookingService;
 import com.netcracker.mano.touragency.interfaces.CreditCardService;
 import com.netcracker.mano.touragency.interfaces.TourService;
@@ -30,24 +33,33 @@ public class BookingServiceImpl implements BookingService {
     private BookingDAO bookingDAO = BookingDAOImplJDBC.getInstance();
 
     @Override
-    public Booking create(Booking booking) {
+    public Booking create(Booking booking) throws CannotCreateEntityException {
         if (booking.getNumberOfClients() < 0) return null;
         TourService tourService = TourServiceImpl.getInstance();
-        Tour tour = tourService.getById(booking.getTourId());
+        Tour tour;
+        try {
+            tour = tourService.getById(booking.getTourId());
+        } catch (EntityNotFoundException e) {
+            throw new CannotCreateEntityException();
+        }
         if (tour == null || tour.getNumberOfClients() < booking.getNumberOfClients()) {
-            return null;
+            throw new CannotCreateEntityException();
         }
         double totalPrice = tour.getPrice() * booking.getNumberOfClients();
         booking.setTotalPrice(totalPrice);
         CreditCardService creditCardService = CreditCardServiceImpl.getInstance();
         CreditCard card = creditCardService.getByGreatestBalance(booking.getUserId()).orElse(null);
         if (card == null || card.getBalance() < totalPrice) {
-            return null;
+            throw new CannotCreateEntityException();
         }
         double remainder = card.getBalance() - booking.getTotalPrice();
-        creditCardService.updateBalance(card.getId(), remainder, booking.getUserId());
-        tour.setNumberOfClients(tour.getNumberOfClients() - booking.getNumberOfClients());
-        tourService.update(tour);
+        try {
+            creditCardService.updateBalance(card.getId(), remainder, booking.getUserId());
+            tour.setNumberOfClients(tour.getNumberOfClients() - booking.getNumberOfClients());
+            tourService.update(tour);
+        } catch (CannotUpdateEntityException e) {
+            throw new CannotCreateEntityException();
+        }
         bookingDAO.add(booking);
         return booking;
     }
@@ -68,7 +80,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public Booking updateBooking(Booking booking) {
+    public Booking updateBooking(Booking booking) throws CannotUpdateEntityException {
         return bookingDAO.update(booking);
     }
 

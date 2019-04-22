@@ -3,6 +3,7 @@ package com.netcracker.mano.touragency.dao.impl.file;
 import com.netcracker.mano.touragency.dao.UserDAO;
 import com.netcracker.mano.touragency.entity.Credentials;
 import com.netcracker.mano.touragency.entity.User;
+import com.netcracker.mano.touragency.exceptions.EntityNotFoundException;
 
 import java.util.Optional;
 
@@ -23,12 +24,13 @@ public class UserDAOImpl extends CrudDAOImpl<User> implements UserDAO {
     }
 
     @Override
-    public Boolean checkUserIfExist(String login) {
+    public Credentials findCredentialsByLogin(String login) throws EntityNotFoundException {
         Optional<User> user = super.getAll()
                 .stream()
                 .filter(a -> login.equals(a.getCredentials().getLogin()))
                 .findFirst();
-        return user.isPresent();
+        if (!user.isPresent()) throw new EntityNotFoundException();
+        else return user.get().getCredentials();
     }
 
     @Override

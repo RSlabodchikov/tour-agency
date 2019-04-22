@@ -2,16 +2,19 @@ package com.netcracker.mano.touragency.dao.impl.jdbc;
 
 import com.netcracker.mano.touragency.dao.BookingDAO;
 import com.netcracker.mano.touragency.entity.Booking;
+import com.netcracker.mano.touragency.exceptions.CannotCreateEntityException;
+import com.netcracker.mano.touragency.exceptions.CannotUpdateEntityException;
+import com.netcracker.mano.touragency.exceptions.EntityNotFoundException;
 import com.netcracker.mano.touragency.sql.scripts.BookingScripts;
-import org.apache.log4j.Logger;
+import lombok.extern.slf4j.Slf4j;
 
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 public class BookingDAOImplJDBC extends CrudDAOJImplJDBC implements BookingDAO {
-    private final Logger logger = Logger.getLogger(BookingDAOImplJDBC.class);
 
     private static BookingDAOImplJDBC instance;
 
@@ -26,18 +29,19 @@ public class BookingDAOImplJDBC extends CrudDAOJImplJDBC implements BookingDAO {
     }
 
     @Override
-    public Booking getById(long id) {
+    public Booking getById(long id) throws EntityNotFoundException {
         Booking booking = new Booking();
         try {
-            connection = ConnectionPool.getConnection();
+            connection = connectionPool.getConnection();
             preparedStatement = connection.prepareStatement(BookingScripts.SELECT_BY_ID);
             preparedStatement.setLong(1, id);
             resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
                 booking.extractResult(resultSet);
-            } else return null;
+            } else throw new SQLException();
         } catch (SQLException e) {
-            logger.error(e);
+            log.error(e.getSQLState());
+            throw new EntityNotFoundException();
         } finally {
             closeConnection();
         }
@@ -45,9 +49,9 @@ public class BookingDAOImplJDBC extends CrudDAOJImplJDBC implements BookingDAO {
     }
 
     @Override
-    public Booking add(Booking entity) {
+    public Booking add(Booking entity) throws CannotCreateEntityException {
         try {
-            connection = ConnectionPool.getConnection();
+            connection = connectionPool.getConnection();
             preparedStatement = connection.prepareStatement(BookingScripts.CREATE, Statement.RETURN_GENERATED_KEYS);
             entity.setStatementParams(preparedStatement);
             preparedStatement.setLong(3, entity.getUserId());
@@ -56,9 +60,10 @@ public class BookingDAOImplJDBC extends CrudDAOJImplJDBC implements BookingDAO {
             resultSet = preparedStatement.getGeneratedKeys();
             if (resultSet.next()) {
                 entity.setId(resultSet.getLong(1));
-            } else return null;
+            } else throw new SQLException();
         } catch (SQLException e) {
-            logger.error(e);
+            log.error(e.getSQLState());
+            throw new CannotCreateEntityException();
         } finally {
             closeConnection();
         }
@@ -66,9 +71,9 @@ public class BookingDAOImplJDBC extends CrudDAOJImplJDBC implements BookingDAO {
     }
 
     @Override
-    public Booking update(Booking entity) {
+    public Booking update(Booking entity) throws CannotUpdateEntityException {
         try {
-            connection = ConnectionPool.getConnection();
+            connection = connectionPool.getConnection();
             preparedStatement = connection.prepareStatement(BookingScripts.UPDATE, Statement.RETURN_GENERATED_KEYS);
             entity.setStatementParams(preparedStatement);
             preparedStatement.setLong(3, entity.getId());
@@ -76,9 +81,10 @@ public class BookingDAOImplJDBC extends CrudDAOJImplJDBC implements BookingDAO {
             resultSet = preparedStatement.getGeneratedKeys();
             if (resultSet.next()) {
                 entity.extractResult(resultSet);
-            } else return null;
+            } else throw new SQLException();
         } catch (SQLException e) {
-            logger.error(e);
+            log.error(e.getSQLState());
+            throw new CannotUpdateEntityException();
         } finally {
             closeConnection();
         }
@@ -88,12 +94,12 @@ public class BookingDAOImplJDBC extends CrudDAOJImplJDBC implements BookingDAO {
     @Override
     public void delete(long id) {
         try {
-            connection = ConnectionPool.getConnection();
+            connection = connectionPool.getConnection();
             preparedStatement = connection.prepareStatement(BookingScripts.DELETE);
             preparedStatement.setLong(1, id);
             preparedStatement.execute();
         } catch (SQLException e) {
-            logger.error(e);
+            log.error(e.getSQLState());
         } finally {
             closeConnection();
         }
@@ -104,7 +110,7 @@ public class BookingDAOImplJDBC extends CrudDAOJImplJDBC implements BookingDAO {
     public List<Booking> getAll() {
         List<Booking> bookings = new ArrayList<>();
         try {
-            connection = ConnectionPool.getConnection();
+            connection = connectionPool.getConnection();
             preparedStatement = connection.prepareStatement(BookingScripts.SELECT_ALL);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
@@ -113,7 +119,7 @@ public class BookingDAOImplJDBC extends CrudDAOJImplJDBC implements BookingDAO {
                 bookings.add(booking);
             }
         } catch (SQLException e) {
-            logger.error(e);
+            log.error(e.getSQLState());
         } finally {
             closeConnection();
         }
@@ -124,7 +130,7 @@ public class BookingDAOImplJDBC extends CrudDAOJImplJDBC implements BookingDAO {
     public List<Booking> getAllByCategory(String category) {
         List<Booking> bookings = new ArrayList<>();
         try {
-            connection = ConnectionPool.getConnection();
+            connection = connectionPool.getConnection();
             preparedStatement = connection.prepareStatement(BookingScripts.SELECT_BY_CATEGORY);
             preparedStatement.setString(1, category);
             resultSet = preparedStatement.executeQuery();
@@ -134,7 +140,7 @@ public class BookingDAOImplJDBC extends CrudDAOJImplJDBC implements BookingDAO {
                 bookings.add(booking);
             }
         } catch (SQLException e) {
-            logger.error(e);
+            log.error(e.getSQLState());
         } finally {
             closeConnection();
         }

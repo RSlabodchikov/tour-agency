@@ -1,13 +1,18 @@
 package menu.client;
 
 import com.netcracker.mano.touragency.entity.User;
+import com.netcracker.mano.touragency.exceptions.AuthorizationException;
+import com.netcracker.mano.touragency.exceptions.CannotUpdateEntityException;
 import com.netcracker.mano.touragency.impl.UserServiceImpl;
 import com.netcracker.mano.touragency.interfaces.UserService;
+import lombok.extern.slf4j.Slf4j;
 import menu.Menu;
 
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
+
+@Slf4j
 public class ClientProfileMenu implements Menu {
     private User user;
 
@@ -61,6 +66,12 @@ public class ClientProfileMenu implements Menu {
 
             } catch (InputMismatchException e) {
                 System.out.println(e.getMessage());
+            } catch (AuthorizationException e1) {
+                System.out.println("Wrong login or password");
+                log.error("Authorization problem", e1);
+            } catch (CannotUpdateEntityException e) {
+                System.out.println("Cannot update user entity");
+                log.error("Cannot update user entity", e);
             }
         }
     }

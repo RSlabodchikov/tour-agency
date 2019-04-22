@@ -1,14 +1,19 @@
 package menu.client;
 
-import com.netcracker.mano.touragency.entity.CreditCard;
 import com.netcracker.mano.touragency.entity.User;
+import com.netcracker.mano.touragency.exceptions.CannotCreateEntityException;
+import com.netcracker.mano.touragency.exceptions.CannotUpdateEntityException;
+import com.netcracker.mano.touragency.exceptions.EntityNotFoundException;
 import com.netcracker.mano.touragency.impl.CreditCardServiceImpl;
 import com.netcracker.mano.touragency.interfaces.CreditCardService;
+import lombok.extern.slf4j.Slf4j;
 import menu.Menu;
 
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
+
+@Slf4j
 public class ClientCreditCardMenu implements Menu {
     private User user;
     private CreditCardService service = CreditCardServiceImpl.getInstance();
@@ -47,17 +52,14 @@ public class ClientCreditCardMenu implements Menu {
                         break;
                     case 3:
                         System.out.println("Enter initial balance of card :  ");
-                        createCard(scanner.nextDouble());
+                        System.out.println(service.create((scanner.nextDouble()), user.getId()));
                         break;
                     case 4:
                         System.out.println("Enter ID of card to delete :");
                         service.delete(scanner.nextLong(), user.getId());
                         break;
                     case 5:
-                        CreditCard card = service.getByGreatestBalance(user.getId()).orElse(null);
-                        if (card != null) {
-                            System.out.println(card);
-                        } else System.out.println("Cannot find card with this id :(");
+                        System.out.println(service.getByGreatestBalance(user.getId()).orElse(null));
                         break;
                     case 6:
                         System.out.println("Enter money to add : ");
@@ -73,21 +75,24 @@ public class ClientCreditCardMenu implements Menu {
                 }
             } catch (InputMismatchException e) {
                 System.out.println(e.getMessage());
+            } catch (CannotCreateEntityException e) {
+                System.out.println("Cannot create card");
+                log.error("Problem with creating card", e);
+            } catch (CannotUpdateEntityException e) {
+                System.out.println("cannot update card balance");
+                log.error("Cannot update card entity", e);
+            } catch (EntityNotFoundException e) {
+                System.out.println("Cannot find card");
+                log.error("Cannot find card entity", e);
             }
         }
     }
 
 
-    private void getCardBalance(Long id) {
+    private void getCardBalance(Long id) throws EntityNotFoundException {
         if (service.getById(user.getId(), id).isPresent()) {
             System.out.println(service.getById(user.getId(), id).orElse(null));
         }
     }
-
-
-    private void createCard(Double balance) {
-        service.create(balance, user.getId());
-    }
-
 
 }

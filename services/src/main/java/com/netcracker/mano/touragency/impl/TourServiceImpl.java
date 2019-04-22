@@ -3,6 +3,9 @@ package com.netcracker.mano.touragency.impl;
 import com.netcracker.mano.touragency.dao.TourDAO;
 import com.netcracker.mano.touragency.dao.impl.jdbc.TourDAOImplJDBC;
 import com.netcracker.mano.touragency.entity.Tour;
+import com.netcracker.mano.touragency.exceptions.CannotCreateEntityException;
+import com.netcracker.mano.touragency.exceptions.CannotUpdateEntityException;
+import com.netcracker.mano.touragency.exceptions.EntityNotFoundException;
 import com.netcracker.mano.touragency.interfaces.TourService;
 
 import java.util.List;
@@ -23,15 +26,15 @@ public class TourServiceImpl implements TourService {
     }
 
     @Override
-    public Tour getById(Long id) {
+    public Tour getById(Long id) throws EntityNotFoundException {
         return tourDAO.getById(id);
     }
 
     @Override
-    public Tour create(Tour tour) {
+    public Tour create(Tour tour) throws CannotCreateEntityException {
         if (tour.getSettlementDate().compareTo(tour.getEvictionDate()) > 0
                 || tour.getNumberOfClients() > Byte.MAX_VALUE) {
-            return null;
+            throw new CannotCreateEntityException();
         }
         return tourDAO.add(tour);
     }
@@ -47,7 +50,7 @@ public class TourServiceImpl implements TourService {
     }
 
     @Override
-    public Tour update(Tour tour) {
+    public Tour update(Tour tour) throws CannotUpdateEntityException {
         return tourDAO.update(tour);
     }
 }

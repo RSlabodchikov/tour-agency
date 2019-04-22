@@ -15,8 +15,9 @@ import java.time.LocalDate;
 @Data
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-@ToString
+@ToString(callSuper = true)
 @NoArgsConstructor
+@Builder
 public class Tour extends BaseEntity {
     @JsonDeserialize(using = LocalDateDeserializer.class)
     @JsonSerialize(using = LocalDateSerializer.class)

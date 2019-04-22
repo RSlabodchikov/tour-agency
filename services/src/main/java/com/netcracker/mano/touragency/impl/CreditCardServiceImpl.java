@@ -3,6 +3,8 @@ package com.netcracker.mano.touragency.impl;
 import com.netcracker.mano.touragency.dao.CreditCardDAO;
 import com.netcracker.mano.touragency.dao.impl.jdbc.CreditCardDAOImplJDBC;
 import com.netcracker.mano.touragency.entity.CreditCard;
+import com.netcracker.mano.touragency.exceptions.CannotCreateEntityException;
+import com.netcracker.mano.touragency.exceptions.CannotUpdateEntityException;
 import com.netcracker.mano.touragency.interfaces.CreditCardService;
 
 import java.math.BigInteger;
@@ -46,13 +48,13 @@ public class CreditCardServiceImpl implements CreditCardService {
     }
 
     @Override
-    public void create(Double balance, Long id) {
-        if (balance < 0) return;
+    public CreditCard create(Double balance, Long id) throws CannotCreateEntityException {
+        if (balance < 0) throw new CannotCreateEntityException();
         CreditCard card = new CreditCard();
         card.setBalance(balance);
         card.setUserId(id);
         card.setNumber(BigInteger.valueOf((Math.abs(random.nextLong()))));
-        creditCardDAO.add(card);
+        return creditCardDAO.add(card);
     }
 
     @Override
@@ -64,7 +66,7 @@ public class CreditCardServiceImpl implements CreditCardService {
     }
 
     @Override
-    public CreditCard updateBalance(Long cardId, Double balance, Long userId) {
+    public CreditCard updateBalance(Long cardId, Double balance, Long userId) throws CannotUpdateEntityException {
         Optional<CreditCard> card = getById(userId, cardId);
         if (card.isPresent()) {
             card.get().setBalance(card.get().getBalance() + balance);

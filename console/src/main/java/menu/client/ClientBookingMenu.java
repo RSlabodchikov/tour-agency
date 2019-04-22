@@ -2,15 +2,20 @@ package menu.client;
 
 import com.netcracker.mano.touragency.entity.Booking;
 import com.netcracker.mano.touragency.entity.User;
+import com.netcracker.mano.touragency.exceptions.CannotCreateEntityException;
+import com.netcracker.mano.touragency.exceptions.EntityNotFoundException;
 import com.netcracker.mano.touragency.impl.BookingServiceImpl;
 import com.netcracker.mano.touragency.impl.TourServiceImpl;
 import com.netcracker.mano.touragency.interfaces.BookingService;
 import com.netcracker.mano.touragency.interfaces.TourService;
+import lombok.extern.slf4j.Slf4j;
 import menu.Menu;
 
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
+
+@Slf4j
 public class ClientBookingMenu implements Menu {
 
     private User user;
@@ -24,8 +29,8 @@ public class ClientBookingMenu implements Menu {
 
     @Override
     public void printTextMenu() {
-        System.out.println("1)Get all bookings");
-        System.out.println("2)Get booking by id");
+        System.out.println("1)Find all bookings");
+        System.out.println("2)Find booking by id");
         System.out.println("3)Create booking");
         System.out.println("4)Delete booking");
         System.out.println("5)Find bookings by parameter");
@@ -73,6 +78,12 @@ public class ClientBookingMenu implements Menu {
 
             } catch (InputMismatchException e) {
                 System.out.println(e.getMessage());
+            } catch (CannotCreateEntityException e) {
+                System.out.println("Cannot create booking");
+                log.error("Can't create booking", e);
+            } catch (EntityNotFoundException e) {
+                System.out.println("Cannot find booking");
+                log.error("Cannot find booking entity", e);
             }
         }
     }

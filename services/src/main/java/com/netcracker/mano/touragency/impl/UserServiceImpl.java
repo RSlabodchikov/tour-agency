@@ -3,15 +3,18 @@ package com.netcracker.mano.touragency.impl;
 import com.netcracker.mano.touragency.dao.UserDAO;
 import com.netcracker.mano.touragency.dao.impl.jdbc.UserDAOImplJDBC;
 import com.netcracker.mano.touragency.entity.Credentials;
+import com.netcracker.mano.touragency.entity.Role;
 import com.netcracker.mano.touragency.entity.User;
+import com.netcracker.mano.touragency.exceptions.*;
 import com.netcracker.mano.touragency.interfaces.UserService;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.xml.bind.DatatypeConverter;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
-
+@Slf4j
 public class UserServiceImpl implements UserService {
     private static UserServiceImpl instance;
 
@@ -29,40 +32,57 @@ public class UserServiceImpl implements UserService {
     private UserDAO userDAO = UserDAOImplJDBC.getInstance();
 
     @Override
-    public User registration(User user) {
-        if (userDAO.checkUserIfExist(user.getCredentials().getLogin())) return null;
+    public User register(User user) throws RegistrationException {
+        if (checkUserIfExist(user.getCredentials().getLogin()))
+            throw new RegistrationException();
         try {
+            user.setRole(Role.CLIENT);
             MessageDigest md = MessageDigest.getInstance("MD5");
             md.update(user.getCredentials().getPassword().getBytes());
             String hash = DatatypeConverter.printHexBinary(md.digest()).toUpperCase();
             user.getCredentials().setPassword(hash);
         } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
+            log.error("NoSuchAlgorithmException", e);
         }
-        return userDAO.add(user);
+        try {
+            user = userDAO.add(user);
+        } catch (CannotCreateEntityException e) {
+            log.error("Cannot create user ", e);
+            throw new RegistrationException();
+        }
+        return user;
 
     }
 
+    private boolean checkUserIfExist(String login) {
+        try {
+            userDAO.findCredentialsByLogin(login);
+            return true;
+        } catch (EntityNotFoundException e) {
+            return false;
+        }
+    }
+
     @Override
-    public User signIn(Credentials credentials) {
+    public User signIn(Credentials credentials) throws AuthorizationException {
         try {
             MessageDigest md = MessageDigest.getInstance("MD5");
             md.update(credentials.getPassword().getBytes());
             String hash = DatatypeConverter.printHexBinary(md.digest()).toUpperCase();
             credentials.setPassword(hash);
         } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
+            log.error("NoSuchAlgorithmException", e);
         }
         return userDAO.findUserByCredentials(credentials);
     }
 
     @Override
-    public void update(User user) {
+    public void update(User user) throws CannotUpdateEntityException {
         userDAO.update(user);
     }
 
     @Override
-    public User findById(Long id) {
+    public User findById(Long id) throws EntityNotFoundException {
         return userDAO.getById(id);
     }
 
@@ -72,7 +92,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void blockUser(Long id) {
+    public void blockUser(Long id)  throws CannotUpdateEntityException, EntityNotFoundException{
         User user = userDAO.getById(id);
         if (user != null) {
             user.setIsBlocked(true);
@@ -81,7 +101,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void unblockUser(Long id) {
+    public void unblockUser(Long id) throws CannotUpdateEntityException, EntityNotFoundException {
         User user = userDAO.getById(id);
         if (user != null) {
             user.setIsBlocked(false);
@@ -90,22 +110,18 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void changePassword(String login, String oldPassword, String newPassword) {
+    public void changePassword(String login, String oldPassword, String newPassword) throws AuthorizationException {
 
         try {
             MessageDigest md = MessageDigest.getInstance("MD5");
             md.update(oldPassword.getBytes());
             oldPassword = DatatypeConverter.printHexBinary(md.digest()).toUpperCase();
-            if (userDAO.findUserByCredentials(new Credentials(login, oldPassword)) == null) {
-                return;
-            }
+            userDAO.findUserByCredentials(new Credentials(login, oldPassword));
             md.update(newPassword.getBytes());
             String hash = DatatypeConverter.printHexBinary(md.digest()).toUpperCase();
             userDAO.changePassword(login, hash);
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
-
-
     }
 }

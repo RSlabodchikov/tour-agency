@@ -2,16 +2,20 @@ package com.netcracker.mano.touragency.dao.impl.jdbc;
 
 import com.netcracker.mano.touragency.dao.TourDAO;
 import com.netcracker.mano.touragency.entity.Tour;
+import com.netcracker.mano.touragency.exceptions.CannotCreateEntityException;
+import com.netcracker.mano.touragency.exceptions.CannotUpdateEntityException;
+import com.netcracker.mano.touragency.exceptions.EntityNotFoundException;
 import com.netcracker.mano.touragency.sql.scripts.TourScripts;
-import org.apache.log4j.Logger;
+import lombok.extern.slf4j.Slf4j;
 
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+
+@Slf4j
 public class TourDAOImplJDBC extends CrudDAOJImplJDBC implements TourDAO {
-    private final Logger logger = Logger.getLogger(TourDAOImplJDBC.class);
     private static TourDAOImplJDBC instance;
 
     private TourDAOImplJDBC() {
@@ -25,18 +29,19 @@ public class TourDAOImplJDBC extends CrudDAOJImplJDBC implements TourDAO {
     }
 
     @Override
-    public Tour getById(long id) {
+    public Tour getById(long id) throws EntityNotFoundException {
         Tour tour = new Tour();
         try {
-            connection = ConnectionPool.getConnection();
+            connection = connectionPool.getConnection();
             preparedStatement = connection.prepareStatement(TourScripts.SELECT_BY_ID);
             preparedStatement.setLong(1, id);
             resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
                 tour.extractResult(resultSet);
-            } else return null;
+            } else throw new EntityNotFoundException();
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error(e.getSQLState());
+            throw new EntityNotFoundException();
         } finally {
             closeConnection();
         }
@@ -44,9 +49,9 @@ public class TourDAOImplJDBC extends CrudDAOJImplJDBC implements TourDAO {
     }
 
     @Override
-    public Tour add(Tour entity) {
+    public Tour add(Tour entity) throws CannotCreateEntityException {
         try {
-            connection = ConnectionPool.getConnection();
+            connection = connectionPool.getConnection();
             connection.setAutoCommit(false);
             long category_id;
             preparedStatement = connection.prepareStatement(TourScripts.GET_CATEGORY_ID);
@@ -54,7 +59,7 @@ public class TourDAOImplJDBC extends CrudDAOJImplJDBC implements TourDAO {
             resultSet = preparedStatement.executeQuery();
             if (resultSet.next())
                 category_id = resultSet.getLong(1);
-            else throw new SQLException("Cannot find category");
+            else throw new CannotCreateEntityException();
             preparedStatement = connection.prepareStatement(TourScripts.CREATE, Statement.RETURN_GENERATED_KEYS);
             entity.setStatementParamsToCreate(preparedStatement);
             preparedStatement.setLong(7, category_id);
@@ -62,17 +67,18 @@ public class TourDAOImplJDBC extends CrudDAOJImplJDBC implements TourDAO {
             resultSet = preparedStatement.getGeneratedKeys();
             if (resultSet.next()) {
                 entity.setId(resultSet.getLong(1));
-            }
+            } else throw new CannotCreateEntityException();
             connection.commit();
         } catch (SQLException e) {
             if (connection != null) {
                 try {
                     connection.rollback();
                 } catch (SQLException e1) {
-                    logger.error(e1);
+                    log.error(e1.getSQLState());
                 }
             }
-            logger.error(e);
+            log.error(e.getSQLState());
+            throw new CannotCreateEntityException();
         } finally {
             closeConnection();
         }
@@ -80,19 +86,19 @@ public class TourDAOImplJDBC extends CrudDAOJImplJDBC implements TourDAO {
     }
 
     @Override
-    public Tour update(Tour entity) {
+    public Tour update(Tour entity) throws CannotUpdateEntityException {
         try {
-            connection = ConnectionPool.getConnection();
+            connection = connectionPool.getConnection();
             preparedStatement = connection.prepareStatement(TourScripts.UPDATE, Statement.RETURN_GENERATED_KEYS);
             entity.setStatementParamsToChange(preparedStatement);
             preparedStatement.execute();
             resultSet = preparedStatement.getGeneratedKeys();
             if (resultSet.next()) {
                 entity.extractResult(resultSet);
-            } else return null;
+            } else throw new CannotUpdateEntityException();
         } catch (SQLException e) {
-            logger.error(e);
-            return null;
+            log.error(e.getSQLState());
+            throw new CannotUpdateEntityException();
         } finally {
             closeConnection();
         }
@@ -102,11 +108,11 @@ public class TourDAOImplJDBC extends CrudDAOJImplJDBC implements TourDAO {
     @Override
     public void delete(long id) {
         try {
-            connection = ConnectionPool.getConnection();
+            connection = connectionPool.getConnection();
             preparedStatement = connection.prepareStatement(TourScripts.DELETE);
             preparedStatement.execute();
         } catch (SQLException e) {
-            logger.error(e);
+            log.error(e.getSQLState());
         } finally {
             closeConnection();
         }
@@ -116,7 +122,7 @@ public class TourDAOImplJDBC extends CrudDAOJImplJDBC implements TourDAO {
     public List<Tour> getAll() {
         List<Tour> tours = new ArrayList<>();
         try {
-            connection = ConnectionPool.getConnection();
+            connection = connectionPool.getConnection();
             preparedStatement = connection.prepareStatement(TourScripts.SELECT_ALL);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
@@ -125,7 +131,7 @@ public class TourDAOImplJDBC extends CrudDAOJImplJDBC implements TourDAO {
                 tours.add(tour);
             }
         } catch (SQLException e) {
-            logger.error(e);
+            log.error(e.getSQLState());
         } finally {
             closeConnection();
         }

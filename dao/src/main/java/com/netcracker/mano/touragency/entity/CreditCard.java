@@ -10,7 +10,7 @@ import java.sql.SQLException;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @AllArgsConstructor
-@ToString
+@ToString(callSuper = true)
 @NoArgsConstructor
 public class CreditCard extends BaseEntity {
     private BigInteger number;
