@@ -14,7 +14,7 @@ public interface TourService {
 
     List<Tour> getAll();
 
-    void delete(Long id);
+    void delete(Long id) throws EntityNotFoundException;
 
     Tour update(Tour tour) throws CannotUpdateEntityException;
 }

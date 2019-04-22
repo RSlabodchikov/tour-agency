@@ -66,10 +66,10 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public void delete(Long userId, Long bookingId) {
-        if (findBooking(userId, bookingId) != null) {
-            bookingDAO.delete(bookingId);
-        }
+    public void delete(Long userId, Long bookingId) throws EntityNotFoundException {
+        findBooking(userId, bookingId);
+        bookingDAO.delete(bookingId);
+
     }
 
     @Override
@@ -86,12 +86,14 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public Booking findBooking(Long userId, Long id) {
+    public Booking findBooking(Long userId, Long id) throws EntityNotFoundException {
         Optional<Booking> booking = getAll(userId)
                 .stream()
                 .filter(a -> a.getId() == id)
                 .findFirst();
-        return booking.orElse(null);
+        if (booking.isPresent()) {
+            return booking.get();
+        } else throw new EntityNotFoundException();
     }
 
     public List<Booking> findAllByCategory(Long userId, String category) {

@@ -40,7 +40,8 @@ public class TourServiceImpl implements TourService {
     }
 
     @Override
-    public void delete(Long id) {
+    public void delete(Long id) throws EntityNotFoundException {
+        getById(id);
         tourDAO.delete(id);
     }
 

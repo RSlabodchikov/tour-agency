@@ -34,11 +34,6 @@ public class TourServiceTest {
     @InjectMocks
     private TourService tourService = TourServiceImpl.getInstance();
 
-    @Test
-    @SneakyThrows
-    public void getTourId() {
-    }
-
     @Before
     public void setUp() {
         initMocks(this);

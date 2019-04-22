@@ -51,12 +51,10 @@ public class ClientBookingMenu implements Menu {
                         break;
                     case 2:
                         System.out.println("Enter id of booking :");
-                        System.out.println(service.findBooking(user.getId(),scanner.nextLong()));
+                        System.out.println(service.findBooking(user.getId(), scanner.nextLong()));
                         break;
                     case 3:
-                        if (service.create(createBooking()) == null) {
-                            System.out.println("Cannot create booking :(");
-                        }
+                        service.create(createBooking());
                         break;
                     case 4:
                         System.out.println("Enter id of booking to delete :");

@@ -10,7 +10,7 @@ import java.util.List;
 public interface BookingService {
     Booking create(Booking booking) throws CannotCreateEntityException;
 
-    void delete(Long userId, Long bookingId);
+    void delete(Long userId, Long bookingId) throws EntityNotFoundException;
 
     List<Booking> getAll(Long userId);
 
