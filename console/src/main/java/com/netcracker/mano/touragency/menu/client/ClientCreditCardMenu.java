@@ -1,4 +1,4 @@
-package menu.client;
+package com.netcracker.mano.touragency.menu.client;
 
 import com.netcracker.mano.touragency.entity.User;
 import com.netcracker.mano.touragency.exceptions.CannotCreateEntityException;
@@ -7,7 +7,7 @@ import com.netcracker.mano.touragency.exceptions.EntityNotFoundException;
 import com.netcracker.mano.touragency.impl.CreditCardServiceImpl;
 import com.netcracker.mano.touragency.interfaces.CreditCardService;
 import lombok.extern.slf4j.Slf4j;
-import menu.Menu;
+import com.netcracker.mano.touragency.menu.Menu;
 
 import java.util.InputMismatchException;
 import java.util.Scanner;
@@ -30,7 +30,7 @@ public class ClientCreditCardMenu implements Menu {
         System.out.println("4)Delete credit card");
         System.out.println("5)Get card with greatest balance");
         System.out.println("6)Add money to card");
-        System.out.println("0)Move to previous menu");
+        System.out.println("0)Move to previous Application.menu");
     }
 
     @Override
@@ -66,7 +66,7 @@ public class ClientCreditCardMenu implements Menu {
                         double balance = scanner.nextDouble();
                         System.out.println("Enter card id : ");
                         Long id = scanner.nextLong();
-                        service.updateBalance(id, balance, user.getId());
+                        System.out.println(service.updateBalance(id, balance, user.getId()));
                         break;
                     case 0:
                         return;

@@ -7,6 +7,7 @@ import com.netcracker.mano.touragency.exceptions.CannotUpdateEntityException;
 import com.netcracker.mano.touragency.exceptions.EntityNotFoundException;
 import com.netcracker.mano.touragency.sql.scripts.TourScripts;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -15,18 +16,9 @@ import java.util.List;
 
 
 @Slf4j
+@Component
 public class TourDAOImplJDBC extends CrudDAOJImplJDBC implements TourDAO {
-    private static TourDAOImplJDBC instance;
 
-    private TourDAOImplJDBC() {
-    }
-
-    public static TourDAOImplJDBC getInstance() {
-        if (instance == null) {
-            instance = new TourDAOImplJDBC();
-        }
-        return instance;
-    }
 
     @Override
     public Tour getById(long id) throws EntityNotFoundException {
@@ -40,11 +32,12 @@ public class TourDAOImplJDBC extends CrudDAOJImplJDBC implements TourDAO {
                 tour.extractResult(resultSet);
             } else throw new EntityNotFoundException();
         } catch (SQLException e) {
-            log.error(e.getSQLState());
+            log.error("Cannot get tour by id", e);
             throw new EntityNotFoundException();
         } finally {
             closeConnection();
         }
+        log.info("Get tour from database :{}", tour);
         return tour;
     }
 
@@ -74,14 +67,15 @@ public class TourDAOImplJDBC extends CrudDAOJImplJDBC implements TourDAO {
                 try {
                     connection.rollback();
                 } catch (SQLException e1) {
-                    log.error(e1.getSQLState());
+                    log.error("Cannot rollback", e1);
                 }
             }
-            log.error(e.getSQLState());
+            log.error("Cannot create tour", e);
             throw new CannotCreateEntityException();
         } finally {
             closeConnection();
         }
+        log.info("Created new tour : {}", entity);
         return entity;
     }
 
@@ -92,16 +86,13 @@ public class TourDAOImplJDBC extends CrudDAOJImplJDBC implements TourDAO {
             preparedStatement = connection.prepareStatement(TourScripts.UPDATE, Statement.RETURN_GENERATED_KEYS);
             entity.setStatementParamsToChange(preparedStatement);
             preparedStatement.execute();
-            resultSet = preparedStatement.getGeneratedKeys();
-            if (resultSet.next()) {
-                entity.extractResult(resultSet);
-            } else throw new CannotUpdateEntityException();
         } catch (SQLException e) {
-            log.error(e.getSQLState());
+            log.error("Cannot update tour", e);
             throw new CannotUpdateEntityException();
         } finally {
             closeConnection();
         }
+        log.info("Updated tour : {}", entity);
         return entity;
     }
 
@@ -110,12 +101,14 @@ public class TourDAOImplJDBC extends CrudDAOJImplJDBC implements TourDAO {
         try {
             connection = ConnectionPool.getConnection();
             preparedStatement = connection.prepareStatement(TourScripts.DELETE);
+            preparedStatement.setLong(1, id);
             preparedStatement.execute();
         } catch (SQLException e) {
-            log.error(e.getSQLState());
+            log.error("Cannot delete tour", e);
         } finally {
             closeConnection();
         }
+        log.info("Tour delete from database with id :{}", id);
     }
 
     @Override
@@ -131,10 +124,11 @@ public class TourDAOImplJDBC extends CrudDAOJImplJDBC implements TourDAO {
                 tours.add(tour);
             }
         } catch (SQLException e) {
-            log.error(e.getSQLState());
+            log.error("Cannot get all tours", e);
         } finally {
             closeConnection();
         }
+        log.info("Get all tours from database:{}", tours);
         return tours;
     }
 }

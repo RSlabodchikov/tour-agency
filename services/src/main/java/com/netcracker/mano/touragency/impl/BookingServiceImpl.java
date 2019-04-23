@@ -10,12 +10,17 @@ import com.netcracker.mano.touragency.exceptions.CannotUpdateEntityException;
 import com.netcracker.mano.touragency.exceptions.EntityNotFoundException;
 import com.netcracker.mano.touragency.interfaces.BookingService;
 import com.netcracker.mano.touragency.interfaces.CreditCardService;
-import com.netcracker.mano.touragency.interfaces.TourService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+
+@Slf4j
+@Component
 public class BookingServiceImpl implements BookingService {
 
     private static BookingServiceImpl instance;
@@ -30,31 +35,38 @@ public class BookingServiceImpl implements BookingService {
     private BookingServiceImpl() {
     }
 
+    private CreditCardService creditCardService = CreditCardServiceImpl.getInstance();
+
     private BookingDAO bookingDAO = BookingDAOImplJDBC.getInstance();
+
+    private TourServiceImpl tourService;
+
+    @Autowired
+    public void setTourService(TourServiceImpl tourService) {
+        this.tourService = tourService;
+    }
 
     @Override
     public Booking create(Booking booking) throws CannotCreateEntityException {
-        if (booking.getNumberOfClients() < 0) return null;
-        TourService tourService = TourServiceImpl.getInstance();
+        log.debug("Trying to create booking :{}", booking);
+        if (booking.getNumberOfClients() < 0) throw new CannotCreateEntityException();
         Tour tour;
         try {
             tour = tourService.getById(booking.getTourId());
         } catch (EntityNotFoundException e) {
             throw new CannotCreateEntityException();
         }
-        if (tour == null || tour.getNumberOfClients() < booking.getNumberOfClients()) {
+        if (tour.getNumberOfClients() < booking.getNumberOfClients()) {
             throw new CannotCreateEntityException();
         }
         double totalPrice = tour.getPrice() * booking.getNumberOfClients();
         booking.setTotalPrice(totalPrice);
         try {
-            CreditCardService creditCardService = CreditCardServiceImpl.getInstance();
             CreditCard card = creditCardService.getByGreatestBalance(booking.getUserId());
-            if (card == null || card.getBalance() < totalPrice) {
+            if (card.getBalance() < totalPrice) {
                 throw new CannotCreateEntityException();
             }
             double remainder = card.getBalance() - booking.getTotalPrice();
-
             creditCardService.updateBalance(card.getId(), remainder, booking.getUserId());
             tour.setNumberOfClients(tour.getNumberOfClients() - booking.getNumberOfClients());
             tourService.update(tour);
@@ -67,26 +79,33 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public void delete(Long userId, Long bookingId) throws EntityNotFoundException {
-        findBooking(userId, bookingId);
+        log.debug("Tring to delete booking with id :{}", bookingId);
+        find(userId, bookingId);
         bookingDAO.delete(bookingId);
 
     }
 
     @Override
-    public List<Booking> getAll(Long userId) {
-        return bookingDAO.getAll()
+    public List<Booking> getAll(Long userId) throws EntityNotFoundException {
+        log.debug("Trying to get all  user bookings ");
+        List<Booking> bookings = bookingDAO.getAll()
                 .stream()
                 .filter(a -> a.getUserId() == userId)
                 .collect(Collectors.toList());
+        if (bookings.size() == 0) {
+            throw new EntityNotFoundException();
+        } else return bookings;
     }
 
     @Override
-    public Booking updateBooking(Booking booking) throws CannotUpdateEntityException {
+    public Booking update(Booking booking) throws CannotUpdateEntityException {
+        log.debug("Trying to update booking :{}", booking);
         return bookingDAO.update(booking);
     }
 
     @Override
-    public Booking findBooking(Long userId, Long id) throws EntityNotFoundException {
+    public Booking find(Long userId, Long id) throws EntityNotFoundException {
+        log.debug("Trying go get booking by id :{}", id);
         Optional<Booking> booking = getAll(userId)
                 .stream()
                 .filter(a -> a.getId() == id)
@@ -96,7 +115,8 @@ public class BookingServiceImpl implements BookingService {
         } else throw new EntityNotFoundException();
     }
 
-    public List<Booking> findAllByCategory(Long userId, String category) {
+    public List<Booking> findAllByCategory(Long userId, String category) throws EntityNotFoundException {
+        log.debug("Trying to get all bookings by category :{}", category);
         return bookingDAO.getAllByCategory(category)
                 .stream()
                 .filter(a -> a.getUserId() == userId)

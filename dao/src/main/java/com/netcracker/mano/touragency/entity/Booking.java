@@ -11,6 +11,7 @@ import java.sql.SQLException;
 @AllArgsConstructor
 @ToString(callSuper = true )
 @NoArgsConstructor
+@Builder
 public class Booking extends BaseEntity {
     private int numberOfClients;
     private double totalPrice;

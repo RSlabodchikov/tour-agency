@@ -12,11 +12,11 @@ public interface BookingService {
 
     void delete(Long userId, Long bookingId) throws EntityNotFoundException;
 
-    List<Booking> getAll(Long userId);
+    List<Booking> getAll(Long userId) throws EntityNotFoundException;
 
-    Booking updateBooking(Booking booking) throws CannotUpdateEntityException;
+    Booking update(Booking booking) throws CannotUpdateEntityException;
 
-    Booking findBooking(Long userId, Long id) throws EntityNotFoundException;
+    Booking find(Long userId, Long id) throws EntityNotFoundException;
 
-    List<Booking> findAllByCategory(Long userId, String category);
+    List<Booking> findAllByCategory(Long userId, String category) throws EntityNotFoundException;
 }

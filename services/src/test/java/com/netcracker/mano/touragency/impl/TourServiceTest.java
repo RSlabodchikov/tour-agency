@@ -32,7 +32,7 @@ public class TourServiceTest {
     private ArgumentCaptor<Tour> captor;
 
     @InjectMocks
-    private TourService tourService = TourServiceImpl.getInstance();
+    private TourService tourService;
 
     @Before
     public void setUp() {

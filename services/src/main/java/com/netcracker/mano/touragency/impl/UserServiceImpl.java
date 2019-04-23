@@ -33,6 +33,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User register(User user) throws RegistrationException {
+        log.debug("Trying to register new user :{}", user);
         if (checkUserIfExist(user.getCredentials().getLogin()))
             throw new RegistrationException();
         try {
@@ -55,6 +56,7 @@ public class UserServiceImpl implements UserService {
     }
 
     private boolean checkUserIfExist(String login) {
+        log.debug("Check user if exist :{}", login);
         try {
             userDAO.findCredentialsByLogin(login);
             return true;
@@ -65,6 +67,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User signIn(Credentials credentials) throws AuthorizationException {
+        log.debug("Trying to find user by credentials :{}", credentials);
         try {
             MessageDigest md = MessageDigest.getInstance("MD5");
             md.update(credentials.getPassword().getBytes());
@@ -78,21 +81,24 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void update(User user) throws CannotUpdateEntityException {
+        log.debug("Trying to update user :{}", user);
         userDAO.update(user);
     }
 
     @Override
     public User findById(Long id) throws EntityNotFoundException {
+        log.debug("Trying to get user by id :{}", id);
         return userDAO.getById(id);
     }
 
     @Override
     public List<User> getAllUsers() {
+        log.debug("Trying to get all users");
         return userDAO.getAll();
     }
 
     @Override
-    public void blockUser(Long id)  throws CannotUpdateEntityException, EntityNotFoundException{
+    public void blockUser(Long id) throws CannotUpdateEntityException, EntityNotFoundException {
         User user = userDAO.getById(id);
         if (user != null) {
             user.setIsBlocked(true);
@@ -111,7 +117,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void changePassword(String login, String oldPassword, String newPassword) throws AuthorizationException {
-
         try {
             MessageDigest md = MessageDigest.getInstance("MD5");
             md.update(oldPassword.getBytes());

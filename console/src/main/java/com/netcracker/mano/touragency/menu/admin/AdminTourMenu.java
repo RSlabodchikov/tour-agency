@@ -1,4 +1,4 @@
-package menu.admin;
+package com.netcracker.mano.touragency.menu.admin;
 
 import com.netcracker.mano.touragency.entity.Category;
 import com.netcracker.mano.touragency.entity.Tour;
@@ -6,9 +6,10 @@ import com.netcracker.mano.touragency.exceptions.CannotCreateEntityException;
 import com.netcracker.mano.touragency.exceptions.CannotUpdateEntityException;
 import com.netcracker.mano.touragency.exceptions.EntityNotFoundException;
 import com.netcracker.mano.touragency.impl.TourServiceImpl;
-import com.netcracker.mano.touragency.interfaces.TourService;
 import lombok.extern.slf4j.Slf4j;
-import menu.Menu;
+import com.netcracker.mano.touragency.menu.Menu;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.util.InputMismatchException;
@@ -16,8 +17,15 @@ import java.util.Scanner;
 
 
 @Slf4j
+@Component
 public class AdminTourMenu implements Menu {
-    private TourService service = TourServiceImpl.getInstance();
+    private TourServiceImpl service;
+
+    @Autowired
+    public void setService(TourServiceImpl service) {
+        this.service = service;
+    }
+
     private Scanner scanner = new Scanner(System.in);
 
     @Override
@@ -27,7 +35,7 @@ public class AdminTourMenu implements Menu {
         System.out.println("3)Delete tour by id");
         System.out.println("4)Change tour");
         System.out.println("5)Create tour");
-        System.out.println("0)Move to previous menu");
+        System.out.println("0)Move to previous Application.menu");
 
     }
 
@@ -47,7 +55,7 @@ public class AdminTourMenu implements Menu {
                         break;
                     case 2:
                         System.out.println("Enter id of tour :");
-                        service.getById(scanner.nextLong());
+                        System.out.println(service.getById(scanner.nextLong()));
                         break;
                     case 3:
                         System.out.println("Enter id of tour to delete :");
@@ -69,7 +77,7 @@ public class AdminTourMenu implements Menu {
             } catch (CannotCreateEntityException e) {
                 System.out.println("Cannot create tour");
                 log.error("Can't create tour entity", e);
-            } catch (EntityNotFoundException e){
+            } catch (EntityNotFoundException e) {
                 System.out.println("Cannot find tour");
                 log.error("Cannot find tour entity", e);
             }

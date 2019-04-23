@@ -48,11 +48,12 @@ public class UserDAOImplJDBC extends CrudDAOJImplJDBC implements UserDAO {
 
             } else throw new EntityNotFoundException();
         } catch (SQLException e) {
-            log.error(e.getSQLState());
+            log.error("Cannot get user by id", e);
             throw new EntityNotFoundException();
         } finally {
             closeConnection();
         }
+        log.info("Get user from database :{}", user);
         return user;
     }
 
@@ -76,11 +77,12 @@ public class UserDAOImplJDBC extends CrudDAOJImplJDBC implements UserDAO {
             } catch (SQLException exception) {
                 exception.printStackTrace();
             }
-            log.error(e.getSQLState());
+            log.error("Cannot find user", e);
             throw new AuthorizationException();
         } finally {
             closeConnection();
         }
+        log.info("Get user by credentials from db :{}", user);
         return user;
     }
 
@@ -97,10 +99,11 @@ public class UserDAOImplJDBC extends CrudDAOJImplJDBC implements UserDAO {
 
             } else throw new EntityNotFoundException();
         } catch (SQLException e) {
-            log.error(e.getSQLState());
+            log.error("Cannot find credentials", e);
         } finally {
             closeConnection();
         }
+        log.info("Found credentials :{}", credentials);
         return credentials;
     }
 
@@ -136,13 +139,14 @@ public class UserDAOImplJDBC extends CrudDAOJImplJDBC implements UserDAO {
                     connection.rollback();
                 }
             } catch (SQLException exception) {
-                exception.printStackTrace();
+                log.error("Cannot rollback ", exception);
             }
-            log.error(e.getSQLState());
+            log.error("Cannot create user", e);
             throw new CannotCreateEntityException();
         } finally {
             closeConnection();
         }
+        log.info("Created new user :{}", entity);
         return entity;
     }
 
@@ -164,6 +168,7 @@ public class UserDAOImplJDBC extends CrudDAOJImplJDBC implements UserDAO {
         } finally {
             closeConnection();
         }
+        log.info("Updated user entity :{}", entity);
         return entity;
     }
 
@@ -176,10 +181,11 @@ public class UserDAOImplJDBC extends CrudDAOJImplJDBC implements UserDAO {
             preparedStatement.setString(2, login);
             preparedStatement.execute();
         } catch (SQLException e) {
-            log.error(e.getSQLState());
+            log.error("Cannot change user password", e);
         } finally {
             closeConnection();
         }
+        log.info("User password changed");
     }
 
     @Override
@@ -190,17 +196,16 @@ public class UserDAOImplJDBC extends CrudDAOJImplJDBC implements UserDAO {
             preparedStatement.setLong(1, id);
             preparedStatement.execute();
         } catch (SQLException e) {
-            log.error(e.getSQLState());
+            log.error("Cannot delete user", e);
         } finally {
             closeConnection();
         }
-
+        log.info("User delete from database with id :{}", id);
     }
 
     @Override
     public List<User> getAll() {
         List<User> users = new ArrayList<>();
-
         try {
             connection = ConnectionPool.getConnection();
             preparedStatement = connection.prepareStatement(UserScripts.SELECT_ALL);
@@ -214,10 +219,11 @@ public class UserDAOImplJDBC extends CrudDAOJImplJDBC implements UserDAO {
                 users.add(user);
             }
         } catch (SQLException e) {
-            log.error(e.getSQLState());
+            log.error("Cannot get users", e);
         } finally {
             closeConnection();
         }
+        log.info("Get all users from db :{}", users);
         return users;
     }
 }

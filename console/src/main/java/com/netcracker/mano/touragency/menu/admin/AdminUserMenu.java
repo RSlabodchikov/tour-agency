@@ -1,4 +1,4 @@
-package menu.admin;
+package com.netcracker.mano.touragency.menu.admin;
 
 import com.netcracker.mano.touragency.entity.User;
 import com.netcracker.mano.touragency.exceptions.CannotUpdateEntityException;
@@ -6,9 +6,9 @@ import com.netcracker.mano.touragency.exceptions.EntityNotFoundException;
 import com.netcracker.mano.touragency.exceptions.RegistrationException;
 import com.netcracker.mano.touragency.impl.UserServiceImpl;
 import com.netcracker.mano.touragency.interfaces.UserService;
+import com.netcracker.mano.touragency.utils.InputUser;
 import lombok.extern.slf4j.Slf4j;
-import menu.Menu;
-import utils.InputUser;
+import com.netcracker.mano.touragency.menu.Menu;
 
 import java.util.InputMismatchException;
 import java.util.Scanner;
@@ -26,7 +26,7 @@ public class AdminUserMenu implements Menu {
         System.out.println("3)Unblock user");
         System.out.println("4)Create user");
         System.out.println("5)Get user by id");
-        System.out.println("0)Move to previous menu");
+        System.out.println("0)Move to previous Application.menu");
     }
 
     @Override

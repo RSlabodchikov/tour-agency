@@ -1,4 +1,4 @@
-package menu.client;
+package com.netcracker.mano.touragency.menu.client;
 
 import com.netcracker.mano.touragency.entity.Booking;
 import com.netcracker.mano.touragency.entity.User;
@@ -7,23 +7,31 @@ import com.netcracker.mano.touragency.exceptions.EntityNotFoundException;
 import com.netcracker.mano.touragency.impl.BookingServiceImpl;
 import com.netcracker.mano.touragency.impl.TourServiceImpl;
 import com.netcracker.mano.touragency.interfaces.BookingService;
-import com.netcracker.mano.touragency.interfaces.TourService;
 import lombok.extern.slf4j.Slf4j;
-import menu.Menu;
+import com.netcracker.mano.touragency.menu.Menu;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
 
 @Slf4j
+@Component
 public class ClientBookingMenu implements Menu {
 
     private User user;
 
     private BookingService service = BookingServiceImpl.getInstance();
 
-    public ClientBookingMenu(User user) {
+    private TourServiceImpl tourService;
 
+    @Autowired
+    public void setTourService(TourServiceImpl tourService) {
+        this.tourService = tourService;
+    }
+
+    public ClientBookingMenu(User user) {
         this.user = user;
     }
 
@@ -33,7 +41,7 @@ public class ClientBookingMenu implements Menu {
         System.out.println("2)Find booking by id");
         System.out.println("3)Create booking");
         System.out.println("4)Delete booking");
-        System.out.println("0)Previous menu");
+        System.out.println("0)Previous Application.menu");
     }
 
     @Override
@@ -51,7 +59,7 @@ public class ClientBookingMenu implements Menu {
                         break;
                     case 2:
                         System.out.println("Enter id of booking :");
-                        System.out.println(service.findBooking(user.getId(), scanner.nextLong()));
+                        System.out.println(service.find(user.getId(), scanner.nextLong()));
                         break;
                     case 3:
                         service.create(createBooking());
@@ -82,7 +90,6 @@ public class ClientBookingMenu implements Menu {
         Booking booking = new Booking();
         booking.setUserId(user.getId());
         Scanner scanner = new Scanner(System.in);
-        TourService tourService = TourServiceImpl.getInstance();
         tourService.getAll().forEach(System.out::println);
         System.out.println("Choose id of tour to create booking : ");
         booking.setTourId(scanner.nextInt());

@@ -40,11 +40,12 @@ public class BookingDAOImplJDBC extends CrudDAOJImplJDBC implements BookingDAO {
                 booking.extractResult(resultSet);
             } else throw new SQLException();
         } catch (SQLException e) {
-            log.error(e.getSQLState());
+            log.error("Cannot get booking by id", e);
             throw new EntityNotFoundException();
         } finally {
             closeConnection();
         }
+        log.info("Found booking : {}", booking);
         return booking;
     }
 
@@ -62,11 +63,12 @@ public class BookingDAOImplJDBC extends CrudDAOJImplJDBC implements BookingDAO {
                 entity.setId(resultSet.getLong(1));
             } else throw new SQLException();
         } catch (SQLException e) {
-            log.error(e.getSQLState());
+            log.error("Cannot create booking", e);
             throw new CannotCreateEntityException();
         } finally {
             closeConnection();
         }
+        log.info("Created new booking :{}", entity);
         return entity;
     }
 
@@ -83,11 +85,12 @@ public class BookingDAOImplJDBC extends CrudDAOJImplJDBC implements BookingDAO {
                 entity.extractResult(resultSet);
             } else throw new SQLException();
         } catch (SQLException e) {
-            log.error(e.getSQLState());
+            log.error("Cannot update booking", e);
             throw new CannotUpdateEntityException();
         } finally {
             closeConnection();
         }
+        log.info("Booking updated :{}", entity);
         return entity;
     }
 
@@ -99,11 +102,11 @@ public class BookingDAOImplJDBC extends CrudDAOJImplJDBC implements BookingDAO {
             preparedStatement.setLong(1, id);
             preparedStatement.execute();
         } catch (SQLException e) {
-            log.error(e.getSQLState());
+            log.error("Cannot delete booking", e);
         } finally {
             closeConnection();
         }
-
+        log.info("Booking deleted from db with id :{}", id);
     }
 
     @Override
@@ -119,15 +122,16 @@ public class BookingDAOImplJDBC extends CrudDAOJImplJDBC implements BookingDAO {
                 bookings.add(booking);
             }
         } catch (SQLException e) {
-            log.error(e.getSQLState());
+            log.error("Cannot get all bookings", e);
         } finally {
             closeConnection();
         }
+        log.info("Get all bookings :{}", bookings);
         return bookings;
     }
 
     @Override
-    public List<Booking> getAllByCategory(String category) {
+    public List<Booking> getAllByCategory(String category) throws EntityNotFoundException {
         List<Booking> bookings = new ArrayList<>();
         try {
             connection = ConnectionPool.getConnection();
@@ -140,10 +144,14 @@ public class BookingDAOImplJDBC extends CrudDAOJImplJDBC implements BookingDAO {
                 bookings.add(booking);
             }
         } catch (SQLException e) {
-            log.error(e.getSQLState());
+            log.error("Cannot get bookings", e);
         } finally {
             closeConnection();
         }
+        if (bookings.size() == 0) {
+            throw new EntityNotFoundException();
+        }
+        log.info("Get all bookings by category :{}", bookings);
         return bookings;
     }
 }

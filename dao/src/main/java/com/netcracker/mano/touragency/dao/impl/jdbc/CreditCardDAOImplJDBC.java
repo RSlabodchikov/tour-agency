@@ -40,11 +40,12 @@ public class CreditCardDAOImplJDBC extends CrudDAOJImplJDBC implements CreditCar
                 card.extractResult(resultSet);
             } else throw new SQLException();
         } catch (SQLException e) {
-            log.error(e.getSQLState());
+            log.error("Cannot get card by id", e);
             throw new EntityNotFoundException();
         } finally {
             closeConnection();
         }
+        log.info("Get card from db:{}", card);
         return card;
     }
 
@@ -60,11 +61,12 @@ public class CreditCardDAOImplJDBC extends CrudDAOJImplJDBC implements CreditCar
                 entity.setId(resultSet.getLong(1));
             } else throw new SQLException();
         } catch (SQLException e) {
-            log.error(e.getSQLState());
+            log.error("Cannot create card", e);
             throw new CannotCreateEntityException();
         } finally {
             closeConnection();
         }
+        log.info("Created new card:{}", entity);
         return entity;
     }
 
@@ -76,16 +78,13 @@ public class CreditCardDAOImplJDBC extends CrudDAOJImplJDBC implements CreditCar
             entity.setStatementParams(preparedStatement);
             preparedStatement.setLong(4, entity.getId());
             preparedStatement.execute();
-            resultSet = preparedStatement.getGeneratedKeys();
-            if (resultSet.next()) {
-                entity.extractResult(resultSet);
-            } else throw new SQLException();
         } catch (SQLException e) {
-            log.error(e.getSQLState());
+            log.error("Cannot update card", e);
             throw new CannotUpdateEntityException();
         } finally {
             closeConnection();
         }
+        log.info("Updated card :{}", entity);
         return entity;
     }
 
@@ -97,10 +96,11 @@ public class CreditCardDAOImplJDBC extends CrudDAOJImplJDBC implements CreditCar
             preparedStatement.setLong(1, id);
             preparedStatement.execute();
         } catch (SQLException e) {
-            log.error(e.getSQLState());
+            log.error("Cannot delete card", e);
         } finally {
             closeConnection();
         }
+        log.info("Card deleted from db with id :{}", id);
     }
 
     @Override
@@ -120,6 +120,7 @@ public class CreditCardDAOImplJDBC extends CrudDAOJImplJDBC implements CreditCar
         } finally {
             closeConnection();
         }
+        log.info("Get all cards from db :{}", cards);
         return cards;
     }
 
@@ -137,12 +138,13 @@ public class CreditCardDAOImplJDBC extends CrudDAOJImplJDBC implements CreditCar
                 clientCards.add(card);
             }
         } catch (SQLException e) {
-            log.error(e.getSQLState());
+            log.error("Cannot get cards", e);
             throw new EntityNotFoundException();
         } finally {
             closeConnection();
         }
         if (clientCards.size() == 0) throw new EntityNotFoundException();
+        log.info("Get all client cards from db :{}", clientCards);
         return clientCards;
     }
 }

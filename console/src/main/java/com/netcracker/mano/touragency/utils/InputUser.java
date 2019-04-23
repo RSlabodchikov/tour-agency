@@ -1,4 +1,4 @@
-package utils;
+package com.netcracker.mano.touragency.utils;
 
 import com.netcracker.mano.touragency.entity.Credentials;
 import com.netcracker.mano.touragency.entity.User;

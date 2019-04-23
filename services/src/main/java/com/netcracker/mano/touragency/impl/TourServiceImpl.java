@@ -1,32 +1,30 @@
 package com.netcracker.mano.touragency.impl;
 
-import com.netcracker.mano.touragency.dao.TourDAO;
 import com.netcracker.mano.touragency.dao.impl.jdbc.TourDAOImplJDBC;
 import com.netcracker.mano.touragency.entity.Tour;
 import com.netcracker.mano.touragency.exceptions.CannotCreateEntityException;
 import com.netcracker.mano.touragency.exceptions.CannotUpdateEntityException;
 import com.netcracker.mano.touragency.exceptions.EntityNotFoundException;
 import com.netcracker.mano.touragency.interfaces.TourService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+@Slf4j
+@Component
 public class TourServiceImpl implements TourService {
-    private TourDAO tourDAO = TourDAOImplJDBC.getInstance();
+    private TourDAOImplJDBC tourDAO;
 
-    private static TourServiceImpl instance;
-
-    private TourServiceImpl() {
-    }
-
-    public static TourServiceImpl getInstance() {
-        if (instance == null) {
-            instance = new TourServiceImpl();
-        }
-        return instance;
+    @Autowired
+    public void setTourDAOImplJDBC(TourDAOImplJDBC tourDAO) {
+        this.tourDAO = tourDAO;
     }
 
     @Override
     public Tour getById(Long id) throws EntityNotFoundException {
+        log.debug("Trying to get tour by id :{}", id);
         return tourDAO.getById(id);
     }
 

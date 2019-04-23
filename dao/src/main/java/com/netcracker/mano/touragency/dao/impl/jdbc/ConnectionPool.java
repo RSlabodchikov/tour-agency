@@ -18,7 +18,11 @@ public class ConnectionPool {
 
     private void initialize() {
         while (!checkIfConnectionPoolIsFull()) {
-            connectionPool.addElement(createNewConnectionForPool());
+            Connection connection = createNewConnectionForPool();
+            if (connection != null) {
+                connectionPool.addElement(connection);
+            }
+
         }
         log.info("Connection pool successfully initialized with 10 connections ");
     }
@@ -33,7 +37,7 @@ public class ConnectionPool {
             Class.forName("com.mysql.jdbc.Driver");
             connection = DriverManager.getConnection(databaseUrl, userName, password);
         } catch (SQLException sqlExc) {
-            log.error(sqlExc.getSQLState());
+            log.error("Cannot create connection", sqlExc);
             return null;
         } catch (ClassNotFoundException exception) {
             log.error(exception.getLocalizedMessage());

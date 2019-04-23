@@ -1,18 +1,28 @@
-package menu;
+package com.netcracker.mano.touragency.menu;
 
 import com.netcracker.mano.touragency.entity.User;
 import com.netcracker.mano.touragency.exceptions.AuthorizationException;
 import com.netcracker.mano.touragency.exceptions.RegistrationException;
 import com.netcracker.mano.touragency.impl.UserServiceImpl;
 import com.netcracker.mano.touragency.interfaces.UserService;
+import com.netcracker.mano.touragency.utils.InputUser;
 import lombok.extern.slf4j.Slf4j;
-import utils.InputUser;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
 @Slf4j
+@Component
 public class MainMenu implements Menu {
+
+    private MenuSearch menuSearch;
+
+    @Autowired
+    public void setMenuSearch(MenuSearch menuSearch) {
+        this.menuSearch = menuSearch;
+    }
 
     @Override
     public void printTextMenu() {
@@ -51,7 +61,7 @@ public class MainMenu implements Menu {
                 if (user.getIsBlocked()) {
                     System.out.println("Your are blocked by admin  :(");
                 } else {
-                    Menu menu = new MenuSearch().getMenuByRole(user);
+                    Menu menu = menuSearch.getMenuByRole(user);
                     menu.printMenu();
                 }
 

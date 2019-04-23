@@ -7,6 +7,7 @@ import com.netcracker.mano.touragency.exceptions.CannotCreateEntityException;
 import com.netcracker.mano.touragency.exceptions.CannotUpdateEntityException;
 import com.netcracker.mano.touragency.exceptions.EntityNotFoundException;
 import com.netcracker.mano.touragency.interfaces.CreditCardService;
+import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigInteger;
 import java.util.Comparator;
@@ -14,6 +15,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
+
+@Slf4j
 public class CreditCardServiceImpl implements CreditCardService {
     private Random random = new Random();
     private CreditCardDAO creditCardDAO = CreditCardDAOImplJDBC.getInstance();
@@ -32,12 +35,14 @@ public class CreditCardServiceImpl implements CreditCardService {
 
     @Override
     public List<CreditCard> getAllClientCards(Long userId) throws EntityNotFoundException {
+        log.debug("Trying to get all client cards :{}", userId);
         return creditCardDAO.getAllClientCards(userId);
 
     }
 
     @Override
     public CreditCard getById(Long clientId, Long cardId) throws EntityNotFoundException {
+        log.debug("Trying to get card by id :{}", cardId);
         Optional<CreditCard> card = getAllClientCards(clientId)
                 .stream()
                 .filter(a -> a.getId() == cardId)
@@ -49,6 +54,7 @@ public class CreditCardServiceImpl implements CreditCardService {
 
     @Override
     public CreditCard create(Double balance, Long id) throws CannotCreateEntityException {
+        log.debug("Trying to create credit card with balance :{}", balance);
         if (balance < 0) throw new CannotCreateEntityException();
         CreditCard card = new CreditCard();
         card.setBalance(balance);
@@ -59,12 +65,14 @@ public class CreditCardServiceImpl implements CreditCardService {
 
     @Override
     public void delete(Long cardId, Long clientId) throws EntityNotFoundException {
+        log.debug("Trying to delete card :{}", cardId);
         getById(clientId, cardId);
         creditCardDAO.delete(cardId);
     }
 
     @Override
     public CreditCard updateBalance(Long cardId, Double balance, Long userId) throws CannotUpdateEntityException, EntityNotFoundException {
+        log.debug("Trying to change card balance", balance, cardId);
         CreditCard card = getById(userId, cardId);
         card.setBalance(card.getBalance() + balance);
         return creditCardDAO.update(card);
@@ -73,6 +81,7 @@ public class CreditCardServiceImpl implements CreditCardService {
 
     @Override
     public CreditCard getByGreatestBalance(Long userId) throws EntityNotFoundException {
+        log.debug("Trying to get user card");
         Optional<CreditCard> creditCard = getAllClientCards(userId)
                 .stream()
                 .max(Comparator.comparing(CreditCard::getBalance));

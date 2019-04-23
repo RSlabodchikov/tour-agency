@@ -1,13 +1,25 @@
-package menu.admin;
+package com.netcracker.mano.touragency.menu.admin;
 
-import menu.Menu;
-import menu.MenuSearch;
-import utils.Constants;
+import com.netcracker.mano.touragency.menu.Menu;
+import com.netcracker.mano.touragency.menu.MenuSearch;
+import com.netcracker.mano.touragency.utils.Constants;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
+
+@Component
 public class AdminMenu implements Menu {
+
+    private MenuSearch menuSearch;
+
+    @Autowired
+    public void setMenuSearch(MenuSearch menuSearch) {
+        this.menuSearch = menuSearch;
+    }
+
     @Override
     public void printTextMenu() {
         System.out.println("1)Users");
@@ -39,7 +51,7 @@ public class AdminMenu implements Menu {
                     default:
                         throw new InputMismatchException("Wrong choice! Try again, please!!!");
                 }
-                Menu menu = new MenuSearch().getAdminMenuByAction(action);
+                Menu menu = menuSearch.getAdminMenuByAction(action);
                 menu.printMenu();
             } catch (InputMismatchException e) {
                 System.out.println(e.getMessage());

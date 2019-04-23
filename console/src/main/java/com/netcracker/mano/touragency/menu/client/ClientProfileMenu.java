@@ -1,4 +1,4 @@
-package menu.client;
+package com.netcracker.mano.touragency.menu.client;
 
 import com.netcracker.mano.touragency.entity.User;
 import com.netcracker.mano.touragency.exceptions.AuthorizationException;
@@ -6,7 +6,7 @@ import com.netcracker.mano.touragency.exceptions.CannotUpdateEntityException;
 import com.netcracker.mano.touragency.impl.UserServiceImpl;
 import com.netcracker.mano.touragency.interfaces.UserService;
 import lombok.extern.slf4j.Slf4j;
-import menu.Menu;
+import com.netcracker.mano.touragency.menu.Menu;
 
 import java.util.InputMismatchException;
 import java.util.Scanner;
@@ -27,7 +27,7 @@ public class ClientProfileMenu implements Menu {
         System.out.println("1)Show profile");
         System.out.println("2)Change password");
         System.out.println("3)Change name and surname");
-        System.out.println("0)Move back to the client menu");
+        System.out.println("0)Move back to the client Application.menu");
 
     }
 
