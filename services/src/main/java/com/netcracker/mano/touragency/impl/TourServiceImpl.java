@@ -1,6 +1,6 @@
 package com.netcracker.mano.touragency.impl;
 
-import com.netcracker.mano.touragency.dao.impl.jdbc.TourDAOImplJDBC;
+import com.netcracker.mano.touragency.dao.TourDAO;
 import com.netcracker.mano.touragency.entity.Tour;
 import com.netcracker.mano.touragency.exceptions.CannotCreateEntityException;
 import com.netcracker.mano.touragency.exceptions.CannotUpdateEntityException;
@@ -15,21 +15,24 @@ import java.util.List;
 @Slf4j
 @Component
 public class TourServiceImpl implements TourService {
-    private TourDAOImplJDBC tourDAO;
+
+    private TourDAO tourDAO;
 
     @Autowired
-    public void setTourDAOImplJDBC(TourDAOImplJDBC tourDAO) {
+    public void setTourDAO(TourDAO tourDAO) {
         this.tourDAO = tourDAO;
     }
 
+
     @Override
     public Tour getById(Long id) throws EntityNotFoundException {
-        log.debug("Trying to get tour by id :{}", id);
+        log.info("Trying to get tour by id :{}", id);
         return tourDAO.getById(id);
     }
 
     @Override
     public Tour create(Tour tour) throws CannotCreateEntityException {
+        log.info("Trying to create tour :{}", tour);
         if (tour.getSettlementDate().compareTo(tour.getEvictionDate()) > 0
                 || tour.getNumberOfClients() > Byte.MAX_VALUE) {
             throw new CannotCreateEntityException();
@@ -39,17 +42,20 @@ public class TourServiceImpl implements TourService {
 
     @Override
     public void delete(Long id) throws EntityNotFoundException {
+        log.info("Trying to delete tour");
         getById(id);
         tourDAO.delete(id);
     }
 
     @Override
     public List<Tour> getAll() {
+        log.info("Trying to get all tours");
         return tourDAO.getAll();
     }
 
     @Override
     public Tour update(Tour tour) throws CannotUpdateEntityException {
+        log.info("Trying to update tour:{}", tour);
         return tourDAO.update(tour);
     }
 }

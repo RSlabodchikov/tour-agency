@@ -5,16 +5,25 @@ import com.netcracker.mano.touragency.entity.User;
 import com.netcracker.mano.touragency.menu.Menu;
 import com.netcracker.mano.touragency.menu.MenuSearch;
 import com.netcracker.mano.touragency.utils.Constants;
+import lombok.Data;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
+
+@Component
+@Data
 public class ClientMenu implements Menu {
 
     private User user;
 
-    public ClientMenu(User user) {
-        this.user = user;
+    private MenuSearch menuSearch;
+
+    @Autowired
+    public ClientMenu(MenuSearch menuSearch) {
+        this.menuSearch = menuSearch;
     }
 
     @Override
@@ -52,7 +61,7 @@ public class ClientMenu implements Menu {
                     default:
                         throw new InputMismatchException("Wrong choice! Try again, please!!!");
                 }
-                Menu menu = new MenuSearch().getUserMenuByAction(user, action);
+                Menu menu = menuSearch.getUserMenuByAction(user, action);
                 menu.printMenu();
             } catch (InputMismatchException e) {
                 System.out.println(e.getMessage());

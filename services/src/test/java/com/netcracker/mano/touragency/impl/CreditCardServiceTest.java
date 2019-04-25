@@ -5,7 +5,6 @@ import com.netcracker.mano.touragency.entity.CreditCard;
 import com.netcracker.mano.touragency.exceptions.CannotCreateEntityException;
 import com.netcracker.mano.touragency.exceptions.CannotUpdateEntityException;
 import com.netcracker.mano.touragency.exceptions.EntityNotFoundException;
-import com.netcracker.mano.touragency.interfaces.CreditCardService;
 import lombok.SneakyThrows;
 import org.junit.Assert;
 import org.junit.Before;
@@ -14,21 +13,25 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
+
+@Component
 public class CreditCardServiceTest {
     @Mock
     private CreditCardDAO creditCardDAO;
 
     @InjectMocks
-    private CreditCardService creditCardService = CreditCardServiceImpl.getInstance();
+    @Autowired
+    private CreditCardServiceImpl creditCardService;
 
     @Captor
     private ArgumentCaptor<CreditCard> captor;

@@ -17,13 +17,43 @@ import org.springframework.stereotype.Component;
 public class MenuSearch {
     private Menu menu;
 
-    private AdminTourMenu adminTourMenu;
-
     private AdminMenu adminMenu;
 
+    private ClientMenu clientMenu;
+
+    private ClientBookingMenu clientBookingMenu;
+
+    private ClientCreditCardMenu clientCreditCardMenu;
+
+    private ClientProfileMenu clientProfileMenu;
+
+    private AdminTourMenu adminTourMenu;
+
+    private AdminUserMenu adminUserMenu;
+
     @Autowired
-    public void setMenu(AdminMenu adminMenu) {
-        this.adminMenu=adminMenu;
+    public void setAdminMenu(AdminMenu adminMenu) {
+        this.adminMenu = adminMenu;
+    }
+
+    @Autowired
+    public void setClientMenu(ClientMenu clientMenu) {
+        this.clientMenu = clientMenu;
+    }
+
+    @Autowired
+    public void setClientBookingMenu(ClientBookingMenu clientBookingMenu) {
+        this.clientBookingMenu = clientBookingMenu;
+    }
+
+    @Autowired
+    public void setClientCreditCardMenu(ClientCreditCardMenu clientCreditCardMenu) {
+        this.clientCreditCardMenu = clientCreditCardMenu;
+    }
+
+    @Autowired
+    public void setClientProfileMenu(ClientProfileMenu clientProfileMenu) {
+        this.clientProfileMenu = clientProfileMenu;
     }
 
     @Autowired
@@ -31,6 +61,10 @@ public class MenuSearch {
         this.adminTourMenu = adminTourMenu;
     }
 
+    @Autowired
+    public void setAdminUserMenu(AdminUserMenu adminUserMenu) {
+        this.adminUserMenu = adminUserMenu;
+    }
 
     Menu getMenuByRole(User user) {
         switch (user.getRole()) {
@@ -38,7 +72,8 @@ public class MenuSearch {
                 menu = adminMenu;
                 break;
             case CLIENT:
-                menu = new ClientMenu(user);
+                clientMenu.setUser(user);
+                menu = clientMenu;
                 break;
         }
         return menu;
@@ -46,11 +81,14 @@ public class MenuSearch {
 
     public Menu getUserMenuByAction(User user, String action) {
         if (Constants.BOOKING.compareTo(action) == 0) {
-            menu = new ClientBookingMenu(user);
+            clientBookingMenu.setUser(user);
+            menu = clientBookingMenu;
         } else if (Constants.CREDIT_CARDS.compareTo(action) == 0) {
-            menu = new ClientCreditCardMenu(user);
+            clientCreditCardMenu.setUser(user);
+            menu = clientCreditCardMenu;
         } else if (Constants.PROFILE.compareTo(action) == 0) {
-            menu = new ClientProfileMenu(user);
+            clientProfileMenu.setUser(user);
+            menu = clientProfileMenu;
         }
         return menu;
     }
@@ -58,7 +96,7 @@ public class MenuSearch {
     public Menu getAdminMenuByAction(String action) {
         if (Constants.TOURS.compareTo(action) == 0) {
             menu = adminTourMenu;
-        } else menu = new AdminUserMenu();
+        } else menu = adminUserMenu;
         return menu;
     }
 

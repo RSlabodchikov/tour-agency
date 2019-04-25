@@ -5,9 +5,9 @@ import com.netcracker.mano.touragency.entity.Tour;
 import com.netcracker.mano.touragency.exceptions.CannotCreateEntityException;
 import com.netcracker.mano.touragency.exceptions.CannotUpdateEntityException;
 import com.netcracker.mano.touragency.exceptions.EntityNotFoundException;
-import com.netcracker.mano.touragency.impl.TourServiceImpl;
-import lombok.extern.slf4j.Slf4j;
+import com.netcracker.mano.touragency.interfaces.TourService;
 import com.netcracker.mano.touragency.menu.Menu;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -19,10 +19,11 @@ import java.util.Scanner;
 @Slf4j
 @Component
 public class AdminTourMenu implements Menu {
-    private TourServiceImpl service;
+
+    private TourService service;
 
     @Autowired
-    public void setService(TourServiceImpl service) {
+    public AdminTourMenu(TourService service) {
         this.service = service;
     }
 

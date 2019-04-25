@@ -4,11 +4,11 @@ import com.netcracker.mano.touragency.entity.Booking;
 import com.netcracker.mano.touragency.entity.User;
 import com.netcracker.mano.touragency.exceptions.CannotCreateEntityException;
 import com.netcracker.mano.touragency.exceptions.EntityNotFoundException;
-import com.netcracker.mano.touragency.impl.BookingServiceImpl;
-import com.netcracker.mano.touragency.impl.TourServiceImpl;
 import com.netcracker.mano.touragency.interfaces.BookingService;
-import lombok.extern.slf4j.Slf4j;
+import com.netcracker.mano.touragency.interfaces.TourService;
 import com.netcracker.mano.touragency.menu.Menu;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -18,21 +18,19 @@ import java.util.Scanner;
 
 @Slf4j
 @Component
+@Data
 public class ClientBookingMenu implements Menu {
 
     private User user;
 
-    private BookingService service = BookingServiceImpl.getInstance();
+    private BookingService service;
 
-    private TourServiceImpl tourService;
+    private TourService tourService;
 
     @Autowired
-    public void setTourService(TourServiceImpl tourService) {
+    public ClientBookingMenu(BookingService service, TourService tourService) {
+        this.service = service;
         this.tourService = tourService;
-    }
-
-    public ClientBookingMenu(User user) {
-        this.user = user;
     }
 
     @Override

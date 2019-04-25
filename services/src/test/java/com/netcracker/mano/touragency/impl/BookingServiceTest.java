@@ -1,14 +1,11 @@
 package com.netcracker.mano.touragency.impl;
 
 import com.netcracker.mano.touragency.dao.BookingDAO;
-import com.netcracker.mano.touragency.dao.TourDAO;
 import com.netcracker.mano.touragency.entity.Booking;
 import com.netcracker.mano.touragency.entity.CreditCard;
 import com.netcracker.mano.touragency.entity.Tour;
 import com.netcracker.mano.touragency.exceptions.CannotCreateEntityException;
 import com.netcracker.mano.touragency.exceptions.EntityNotFoundException;
-import com.netcracker.mano.touragency.interfaces.BookingService;
-import com.netcracker.mano.touragency.interfaces.TourService;
 import lombok.SneakyThrows;
 import org.junit.Assert;
 import org.junit.Before;
@@ -17,23 +14,26 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
+@Component
 public class BookingServiceTest {
 
     @Mock
+    @Autowired
     private TourServiceImpl tourService;
 
 
     @Mock
+    @Autowired
     private CreditCardServiceImpl creditCardService;
 
     @Mock
@@ -44,7 +44,8 @@ public class BookingServiceTest {
 
 
     @InjectMocks
-    private BookingService bookingService = BookingServiceImpl.getInstance();
+    @Autowired
+    private BookingServiceImpl bookingService;
 
     @Before
     public void setUp() {
@@ -206,7 +207,7 @@ public class BookingServiceTest {
 
     @Test(expected = CannotCreateEntityException.class)
     @SneakyThrows
-    public void cannotCreateBookingWithoutCreditCard(){
+    public void cannotCreateBookingWithoutCreditCard() {
         Booking booking = Booking.builder()
                 .userId(1L)
                 .tourId(1L)
@@ -223,7 +224,7 @@ public class BookingServiceTest {
 
     @Test
     @SneakyThrows
-    public void createBooking(){
+    public void createBooking() {
         Booking booking = Booking.builder()
                 .userId(1L)
                 .tourId(1L)

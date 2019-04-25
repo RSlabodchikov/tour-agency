@@ -1,7 +1,6 @@
 package com.netcracker.mano.touragency.entity;
 
 import lombok.*;
-import org.springframework.stereotype.Component;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -13,7 +12,6 @@ import java.sql.SQLException;
 @Builder
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-@Component
 public class User extends BaseEntity {
     private Credentials credentials;
     private String name;

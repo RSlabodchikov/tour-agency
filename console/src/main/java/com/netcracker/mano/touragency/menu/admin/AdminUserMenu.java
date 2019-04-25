@@ -4,20 +4,27 @@ import com.netcracker.mano.touragency.entity.User;
 import com.netcracker.mano.touragency.exceptions.CannotUpdateEntityException;
 import com.netcracker.mano.touragency.exceptions.EntityNotFoundException;
 import com.netcracker.mano.touragency.exceptions.RegistrationException;
-import com.netcracker.mano.touragency.impl.UserServiceImpl;
 import com.netcracker.mano.touragency.interfaces.UserService;
+import com.netcracker.mano.touragency.menu.Menu;
 import com.netcracker.mano.touragency.utils.InputUser;
 import lombok.extern.slf4j.Slf4j;
-import com.netcracker.mano.touragency.menu.Menu;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
 
 @Slf4j
+@Component
 public class AdminUserMenu implements Menu {
 
-    private UserService service = UserServiceImpl.getInstance();
+    private UserService service;
+
+    @Autowired
+    public AdminUserMenu(UserService service) {
+        this.service = service;
+    }
 
     @Override
     public void printTextMenu() {

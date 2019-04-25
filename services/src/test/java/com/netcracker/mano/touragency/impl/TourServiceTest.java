@@ -6,7 +6,6 @@ import com.netcracker.mano.touragency.entity.Tour;
 import com.netcracker.mano.touragency.exceptions.CannotCreateEntityException;
 import com.netcracker.mano.touragency.exceptions.CannotUpdateEntityException;
 import com.netcracker.mano.touragency.exceptions.EntityNotFoundException;
-import com.netcracker.mano.touragency.interfaces.TourService;
 import lombok.SneakyThrows;
 import org.junit.Assert;
 import org.junit.Before;
@@ -15,6 +14,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -24,6 +25,8 @@ import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
+
+@Component
 public class TourServiceTest {
     @Mock
     private TourDAO tourDAO;
@@ -32,7 +35,8 @@ public class TourServiceTest {
     private ArgumentCaptor<Tour> captor;
 
     @InjectMocks
-    private TourService tourService;
+    @Autowired
+    private TourServiceImpl tourService;
 
     @Before
     public void setUp() {

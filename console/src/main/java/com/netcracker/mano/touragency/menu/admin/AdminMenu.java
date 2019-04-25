@@ -9,14 +9,13 @@ import org.springframework.stereotype.Component;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
-
 @Component
 public class AdminMenu implements Menu {
 
     private MenuSearch menuSearch;
 
     @Autowired
-    public void setMenuSearch(MenuSearch menuSearch) {
+    public AdminMenu(MenuSearch menuSearch) {
         this.menuSearch = menuSearch;
     }
 

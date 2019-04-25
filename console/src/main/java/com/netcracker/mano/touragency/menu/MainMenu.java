@@ -1,9 +1,9 @@
 package com.netcracker.mano.touragency.menu;
 
+import com.netcracker.mano.touragency.dao.impl.jdbc.ConnectionPool;
 import com.netcracker.mano.touragency.entity.User;
 import com.netcracker.mano.touragency.exceptions.AuthorizationException;
 import com.netcracker.mano.touragency.exceptions.RegistrationException;
-import com.netcracker.mano.touragency.impl.UserServiceImpl;
 import com.netcracker.mano.touragency.interfaces.UserService;
 import com.netcracker.mano.touragency.utils.InputUser;
 import lombok.extern.slf4j.Slf4j;
@@ -17,11 +17,25 @@ import java.util.Scanner;
 @Component
 public class MainMenu implements Menu {
 
+    private ConnectionPool connectionPool;
+
     private MenuSearch menuSearch;
 
     @Autowired
     public void setMenuSearch(MenuSearch menuSearch) {
         this.menuSearch = menuSearch;
+    }
+
+    @Autowired
+    public void setConnectionPool(ConnectionPool connectionPool) {
+        this.connectionPool = connectionPool;
+    }
+
+    private UserService service;
+
+    @Autowired
+    public void setService(UserService service) {
+        this.service = service;
     }
 
     @Override
@@ -39,7 +53,6 @@ public class MainMenu implements Menu {
             Scanner scanner = new Scanner(System.in);
             try {
                 User user = null;
-                UserService service = UserServiceImpl.getInstance();
                 if (!scanner.hasNextInt()) {
                     throw new InputMismatchException("Enter int number, please!!!");
                 }
@@ -74,8 +87,6 @@ public class MainMenu implements Menu {
                 System.out.println("Wrong login or password");
                 log.error("Authorization problem", authExc);
             }
-
-
         }
     }
 }

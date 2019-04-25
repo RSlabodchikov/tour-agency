@@ -1,13 +1,14 @@
 package com.netcracker.mano.touragency.impl;
 
 import com.netcracker.mano.touragency.dao.UserDAO;
-import com.netcracker.mano.touragency.dao.impl.jdbc.UserDAOImplJDBC;
 import com.netcracker.mano.touragency.entity.Credentials;
 import com.netcracker.mano.touragency.entity.Role;
 import com.netcracker.mano.touragency.entity.User;
 import com.netcracker.mano.touragency.exceptions.*;
 import com.netcracker.mano.touragency.interfaces.UserService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import javax.xml.bind.DatatypeConverter;
 import java.security.MessageDigest;
@@ -15,25 +16,19 @@ import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 @Slf4j
+@Component
 public class UserServiceImpl implements UserService {
-    private static UserServiceImpl instance;
 
-    private UserServiceImpl() {
+    private UserDAO userDAO;
+
+    @Autowired
+    public void setUserDAO(UserDAO userDAO) {
+        this.userDAO = userDAO;
     }
-
-    public static UserServiceImpl getInstance() {
-        if (instance == null) {
-            instance = new UserServiceImpl();
-        }
-        return instance;
-    }
-
-
-    private UserDAO userDAO = UserDAOImplJDBC.getInstance();
 
     @Override
     public User register(User user) throws RegistrationException {
-        log.debug("Trying to register new user :{}", user);
+        log.info("Trying to register new user :{}", user);
         if (checkUserIfExist(user.getCredentials().getLogin()))
             throw new RegistrationException();
         try {
@@ -56,7 +51,7 @@ public class UserServiceImpl implements UserService {
     }
 
     private boolean checkUserIfExist(String login) {
-        log.debug("Check user if exist :{}", login);
+        log.info("Check user if exist :{}", login);
         try {
             userDAO.findCredentialsByLogin(login);
             return true;
@@ -67,7 +62,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User signIn(Credentials credentials) throws AuthorizationException {
-        log.debug("Trying to find user by credentials :{}", credentials);
+        log.info("Trying to find user by credentials :{}", credentials);
         try {
             MessageDigest md = MessageDigest.getInstance("MD5");
             md.update(credentials.getPassword().getBytes());
@@ -81,19 +76,19 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void update(User user) throws CannotUpdateEntityException {
-        log.debug("Trying to update user :{}", user);
+        log.info("Trying to update user :{}", user);
         userDAO.update(user);
     }
 
     @Override
     public User findById(Long id) throws EntityNotFoundException {
-        log.debug("Trying to get user by id :{}", id);
+        log.info("Trying to get user by id :{}", id);
         return userDAO.getById(id);
     }
 
     @Override
     public List<User> getAllUsers() {
-        log.debug("Trying to get all users");
+        log.info("Trying to get all users");
         return userDAO.getAll();
     }
 
@@ -117,6 +112,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void changePassword(String login, String oldPassword, String newPassword) throws AuthorizationException {
+        log.info("Trying to change user password");
         try {
             MessageDigest md = MessageDigest.getInstance("MD5");
             md.update(oldPassword.getBytes());

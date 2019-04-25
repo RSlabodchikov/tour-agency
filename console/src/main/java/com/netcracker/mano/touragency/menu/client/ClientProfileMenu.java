@@ -3,25 +3,30 @@ package com.netcracker.mano.touragency.menu.client;
 import com.netcracker.mano.touragency.entity.User;
 import com.netcracker.mano.touragency.exceptions.AuthorizationException;
 import com.netcracker.mano.touragency.exceptions.CannotUpdateEntityException;
-import com.netcracker.mano.touragency.impl.UserServiceImpl;
 import com.netcracker.mano.touragency.interfaces.UserService;
-import lombok.extern.slf4j.Slf4j;
 import com.netcracker.mano.touragency.menu.Menu;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
 
 @Slf4j
+@Component
+@Data
 public class ClientProfileMenu implements Menu {
+
     private User user;
 
-    private UserService service = UserServiceImpl.getInstance();
+    private UserService service;
 
-    public ClientProfileMenu(User user) {
-        this.user = user;
+    @Autowired
+    public ClientProfileMenu(UserService service) {
+        this.service = service;
     }
-
 
     public void printTextMenu() {
         System.out.println("1)Show profile");

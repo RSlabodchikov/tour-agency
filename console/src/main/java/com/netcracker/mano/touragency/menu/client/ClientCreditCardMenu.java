@@ -4,22 +4,29 @@ import com.netcracker.mano.touragency.entity.User;
 import com.netcracker.mano.touragency.exceptions.CannotCreateEntityException;
 import com.netcracker.mano.touragency.exceptions.CannotUpdateEntityException;
 import com.netcracker.mano.touragency.exceptions.EntityNotFoundException;
-import com.netcracker.mano.touragency.impl.CreditCardServiceImpl;
 import com.netcracker.mano.touragency.interfaces.CreditCardService;
-import lombok.extern.slf4j.Slf4j;
 import com.netcracker.mano.touragency.menu.Menu;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
 
 @Slf4j
+@Component
+@Data
 public class ClientCreditCardMenu implements Menu {
-    private User user;
-    private CreditCardService service = CreditCardServiceImpl.getInstance();
 
-    public ClientCreditCardMenu(User user) {
-        this.user = user;
+    private User user;
+
+    private CreditCardService service;
+
+    @Autowired
+    public ClientCreditCardMenu(CreditCardService service) {
+        this.service = service;
     }
 
     @Override

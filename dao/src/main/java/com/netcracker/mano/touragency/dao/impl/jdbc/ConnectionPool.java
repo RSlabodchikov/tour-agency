@@ -2,6 +2,7 @@ package com.netcracker.mano.touragency.dao.impl.jdbc;
 
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -9,6 +10,7 @@ import java.sql.SQLException;
 import java.util.Vector;
 
 @Slf4j
+@Component
 public class ConnectionPool {
     private static Vector<Connection> connectionPool = new Vector<>();
 

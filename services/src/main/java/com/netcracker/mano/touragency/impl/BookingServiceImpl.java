@@ -1,7 +1,6 @@
 package com.netcracker.mano.touragency.impl;
 
 import com.netcracker.mano.touragency.dao.BookingDAO;
-import com.netcracker.mano.touragency.dao.impl.jdbc.BookingDAOImplJDBC;
 import com.netcracker.mano.touragency.entity.Booking;
 import com.netcracker.mano.touragency.entity.CreditCard;
 import com.netcracker.mano.touragency.entity.Tour;
@@ -23,32 +22,32 @@ import java.util.stream.Collectors;
 @Component
 public class BookingServiceImpl implements BookingService {
 
-    private static BookingServiceImpl instance;
 
-    public static BookingServiceImpl getInstance() {
-        if (instance == null) {
-            instance = new BookingServiceImpl();
-        }
-        return instance;
-    }
+    private CreditCardService creditCardService;
 
-    private BookingServiceImpl() {
-    }
-
-    private CreditCardService creditCardService = CreditCardServiceImpl.getInstance();
-
-    private BookingDAO bookingDAO = BookingDAOImplJDBC.getInstance();
+    private BookingDAO bookingDAO;
 
     private TourServiceImpl tourService;
+
+    @Autowired
+    public void setCreditCardService(CreditCardService creditCardService) {
+        this.creditCardService = creditCardService;
+    }
+
+    @Autowired
+    public void setBookingDAO(BookingDAO bookingDAO) {
+        this.bookingDAO = bookingDAO;
+    }
 
     @Autowired
     public void setTourService(TourServiceImpl tourService) {
         this.tourService = tourService;
     }
 
+
     @Override
     public Booking create(Booking booking) throws CannotCreateEntityException {
-        log.debug("Trying to create booking :{}", booking);
+        log.info("Trying to create booking :{}", booking);
         if (booking.getNumberOfClients() < 0) throw new CannotCreateEntityException();
         Tour tour;
         try {
@@ -79,7 +78,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public void delete(Long userId, Long bookingId) throws EntityNotFoundException {
-        log.debug("Tring to delete booking with id :{}", bookingId);
+        log.info("Tring to delete booking with id :{}", bookingId);
         find(userId, bookingId);
         bookingDAO.delete(bookingId);
 
@@ -87,7 +86,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<Booking> getAll(Long userId) throws EntityNotFoundException {
-        log.debug("Trying to get all  user bookings ");
+        log.info("Trying to get all  user bookings ");
         List<Booking> bookings = bookingDAO.getAll()
                 .stream()
                 .filter(a -> a.getUserId() == userId)
@@ -99,13 +98,13 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public Booking update(Booking booking) throws CannotUpdateEntityException {
-        log.debug("Trying to update booking :{}", booking);
+        log.info("Trying to update booking :{}", booking);
         return bookingDAO.update(booking);
     }
 
     @Override
     public Booking find(Long userId, Long id) throws EntityNotFoundException {
-        log.debug("Trying go get booking by id :{}", id);
+        log.info("Trying go get booking by id :{}", id);
         Optional<Booking> booking = getAll(userId)
                 .stream()
                 .filter(a -> a.getId() == id)
@@ -116,7 +115,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     public List<Booking> findAllByCategory(Long userId, String category) throws EntityNotFoundException {
-        log.debug("Trying to get all bookings by category :{}", category);
+        log.info("Trying to get all bookings by category :{}", category);
         return bookingDAO.getAllByCategory(category)
                 .stream()
                 .filter(a -> a.getUserId() == userId)

@@ -10,6 +10,7 @@ import com.netcracker.mano.touragency.exceptions.EntityNotFoundException;
 import com.netcracker.mano.touragency.sql.scripts.CredentialsScripts;
 import com.netcracker.mano.touragency.sql.scripts.UserScripts;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -18,6 +19,7 @@ import java.util.List;
 
 
 @Slf4j
+@Component
 public class UserDAOImplJDBC extends CrudDAOJImplJDBC implements UserDAO {
     private static UserDAOImplJDBC instance;
 

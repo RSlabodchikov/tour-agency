@@ -5,7 +5,6 @@ import com.netcracker.mano.touragency.entity.Credentials;
 import com.netcracker.mano.touragency.entity.Role;
 import com.netcracker.mano.touragency.entity.User;
 import com.netcracker.mano.touragency.exceptions.*;
-import com.netcracker.mano.touragency.interfaces.UserService;
 import lombok.SneakyThrows;
 import org.junit.Assert;
 import org.junit.Before;
@@ -14,6 +13,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,13 +22,14 @@ import java.util.List;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-
+@Component
 public class UserServiceTest {
     @Mock
     private UserDAO userDAO;
 
     @InjectMocks
-    private UserService userService = UserServiceImpl.getInstance();
+    @Autowired
+    private UserServiceImpl userService;
 
     @Captor
     private ArgumentCaptor<User> captor;
