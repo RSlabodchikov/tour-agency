@@ -11,5 +11,4 @@ Application.log
 console/target/
 dao/target/
 services/target/
-
 /.idea/libraries/Maven__org_projectlombok_lombok_1_18_6.xml
