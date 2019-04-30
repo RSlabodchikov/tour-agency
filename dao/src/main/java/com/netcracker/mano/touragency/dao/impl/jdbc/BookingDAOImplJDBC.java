@@ -17,19 +17,6 @@ import java.util.List;
 @Slf4j
 @Component
 public class BookingDAOImplJDBC extends CrudDAOJImplJDBC implements BookingDAO {
-
-    private static BookingDAOImplJDBC instance;
-
-    private BookingDAOImplJDBC() {
-    }
-
-    public static BookingDAOImplJDBC getInstance() {
-        if (instance == null) {
-            instance = new BookingDAOImplJDBC();
-        }
-        return instance;
-    }
-
     @Override
     public Booking getById(long id) throws EntityNotFoundException {
         Booking booking = new Booking();

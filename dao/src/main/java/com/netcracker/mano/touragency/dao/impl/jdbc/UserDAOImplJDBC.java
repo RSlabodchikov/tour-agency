@@ -21,18 +21,6 @@ import java.util.List;
 @Slf4j
 @Component
 public class UserDAOImplJDBC extends CrudDAOJImplJDBC implements UserDAO {
-    private static UserDAOImplJDBC instance;
-
-    private UserDAOImplJDBC() {
-    }
-
-    public static UserDAOImplJDBC getInstance() {
-        if (instance == null) {
-            instance = new UserDAOImplJDBC();
-        }
-        return instance;
-    }
-
     @Override
     public User getById(long id) throws EntityNotFoundException {
 

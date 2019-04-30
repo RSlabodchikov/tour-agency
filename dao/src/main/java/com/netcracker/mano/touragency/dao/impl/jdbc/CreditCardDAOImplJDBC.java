@@ -17,19 +17,6 @@ import java.util.List;
 @Slf4j
 @Component
 public class CreditCardDAOImplJDBC extends CrudDAOJImplJDBC implements CreditCardDAO {
-
-    private static CreditCardDAOImplJDBC instance;
-
-    private CreditCardDAOImplJDBC() {
-    }
-
-    public static CreditCardDAOImplJDBC getInstance() {
-        if (instance == null) {
-            instance = new CreditCardDAOImplJDBC();
-        }
-        return instance;
-    }
-
     @Override
     public CreditCard getById(long id) throws EntityNotFoundException {
         CreditCard card = new CreditCard();

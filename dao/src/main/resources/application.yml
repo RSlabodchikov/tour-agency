@@ -1,0 +1,12 @@
+logging:
+  file: application.log
+  level:
+    root: INFO
+spring:
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+files:
+  user: src/main/resources/userData.json
+  credit-card: src/main/resources/card_data.json
+  booking: src/main/resources/booking_data.json
+  tour: src/main/resources/tourData.json
