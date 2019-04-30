@@ -4,6 +4,7 @@ package com.netcracker.mano.touragency.dao.impl.jdbc;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -14,10 +15,7 @@ import java.util.Vector;
 public class ConnectionPool {
     private static Vector<Connection> connectionPool = new Vector<>();
 
-    public ConnectionPool() {
-        initialize();
-    }
-
+    @PostConstruct
     private void initialize() {
         while (!checkIfConnectionPoolIsFull()) {
             Connection connection = createNewConnectionForPool();

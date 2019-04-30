@@ -1,6 +1,5 @@
 package com.netcracker.mano.touragency.menu;
 
-import com.netcracker.mano.touragency.dao.impl.jdbc.ConnectionPool;
 import com.netcracker.mano.touragency.entity.User;
 import com.netcracker.mano.touragency.exceptions.AuthorizationException;
 import com.netcracker.mano.touragency.exceptions.RegistrationException;
@@ -17,24 +16,13 @@ import java.util.Scanner;
 @Component
 public class MainMenu implements Menu {
 
-    private ConnectionPool connectionPool;
-
     private MenuSearch menuSearch;
-
-    @Autowired
-    public void setMenuSearch(MenuSearch menuSearch) {
-        this.menuSearch = menuSearch;
-    }
-
-    @Autowired
-    public void setConnectionPool(ConnectionPool connectionPool) {
-        this.connectionPool = connectionPool;
-    }
 
     private UserService service;
 
     @Autowired
-    public void setService(UserService service) {
+    public MainMenu(MenuSearch menuSearch, UserService service) {
+        this.menuSearch = menuSearch;
         this.service = service;
     }
 

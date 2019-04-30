@@ -11,7 +11,7 @@ import com.netcracker.mano.touragency.interfaces.BookingService;
 import com.netcracker.mano.touragency.interfaces.CreditCardService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 
 
 @Slf4j
-@Component
+@Service
 public class BookingServiceImpl implements BookingService {
 
 
@@ -30,17 +30,9 @@ public class BookingServiceImpl implements BookingService {
     private TourServiceImpl tourService;
 
     @Autowired
-    public void setCreditCardService(CreditCardService creditCardService) {
+    public BookingServiceImpl(CreditCardService creditCardService, BookingDAO bookingDAO, TourServiceImpl tourService) {
         this.creditCardService = creditCardService;
-    }
-
-    @Autowired
-    public void setBookingDAO(BookingDAO bookingDAO) {
         this.bookingDAO = bookingDAO;
-    }
-
-    @Autowired
-    public void setTourService(TourServiceImpl tourService) {
         this.tourService = tourService;
     }
 

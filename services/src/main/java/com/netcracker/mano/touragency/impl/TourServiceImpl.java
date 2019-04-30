@@ -8,21 +8,20 @@ import com.netcracker.mano.touragency.exceptions.EntityNotFoundException;
 import com.netcracker.mano.touragency.interfaces.TourService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Slf4j
-@Component
+@Service
 public class TourServiceImpl implements TourService {
 
     private TourDAO tourDAO;
 
     @Autowired
-    public void setTourDAO(TourDAO tourDAO) {
+    public TourServiceImpl(TourDAO tourDAO) {
         this.tourDAO = tourDAO;
     }
-
 
     @Override
     public Tour getById(Long id) throws EntityNotFoundException {

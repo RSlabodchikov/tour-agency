@@ -6,7 +6,6 @@ import com.netcracker.mano.touragency.menu.Menu;
 import com.netcracker.mano.touragency.menu.MenuSearch;
 import com.netcracker.mano.touragency.utils.Constants;
 import lombok.Data;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.InputMismatchException;
@@ -21,7 +20,6 @@ public class ClientMenu implements Menu {
 
     private MenuSearch menuSearch;
 
-    @Autowired
     public ClientMenu(MenuSearch menuSearch) {
         this.menuSearch = menuSearch;
     }

@@ -7,8 +7,7 @@ import com.netcracker.mano.touragency.exceptions.CannotUpdateEntityException;
 import com.netcracker.mano.touragency.exceptions.EntityNotFoundException;
 import com.netcracker.mano.touragency.interfaces.CreditCardService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
 import java.util.Comparator;
@@ -18,15 +17,14 @@ import java.util.Random;
 
 
 @Slf4j
-@Component
+@Service
 public class CreditCardServiceImpl implements CreditCardService {
     private Random random = new Random();
 
 
     private CreditCardDAO creditCardDAO;
 
-    @Autowired
-    public void setCreditCardDAO(CreditCardDAO creditCardDAO) {
+    public CreditCardServiceImpl(CreditCardDAO creditCardDAO) {
         this.creditCardDAO = creditCardDAO;
     }
 

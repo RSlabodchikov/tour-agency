@@ -8,7 +8,7 @@ import com.netcracker.mano.touragency.exceptions.*;
 import com.netcracker.mano.touragency.interfaces.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import javax.xml.bind.DatatypeConverter;
 import java.security.MessageDigest;
@@ -16,13 +16,13 @@ import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 @Slf4j
-@Component
+@Service
 public class UserServiceImpl implements UserService {
 
     private UserDAO userDAO;
 
     @Autowired
-    public void setUserDAO(UserDAO userDAO) {
+    public UserServiceImpl(UserDAO userDAO) {
         this.userDAO = userDAO;
     }
 
