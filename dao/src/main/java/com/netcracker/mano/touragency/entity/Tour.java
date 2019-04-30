@@ -46,7 +46,7 @@ public class Tour extends BaseEntity {
     public void setStatementParamsToChange(PreparedStatement preparedStatement) throws SQLException {
         preparedStatement.setDouble(1, price);
         preparedStatement.setInt(2, numberOfClients);
-        preparedStatement.setLong(3, id);
+        preparedStatement.setLong(3, getId());
     }
 
     public void setStatementParamsToCreate(PreparedStatement preparedStatement) throws SQLException {

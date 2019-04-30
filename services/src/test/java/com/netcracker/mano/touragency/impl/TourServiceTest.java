@@ -14,8 +14,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -26,7 +24,6 @@ import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 
-@Component
 public class TourServiceTest {
     @Mock
     private TourDAO tourDAO;
@@ -35,7 +32,6 @@ public class TourServiceTest {
     private ArgumentCaptor<Tour> captor;
 
     @InjectMocks
-    @Autowired
     private TourServiceImpl tourService;
 
     @Before

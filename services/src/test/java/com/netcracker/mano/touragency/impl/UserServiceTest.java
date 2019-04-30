@@ -13,8 +13,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,13 +20,11 @@ import java.util.List;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-@Component
 public class UserServiceTest {
     @Mock
     private UserDAO userDAO;
 
     @InjectMocks
-    @Autowired
     private UserServiceImpl userService;
 
     @Captor

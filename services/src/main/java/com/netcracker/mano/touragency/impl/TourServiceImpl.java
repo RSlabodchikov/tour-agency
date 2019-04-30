@@ -32,8 +32,7 @@ public class TourServiceImpl implements TourService {
     @Override
     public Tour create(Tour tour) throws CannotCreateEntityException {
         log.info("Trying to create tour :{}", tour);
-        if (tour.getSettlementDate().compareTo(tour.getEvictionDate()) > 0
-                || tour.getNumberOfClients() > Byte.MAX_VALUE) {
+        if (tour.getSettlementDate().compareTo(tour.getEvictionDate()) > 0) {
             throw new CannotCreateEntityException();
         }
         return tourDAO.add(tour);

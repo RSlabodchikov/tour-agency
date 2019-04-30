@@ -133,7 +133,7 @@ public class BookingDAOImplJDBC extends CrudDAOJImplJDBC implements BookingDAO {
     }
 
     @Override
-    public List<Booking> getAllByCategory(String category) throws EntityNotFoundException {
+    public List<Booking> getAllByCategory(String category) {
         List<Booking> bookings = new ArrayList<>();
         try {
             connection = ConnectionPool.getConnection();
@@ -150,10 +150,49 @@ public class BookingDAOImplJDBC extends CrudDAOJImplJDBC implements BookingDAO {
         } finally {
             closeConnection();
         }
-        if (bookings.size() == 0) {
-            throw new EntityNotFoundException();
-        }
         log.info("Get all bookings by category :{}", bookings);
         return bookings;
     }
+
+    @Override
+    public List<Booking> getAllClientBookings(long clientId) {
+        List<Booking> bookings = new ArrayList<>();
+        try {
+            connection = ConnectionPool.getConnection();
+            preparedStatement = connection.prepareStatement(BookingScripts.SELECT_BY_USER_ID);
+            preparedStatement.setLong(1, clientId);
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                Booking booking = new Booking();
+                booking.extractResult(resultSet);
+                bookings.add(booking);
+            }
+        } catch (SQLException e) {
+            log.error("Cannot get client bookings", e);
+        } finally {
+            closeConnection();
+        }
+        return bookings;
+    }
+
+    @Override
+    public Booking findBookingByClientIdAndId(long id, long userId) throws EntityNotFoundException {
+        Booking booking = new Booking();
+        try {
+            connection = ConnectionPool.getConnection();
+            preparedStatement = connection.prepareStatement(BookingScripts.SELECT_BY_USER_ID_AND_ID);
+            preparedStatement.setLong(1, id);
+            preparedStatement.setLong(2, userId);
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                booking.extractResult(resultSet);
+            } else throw new EntityNotFoundException();
+        } catch (SQLException e) {
+            log.error("Cannot find booking", e);
+        } finally {
+            closeConnection();
+        }
+        return booking;
+    }
+
 }

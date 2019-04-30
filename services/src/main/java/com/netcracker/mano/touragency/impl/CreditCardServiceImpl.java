@@ -31,20 +31,16 @@ public class CreditCardServiceImpl implements CreditCardService {
     @Override
     public List<CreditCard> getAllClientCards(Long userId) throws EntityNotFoundException {
         log.debug("Trying to get all client cards :{}", userId);
-        return creditCardDAO.getAllClientCards(userId);
-
+        List<CreditCard> creditCards = creditCardDAO.getAllClientCards(userId);
+        if (creditCards.isEmpty()) {
+            throw new EntityNotFoundException();
+        } else return creditCards;
     }
 
     @Override
     public CreditCard getById(Long clientId, Long cardId) throws EntityNotFoundException {
         log.debug("Trying to get card by id :{}", cardId);
-        Optional<CreditCard> card = getAllClientCards(clientId)
-                .stream()
-                .filter(a -> a.getId() == cardId)
-                .findFirst();
-        if (card.isPresent()) {
-            return card.get();
-        } else throw new EntityNotFoundException();
+        return creditCardDAO.getClientCard(cardId, clientId);
     }
 
     @Override

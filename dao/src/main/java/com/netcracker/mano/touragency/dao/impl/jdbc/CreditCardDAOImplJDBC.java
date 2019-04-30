@@ -127,7 +127,7 @@ public class CreditCardDAOImplJDBC extends CrudDAOJImplJDBC implements CreditCar
     }
 
     @Override
-    public List<CreditCard> getAllClientCards(Long clientId) throws EntityNotFoundException {
+    public List<CreditCard> getAllClientCards(Long clientId) {
         List<CreditCard> clientCards = new ArrayList<>();
         try {
             connection = ConnectionPool.getConnection();
@@ -141,12 +141,30 @@ public class CreditCardDAOImplJDBC extends CrudDAOJImplJDBC implements CreditCar
             }
         } catch (SQLException e) {
             log.error("Cannot get cards", e);
-            throw new EntityNotFoundException();
         } finally {
             closeConnection();
         }
-        if (clientCards.size() == 0) throw new EntityNotFoundException();
         log.info("Get all client cards from db :{}", clientCards);
         return clientCards;
+    }
+
+    @Override
+    public CreditCard getClientCard(Long id, Long clientId) throws EntityNotFoundException {
+        CreditCard creditCard = new CreditCard();
+        try {
+            connection = ConnectionPool.getConnection();
+            preparedStatement = connection.prepareStatement(CreditCardsScripts.SELECT_BY_USER_AND_ID);
+            preparedStatement.setLong(1, clientId);
+            preparedStatement.setLong(2, id);
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                creditCard.extractResult(resultSet);
+            } else throw new EntityNotFoundException();
+        } catch (SQLException e) {
+            log.error("Cannot find card", e);
+        } finally {
+            closeConnection();
+        }
+        return creditCard;
     }
 }

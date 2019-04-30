@@ -13,8 +13,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,14 +21,11 @@ import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-
-@Component
 public class CreditCardServiceTest {
     @Mock
     private CreditCardDAO creditCardDAO;
 
     @InjectMocks
-    @Autowired
     private CreditCardServiceImpl creditCardService;
 
     @Captor
@@ -44,7 +39,7 @@ public class CreditCardServiceTest {
     @Test(expected = EntityNotFoundException.class)
     @SneakyThrows
     public void cannotGetCardWithWrongId() {
-        when(creditCardDAO.getAllClientCards(1L)).thenThrow(new EntityNotFoundException());
+        when(creditCardDAO.getClientCard(1L, 1L)).thenThrow(new EntityNotFoundException());
         creditCardService.getById(1L, 1L);
         verify(creditCardDAO, times(1)).getAllClientCards(anyLong());
     }
@@ -57,27 +52,10 @@ public class CreditCardServiceTest {
                 .userId(1L)
                 .build();
         card.setId(1L);
-        List<CreditCard> list = new ArrayList<>();
-        list.add(card);
-        when(creditCardDAO.getAllClientCards(1L)).thenReturn(list);
+        when(creditCardDAO.getClientCard(1L, 1L)).thenReturn(card);
         CreditCard card1 = creditCardService.getById(1L, 1L);
-        verify(creditCardDAO, times(1)).getAllClientCards(anyLong());
+        verify(creditCardDAO, times(1)).getClientCard(anyLong(), anyLong());
         Assert.assertEquals(card, card1);
-    }
-
-    @Test(expected = EntityNotFoundException.class)
-    @SneakyThrows
-    public void cannotFindCard() {
-        CreditCard card = CreditCard.builder()
-                .balance(500)
-                .userId(1L)
-                .build();
-        card.setId(1L);
-        List<CreditCard> list = new ArrayList<>();
-        list.add(card);
-        when(creditCardDAO.getAllClientCards(1L)).thenReturn(list);
-        creditCardService.getById(1L, 2L);
-        verify(creditCardDAO, times(1)).getAllClientCards(anyLong());
     }
 
     @Test
@@ -113,25 +91,16 @@ public class CreditCardServiceTest {
                 .userId(1L)
                 .build();
         card.setId(1L);
-        List<CreditCard> list = new ArrayList<>();
-        list.add(card);
-        when(creditCardDAO.getAllClientCards(1L)).thenReturn(list);
+        when(creditCardDAO.getClientCard(1L, 1L)).thenReturn(card);
         creditCardService.delete(1L, 1L);
         verify(creditCardDAO, times(1)).delete(1L);
-        verify(creditCardDAO, times(1)).getAllClientCards(1L);
+        verify(creditCardDAO, times(1)).getClientCard(1L, 1L);
     }
 
     @Test(expected = EntityNotFoundException.class)
     @SneakyThrows
     public void cannotDeleteWithWrongId() {
-        CreditCard card = CreditCard.builder()
-                .balance(500)
-                .userId(1L)
-                .build();
-        card.setId(1L);
-        List<CreditCard> list = new ArrayList<>();
-        list.add(card);
-        when(creditCardDAO.getAllClientCards(1L)).thenReturn(list);
+        when(creditCardDAO.getClientCard(2L, 1L)).thenThrow(new EntityNotFoundException());
         creditCardService.delete(2L, 1L);
     }
 
@@ -169,7 +138,7 @@ public class CreditCardServiceTest {
     @Test(expected = EntityNotFoundException.class)
     @SneakyThrows
     public void cannotUpdateNotExistingCard() {
-        when(creditCardDAO.getAllClientCards(1L)).thenThrow(new EntityNotFoundException());
+        when(creditCardDAO.getClientCard(1L, 1L)).thenThrow(new EntityNotFoundException());
         creditCardService.updateBalance(1L, 400D, 1L);
         verify(creditCardDAO, times(1)).getAllClientCards(1L);
     }
@@ -182,9 +151,7 @@ public class CreditCardServiceTest {
                 .userId(1L)
                 .build();
         card.setId(1L);
-        List<CreditCard> list = new ArrayList<>();
-        list.add(card);
-        when(creditCardDAO.getAllClientCards(1L)).thenReturn(list);
+        when(creditCardDAO.getClientCard(1L, 1L)).thenReturn(card);
         when(creditCardDAO.update(any())).thenThrow(new CannotUpdateEntityException());
         creditCardService.updateBalance(1L, -2000D, 1L);
     }
@@ -197,9 +164,7 @@ public class CreditCardServiceTest {
                 .userId(1L)
                 .build();
         card.setId(1L);
-        List<CreditCard> list = new ArrayList<>();
-        list.add(card);
-        when(creditCardDAO.getAllClientCards(1L)).thenReturn(list);
+        when(creditCardDAO.getClientCard(1L, 1L)).thenReturn(card);
         when(creditCardDAO.update(card)).thenReturn(card);
         creditCardService.updateBalance(1L, 200D, 1L);
         verify(creditCardDAO).update(captor.capture());

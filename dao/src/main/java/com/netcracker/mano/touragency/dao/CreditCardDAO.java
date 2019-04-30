@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface CreditCardDAO extends CrudDAO<CreditCard> {
     List<CreditCard> getAllClientCards(Long clientId) throws EntityNotFoundException;
+    CreditCard getClientCard(Long id, Long clientId) throws EntityNotFoundException;
 }

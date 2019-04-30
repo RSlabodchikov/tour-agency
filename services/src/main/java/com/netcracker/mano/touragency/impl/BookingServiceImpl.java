@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 
@@ -79,10 +78,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public List<Booking> getAll(Long userId) throws EntityNotFoundException {
         log.info("Trying to get all  user bookings ");
-        List<Booking> bookings = bookingDAO.getAll()
-                .stream()
-                .filter(a -> a.getUserId() == userId)
-                .collect(Collectors.toList());
+        List<Booking> bookings = bookingDAO.getAllClientBookings(userId);
         if (bookings.size() == 0) {
             throw new EntityNotFoundException();
         } else return bookings;
@@ -97,13 +93,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public Booking find(Long userId, Long id) throws EntityNotFoundException {
         log.info("Trying go get booking by id :{}", id);
-        Optional<Booking> booking = getAll(userId)
-                .stream()
-                .filter(a -> a.getId() == id)
-                .findFirst();
-        if (booking.isPresent()) {
-            return booking.get();
-        } else throw new EntityNotFoundException();
+        return bookingDAO.findBookingByClientIdAndId(id, userId);
     }
 
     public List<Booking> findAllByCategory(Long userId, String category) throws EntityNotFoundException {

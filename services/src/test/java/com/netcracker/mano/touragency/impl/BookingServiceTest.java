@@ -1,6 +1,6 @@
 package com.netcracker.mano.touragency.impl;
 
-import com.netcracker.mano.touragency.dao.BookingDAO;
+import com.netcracker.mano.touragency.dao.impl.jdbc.BookingDAOImplJDBC;
 import com.netcracker.mano.touragency.entity.Booking;
 import com.netcracker.mano.touragency.entity.CreditCard;
 import com.netcracker.mano.touragency.entity.Tour;
@@ -14,8 +14,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,27 +22,23 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-@Component
+
 public class BookingServiceTest {
 
     @Mock
-    @Autowired
     private TourServiceImpl tourService;
 
-
     @Mock
-    @Autowired
     private CreditCardServiceImpl creditCardService;
 
     @Mock
-    private BookingDAO bookingDAO;
+    private BookingDAOImplJDBC bookingDAO;
 
     @Captor
     private ArgumentCaptor<Booking> captor;
 
 
     @InjectMocks
-    @Autowired
     private BookingServiceImpl bookingService;
 
     @Before
@@ -72,10 +66,10 @@ public class BookingServiceTest {
         List<Booking> list = new ArrayList<>();
         list.add(booking1);
         list.add(booking);
-        when(bookingDAO.getAll()).thenReturn(list);
+        when(bookingDAO.getAllClientBookings(1L)).thenReturn(list);
         List<Booking> result = bookingService.getAll(1L);
-        verify(bookingDAO, times(1)).getAll();
-        Assert.assertEquals(1, result.size());
+        verify(bookingDAO, times(1)).getAllClientBookings(1L);
+        Assert.assertEquals(2, result.size());
     }
 
     @Test(expected = EntityNotFoundException.class)
@@ -85,10 +79,8 @@ public class BookingServiceTest {
                 .userId(1L)
                 .build();
         booking.setId(1L);
-        List<Booking> list = new ArrayList<>();
-        list.add(booking);
-        when(bookingDAO.getAll()).thenReturn(list);
-        bookingService.find(1L, 2L);
+        when(bookingDAO.findBookingByClientIdAndId(1L, 1L)).thenThrow(new EntityNotFoundException());
+        bookingService.find(1L, 1L);
         verify(bookingDAO, times(1)).getAll();
     }
 
@@ -99,11 +91,9 @@ public class BookingServiceTest {
                 .userId(1L)
                 .build();
         booking.setId(1L);
-        List<Booking> list = new ArrayList<>();
-        list.add(booking);
-        when(bookingDAO.getAll()).thenReturn(list);
+        when(bookingDAO.findBookingByClientIdAndId(1L, 1L)).thenReturn(booking);
         Booking booking1 = bookingService.find(1L, 1L);
-        verify(bookingDAO, times(1)).getAll();
+        verify(bookingDAO, times(1)).findBookingByClientIdAndId(1L, 1L);
         Assert.assertEquals(booking, booking1);
     }
 

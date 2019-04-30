@@ -9,7 +9,7 @@ import java.sql.SQLException;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @AllArgsConstructor
-@ToString(callSuper = true )
+@ToString(callSuper = true)
 @NoArgsConstructor
 @Builder
 public class Booking extends BaseEntity {
@@ -20,7 +20,7 @@ public class Booking extends BaseEntity {
 
 
     public void extractResult(ResultSet resultSet) throws SQLException {
-        id = resultSet.getLong(1);
+        setId(resultSet.getLong(1));
         numberOfClients = resultSet.getByte(2);
         totalPrice = resultSet.getLong(3);
         userId = resultSet.getLong(4);

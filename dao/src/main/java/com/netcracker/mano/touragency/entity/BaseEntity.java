@@ -19,5 +19,5 @@ import java.io.Serializable;
         @JsonSubTypes.Type(value = CreditCard.class, name = "CreditCard")}
 )
 public abstract class BaseEntity implements Serializable {
-    protected long id;
+    private long id;
 }

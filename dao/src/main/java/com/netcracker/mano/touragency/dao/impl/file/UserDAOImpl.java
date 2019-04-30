@@ -4,14 +4,16 @@ import com.netcracker.mano.touragency.dao.UserDAO;
 import com.netcracker.mano.touragency.entity.Credentials;
 import com.netcracker.mano.touragency.entity.User;
 import com.netcracker.mano.touragency.exceptions.EntityNotFoundException;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.Optional;
 
-import static com.netcracker.mano.touragency.constants.FileNames.USER_FILENAME;
-
 public class UserDAOImpl extends CrudDAOImpl<User> implements UserDAO {
+    @Value("${files.user}")
+    public static String filename;
+
     public UserDAOImpl() {
-        super(USER_FILENAME);
+        super(filename);
     }
 
     @Override
