@@ -41,7 +41,7 @@ public class TourServiceImpl implements TourService {
     @Override
     public void delete(Long id) throws EntityNotFoundException {
         log.info("Trying to delete tour");
-        getById(id);
+        if (!tourDAO.checkIfExist(id)) throw new EntityNotFoundException();
         tourDAO.delete(id);
     }
 
@@ -54,6 +54,9 @@ public class TourServiceImpl implements TourService {
     @Override
     public Tour update(Tour tour) throws CannotUpdateEntityException {
         log.info("Trying to update tour:{}", tour);
+        if (tour.getSettlementDate().compareTo(tour.getEvictionDate()) > 0) {
+            throw new CannotUpdateEntityException();
+        }
         return tourDAO.update(tour);
     }
 }

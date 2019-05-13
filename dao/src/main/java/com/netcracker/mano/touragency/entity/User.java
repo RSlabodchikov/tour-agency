@@ -2,6 +2,7 @@ package com.netcracker.mano.touragency.entity;
 
 import lombok.*;
 
+import javax.persistence.*;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -12,9 +13,18 @@ import java.sql.SQLException;
 @Builder
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
+@Entity
+@Table(name = "users", schema = "tour_agency")
 public class User extends BaseEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private long id;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "credentials_id")
     private Credentials credentials;
+    @Column(name="name")
     private String name;
+    @Column(name="surname")
     private String surname;
     private Role role;
     private Boolean isBlocked;

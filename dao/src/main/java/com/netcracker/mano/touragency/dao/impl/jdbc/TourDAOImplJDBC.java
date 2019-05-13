@@ -42,6 +42,22 @@ public class TourDAOImplJDBC extends CrudDAOJImplJDBC implements TourDAO {
     }
 
     @Override
+    public Boolean checkIfExist(Long id) {
+        try {
+            connection = ConnectionPool.getConnection();
+            preparedStatement = connection.prepareStatement(TourScripts.SELECT_BY_ID);
+            preparedStatement.setLong(1, id);
+            resultSet = preparedStatement.executeQuery();
+            return resultSet.next();
+        } catch (SQLException e) {
+            log.error("Cannot find tour", e);
+            return false;
+        } finally {
+            closeConnection();
+        }
+    }
+
+    @Override
     public Tour add(Tour entity) throws CannotCreateEntityException {
         try {
             connection = ConnectionPool.getConnection();

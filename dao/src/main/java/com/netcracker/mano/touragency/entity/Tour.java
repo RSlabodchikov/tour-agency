@@ -19,6 +19,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @Builder
 public class Tour extends BaseEntity {
+    private long id;
     @JsonDeserialize(using = LocalDateDeserializer.class)
     @JsonSerialize(using = LocalDateSerializer.class)
     private LocalDate evictionDate;

@@ -75,9 +75,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void update(User user) throws CannotUpdateEntityException {
+    public User update(User user) throws CannotUpdateEntityException {
         log.info("Trying to update user :{}", user);
-        userDAO.update(user);
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            md.update(user.getCredentials().getPassword().getBytes());
+            user.getCredentials().setPassword(DatatypeConverter.printHexBinary(md.digest()).toUpperCase());
+        } catch (NoSuchAlgorithmException e) {
+            throw new CannotUpdateEntityException();
+        }
+        return userDAO.update(user);
     }
 
     @Override
@@ -95,34 +102,18 @@ public class UserServiceImpl implements UserService {
     @Override
     public void blockUser(Long id) throws CannotUpdateEntityException, EntityNotFoundException {
         User user = userDAO.getById(id);
-        if (user != null) {
-            user.setIsBlocked(true);
-            update(user);
-        }
+        if (user.getIsBlocked()) throw new CannotUpdateEntityException();
+        user.setIsBlocked(true);
+        update(user);
+
     }
 
     @Override
     public void unblockUser(Long id) throws CannotUpdateEntityException, EntityNotFoundException {
         User user = userDAO.getById(id);
-        if (user != null) {
-            user.setIsBlocked(false);
-            update(user);
-        }
-    }
+        if (!user.getIsBlocked()) throw new CannotUpdateEntityException();
+        user.setIsBlocked(false);
+        update(user);
 
-    @Override
-    public void changePassword(String login, String oldPassword, String newPassword) throws AuthorizationException {
-        log.info("Trying to change user password");
-        try {
-            MessageDigest md = MessageDigest.getInstance("MD5");
-            md.update(oldPassword.getBytes());
-            oldPassword = DatatypeConverter.printHexBinary(md.digest()).toUpperCase();
-            userDAO.findUserByCredentials(new Credentials(login, oldPassword));
-            md.update(newPassword.getBytes());
-            String hash = DatatypeConverter.printHexBinary(md.digest()).toUpperCase();
-            userDAO.changePassword(login, hash);
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
     }
 }

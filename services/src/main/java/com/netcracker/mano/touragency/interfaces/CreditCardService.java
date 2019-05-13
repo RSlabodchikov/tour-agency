@@ -12,13 +12,13 @@ public interface CreditCardService {
 
     CreditCard getById(Long clientId, Long cardId) throws EntityNotFoundException;
 
-    CreditCard create(Double balance, Long id) throws CannotCreateEntityException;
+    CreditCard create(CreditCard creditCard) throws CannotCreateEntityException;
 
     void delete(Long cardId, Long clientId) throws EntityNotFoundException;
 
-    CreditCard updateBalance(Long cardId, Double balance, Long userId) throws CannotUpdateEntityException, EntityNotFoundException;
+    CreditCard updateBalance(CreditCard creditCard) throws CannotUpdateEntityException, EntityNotFoundException;
 
     CreditCard getByGreatestBalance(Long userId) throws EntityNotFoundException;
 
-
+    List<CreditCard> getAll();
 }

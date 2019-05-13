@@ -9,6 +9,7 @@ import com.netcracker.mano.touragency.sql.scripts.CreditCardsScripts;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -153,5 +154,21 @@ public class CreditCardDAOImplJDBC extends CrudDAOJImplJDBC implements CreditCar
             closeConnection();
         }
         return creditCard;
+    }
+
+    @Override
+    public Boolean checkIfExist(Long id, Long clientId) {
+        try {
+            connection = ConnectionPool.getConnection();
+            preparedStatement = connection.prepareStatement(CreditCardsScripts.SELECT_BY_USER_AND_ID);
+            preparedStatement.setLong(1, clientId);
+            preparedStatement.setLong(2, id);
+            resultSet = preparedStatement.executeQuery();
+            return resultSet.next();
+        } catch (SQLException e) {
+            return false;
+        } finally {
+            closeConnection();
+        }
     }
 }

@@ -29,6 +29,12 @@ public class CreditCardServiceImpl implements CreditCardService {
     }
 
     @Override
+    public List<CreditCard> getAll() {
+        log.info("Trying to get all cards");
+        return creditCardDAO.getAll();
+    }
+
+    @Override
     public List<CreditCard> getAllClientCards(Long userId) throws EntityNotFoundException {
         log.debug("Trying to get all client cards :{}", userId);
         List<CreditCard> creditCards = creditCardDAO.getAllClientCards(userId);
@@ -44,29 +50,27 @@ public class CreditCardServiceImpl implements CreditCardService {
     }
 
     @Override
-    public CreditCard create(Double balance, Long id) throws CannotCreateEntityException {
-        log.debug("Trying to create credit card with balance :{}", balance);
-        if (balance < 0) throw new CannotCreateEntityException();
-        CreditCard card = new CreditCard();
-        card.setBalance(balance);
-        card.setUserId(id);
-        card.setNumber(BigInteger.valueOf((Math.abs(random.nextLong()))));
-        return creditCardDAO.add(card);
+    public CreditCard create(CreditCard creditCard) throws CannotCreateEntityException {
+        log.debug("Trying to create credit card with balance :{}", creditCard.getBalance());
+        if (creditCard.getBalance() < 0) throw new CannotCreateEntityException();
+        creditCard.setNumber(BigInteger.valueOf((Math.abs(random.nextLong()))));
+        return creditCardDAO.add(creditCard);
     }
 
     @Override
     public void delete(Long cardId, Long clientId) throws EntityNotFoundException {
-        log.info("Trying to delete card :{}", cardId);
-        getById(clientId, cardId);
+        log.info("Trying to delete card... id :{}", cardId);
+        if (!creditCardDAO.checkIfExist(cardId, clientId)) throw new EntityNotFoundException();
         creditCardDAO.delete(cardId);
     }
 
     @Override
-    public CreditCard updateBalance(Long cardId, Double balance, Long userId) throws CannotUpdateEntityException, EntityNotFoundException {
-        log.info("Trying to change card balance", balance, cardId);
-        CreditCard card = getById(userId, cardId);
-        card.setBalance(card.getBalance() + balance);
-        return creditCardDAO.update(card);
+    public CreditCard updateBalance(CreditCard creditCard) throws CannotUpdateEntityException, EntityNotFoundException {
+        log.info("Trying to change card balance");
+        if (!creditCardDAO.checkIfExist(creditCard.getId(), creditCard.getUserId()))
+            throw new EntityNotFoundException();
+        if (creditCard.getBalance() < 0) throw new CannotUpdateEntityException();
+        return creditCardDAO.update(creditCard);
 
     }
 

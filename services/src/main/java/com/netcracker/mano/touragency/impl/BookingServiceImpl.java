@@ -52,12 +52,13 @@ public class BookingServiceImpl implements BookingService {
         double totalPrice = tour.getPrice() * booking.getNumberOfClients();
         booking.setTotalPrice(totalPrice);
         try {
-            CreditCard card = creditCardService.getByGreatestBalance(booking.getUserId());
+            CreditCard card = creditCardService.getById(booking.getUserId(), booking.getCardId());
             if (card.getBalance() < totalPrice) {
                 throw new CannotCreateEntityException();
             }
             double remainder = card.getBalance() - booking.getTotalPrice();
-            creditCardService.updateBalance(card.getId(), remainder, booking.getUserId());
+            card.setBalance(remainder);
+            creditCardService.updateBalance(card);
             tour.setNumberOfClients(tour.getNumberOfClients() - booking.getNumberOfClients());
             tourService.update(tour);
         } catch (CannotUpdateEntityException | EntityNotFoundException e) {
@@ -69,8 +70,8 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public void delete(Long userId, Long bookingId) throws EntityNotFoundException {
-        log.info("Tring to delete booking with id :{}", bookingId);
-        find(userId, bookingId);
+        log.info("Trying to delete booking with id :{}", bookingId);
+        if (!bookingDAO.checkExist(bookingId, userId)) throw new EntityNotFoundException();
         bookingDAO.delete(bookingId);
 
     }

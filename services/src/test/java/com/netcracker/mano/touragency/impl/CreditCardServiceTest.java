@@ -66,7 +66,7 @@ public class CreditCardServiceTest {
                 .userId(1L)
                 .build();
         when(creditCardDAO.add(card)).thenReturn(card);
-        creditCardService.create(500D, 1L);
+        creditCardService.create(card);
         verify(creditCardDAO, times(1)).add(captor.capture());
         Assert.assertEquals(card.getBalance(), captor.getValue().getBalance(), 0);
     }
@@ -75,11 +75,11 @@ public class CreditCardServiceTest {
     @SneakyThrows
     public void cannotCreateCardWithNegativeBalance() {
         CreditCard card = CreditCard.builder()
-                .balance(500)
+                .balance(-500)
                 .userId(1L)
                 .build();
         when(creditCardDAO.add(card)).thenReturn(card);
-        creditCardService.create(-400D, 1L);
+        creditCardService.create(card);
         verify(creditCardDAO, times(1)).add(any());
     }
 
@@ -139,7 +139,7 @@ public class CreditCardServiceTest {
     @SneakyThrows
     public void cannotUpdateNotExistingCard() {
         when(creditCardDAO.getClientCard(1L, 1L)).thenThrow(new EntityNotFoundException());
-        creditCardService.updateBalance(1L, 400D, 1L);
+        creditCardService.updateBalance(any());
         verify(creditCardDAO, times(1)).getAllClientCards(1L);
     }
 
@@ -153,7 +153,7 @@ public class CreditCardServiceTest {
         card.setId(1L);
         when(creditCardDAO.getClientCard(1L, 1L)).thenReturn(card);
         when(creditCardDAO.update(any())).thenThrow(new CannotUpdateEntityException());
-        creditCardService.updateBalance(1L, -2000D, 1L);
+        creditCardService.updateBalance(card);
     }
 
     @Test
@@ -166,7 +166,7 @@ public class CreditCardServiceTest {
         card.setId(1L);
         when(creditCardDAO.getClientCard(1L, 1L)).thenReturn(card);
         when(creditCardDAO.update(card)).thenReturn(card);
-        creditCardService.updateBalance(1L, 200D, 1L);
+        creditCardService.updateBalance(card);
         verify(creditCardDAO).update(captor.capture());
         Assert.assertEquals(card.getBalance(), captor.getValue().getBalance(), 1);
 

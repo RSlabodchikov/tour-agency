@@ -18,6 +18,23 @@ import java.util.List;
 @Component
 public class BookingDAOImplJDBC extends CrudDAOJImplJDBC implements BookingDAO {
     @Override
+    public Boolean checkExist(Long id, Long clientId) {
+        try {
+            connection = ConnectionPool.getConnection();
+            preparedStatement = connection.prepareStatement(BookingScripts.SELECT_BY_USER_ID_AND_ID);
+            preparedStatement.setLong(1, id);
+            preparedStatement.setLong(2, clientId);
+            resultSet = preparedStatement.executeQuery();
+            return resultSet.next();
+        } catch (SQLException e) {
+            log.error("Cannot find booking", e);
+            return false;
+        } finally {
+            closeConnection();
+        }
+    }
+
+    @Override
     public Booking getById(long id) throws EntityNotFoundException {
         Booking booking = new Booking();
         try {
@@ -44,8 +61,6 @@ public class BookingDAOImplJDBC extends CrudDAOJImplJDBC implements BookingDAO {
             connection = ConnectionPool.getConnection();
             preparedStatement = connection.prepareStatement(BookingScripts.CREATE, Statement.RETURN_GENERATED_KEYS);
             entity.setStatementParams(preparedStatement);
-            preparedStatement.setLong(3, entity.getUserId());
-            preparedStatement.setLong(4, entity.getTourId());
             preparedStatement.execute();
             resultSet = preparedStatement.getGeneratedKeys();
             if (resultSet.next()) {

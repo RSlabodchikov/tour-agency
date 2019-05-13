@@ -13,7 +13,8 @@ import java.sql.SQLException;
 @ToString(callSuper = true)
 @NoArgsConstructor
 @Builder
-public class CreditCard extends BaseEntity {
+public class CreditCard extends BaseEntity{
+    private long id;
     private BigInteger number;
     private double balance;
     private long userId;

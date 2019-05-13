@@ -1,12 +1,18 @@
+server:
+  port: 8081
 logging:
   file: application.log
   level:
     root: INFO
 spring:
+  application:
+    name: tour_agency
   datasource:
+    url: jdbc:mysql://localhost:3306/tour_agency?useSSL=false
     driver-class-name: com.mysql.jdbc.Driver
-files:
-  user: src/main/resources/userData.json
-  credit-card: src/main/resources/card_data.json
-  booking: src/main/resources/booking_data.json
-  tour: src/main/resources/tourData.json
+    username: root
+    password: bananjikda1
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true

@@ -15,7 +15,7 @@ public interface UserService {
 
     User signIn(Credentials credentials) throws AuthorizationException;
 
-    void update(User user) throws CannotUpdateEntityException;
+    User update(User user) throws CannotUpdateEntityException;
 
     User findById(Long id ) throws EntityNotFoundException;
 
@@ -24,7 +24,5 @@ public interface UserService {
     void blockUser(Long id) throws CannotUpdateEntityException, EntityNotFoundException;
 
     void unblockUser(Long id) throws CannotUpdateEntityException, EntityNotFoundException;
-
-    void changePassword(String login, String oldPassword, String newPassword) throws AuthorizationException;
 
 }

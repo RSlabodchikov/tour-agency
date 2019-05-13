@@ -180,33 +180,5 @@ public class UserServiceTest {
         Assert.assertEquals(false, user.getIsBlocked());
     }
 
-    @Test
-    @SneakyThrows
-    public void changePassword() {
-        String login = "login";
-        String oldPassword = "password";
-        String newPassword = "newPassword";
-        Credentials credentials = new Credentials("login", "password");
-        User user = User.builder()
-                .credentials(credentials)
-                .name("name")
-                .surname("surname")
-                .isBlocked(false)
-                .build();
-        when(userDAO.findUserByCredentials(any())).thenReturn(user);
-        userService.changePassword(login, oldPassword, newPassword);
-        verify(userDAO, times(1)).findUserByCredentials(any());
-        verify(userDAO, times(1)).changePassword(anyString(), anyString());
-    }
 
-    @Test(expected = AuthorizationException.class)
-    @SneakyThrows
-    public void cannotChangePasswordWithWrongOldPassword() {
-        String login = "login";
-        String oldPassword = "password";
-        String newPassword = "newPassword";
-        when(userDAO.findUserByCredentials(any())).thenThrow(new AuthorizationException());
-        userService.changePassword(login, oldPassword, newPassword);
-        verify(userDAO, times(1)).findUserByCredentials(any());
-    }
 }

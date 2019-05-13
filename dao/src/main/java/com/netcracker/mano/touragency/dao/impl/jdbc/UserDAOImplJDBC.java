@@ -148,10 +148,6 @@ public class UserDAOImplJDBC extends CrudDAOJImplJDBC implements UserDAO {
             entity.setStatementParams(preparedStatement);
             preparedStatement.setLong(6, entity.getId());
             preparedStatement.execute();
-            resultSet = preparedStatement.getGeneratedKeys();
-            if (resultSet.next()) {
-                entity.extractResult(resultSet);
-            } else throw new SQLException();
         } catch (SQLException e) {
             log.error(e.getSQLState());
             throw new CannotUpdateEntityException();
