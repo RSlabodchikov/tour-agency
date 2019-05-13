@@ -25,7 +25,8 @@ public class UserController {
     }
 
     @GetMapping
-    public ResponseEntity getAll() {
+    public ResponseEntity getAll(@RequestParam String role) {
+        if (role != null) return ResponseEntity.ok(service.getAllUsersByRole(role));
         return ResponseEntity.ok(service.getAllUsers());
     }
 
@@ -75,5 +76,4 @@ public class UserController {
             return new ResponseEntity<>("Cannot unblock user with this id", HttpStatus.BAD_REQUEST);
         }
     }
-
 }

@@ -6,12 +6,11 @@ import com.netcracker.mano.touragency.exceptions.AuthorizationException;
 import com.netcracker.mano.touragency.exceptions.CannotUpdateEntityException;
 import com.netcracker.mano.touragency.exceptions.EntityNotFoundException;
 import com.netcracker.mano.touragency.exceptions.RegistrationException;
+import com.netcracker.mano.touragency.interfaces.RoleService;
 import com.netcracker.mano.touragency.interfaces.UserService;
 import com.netcracker.mano.touragency.repository.CredentialsRepository;
-import com.netcracker.mano.touragency.repository.RoleRepository;
 import com.netcracker.mano.touragency.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.xml.bind.DatatypeConverter;
@@ -28,13 +27,12 @@ public class UserServiceImpl implements UserService {
 
     private CredentialsRepository credentialsRepository;
 
-    private RoleRepository roleRepository;
+    private RoleService roleService;
 
-    @Autowired
-    public UserServiceImpl(UserRepository userRepository, CredentialsRepository credentialsRepository, RoleRepository roleRepository) {
+    public UserServiceImpl(UserRepository userRepository, CredentialsRepository credentialsRepository, RoleService roleService) {
         this.userRepository = userRepository;
         this.credentialsRepository = credentialsRepository;
-        this.roleRepository = roleRepository;
+        this.roleService = roleService;
     }
 
     @Override
@@ -44,7 +42,11 @@ public class UserServiceImpl implements UserService {
             throw new RegistrationException();
         try {
             user.setIsBlocked(false);
-            user.setRole(roleRepository.findByName("client"));
+            try {
+                user.setRole(roleService.findByName("client"));
+            } catch (EntityNotFoundException e) {
+                throw new RegistrationException();
+            }
             MessageDigest md = MessageDigest.getInstance("MD5");
             md.update(user.getCredentials().getPassword().getBytes());
             String hash = DatatypeConverter.printHexBinary(md.digest()).toUpperCase();
@@ -71,8 +73,10 @@ public class UserServiceImpl implements UserService {
         } catch (NoSuchAlgorithmException e) {
             log.error("NoSuchAlgorithmException", e);
         }
-        return userRepository.findByCredentials_LoginAndCredentials_Password(
+        User user = userRepository.findByCredentials_LoginAndCredentials_Password(
                 credentials.getLogin(), credentials.getPassword());
+        if (user == null) throw new AuthorizationException();
+        return user;
     }
 
     @Override
@@ -122,5 +126,10 @@ public class UserServiceImpl implements UserService {
         user.setIsBlocked(false);
         update(user);
 
+    }
+
+    @Override
+    public List<User> getAllUsersByRole(String role) {
+        return userRepository.findAllByRole_Name(role);
     }
 }

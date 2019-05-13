@@ -25,4 +25,6 @@ public interface UserService {
 
     void unblockUser(Long id) throws CannotUpdateEntityException, EntityNotFoundException;
 
+    List<User> getAllUsersByRole(String role);
+
 }
