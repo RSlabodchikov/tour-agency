@@ -18,5 +18,5 @@ public interface BookingService {
 
     Booking find(Long userId, Long id) throws EntityNotFoundException;
 
-    List<Booking> findAllByCategory(Long userId, String category) throws EntityNotFoundException;
+    List<Booking> findAllByCategory(Long userId, String category);
 }

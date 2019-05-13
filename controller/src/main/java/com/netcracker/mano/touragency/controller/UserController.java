@@ -66,7 +66,7 @@ public class UserController {
         }
     }
 
-    @PutMapping(value = "unblock")
+    @PutMapping(value = "/unblock")
     ResponseEntity unblock(@RequestParam(name = "id") Long id) {
         try {
             service.unblockUser(id);

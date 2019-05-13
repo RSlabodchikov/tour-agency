@@ -2,10 +2,8 @@ package com.netcracker.mano.touragency.entity;
 
 import lombok.*;
 
+import javax.persistence.*;
 import java.math.BigInteger;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -13,25 +11,22 @@ import java.sql.SQLException;
 @ToString(callSuper = true)
 @NoArgsConstructor
 @Builder
-public class CreditCard extends BaseEntity{
+@Entity
+@Table(name = "credit_cards")
+public class CreditCard extends BaseEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
+
+    @Column(name = "number")
     private BigInteger number;
+
+    @Column(name = "balance")
     private double balance;
-    private long userId;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 
-
-
-    public void extractResult(ResultSet resultSet) throws SQLException {
-        setId(resultSet.getLong(1));
-        number = new BigInteger(resultSet.getString(2));
-        balance = resultSet.getDouble(3);
-        userId = resultSet.getLong(4);
-    }
-
-    public void setStatementParams(PreparedStatement preparedStatement) throws SQLException {
-        preparedStatement.setString(1, number.toString());
-        preparedStatement.setDouble(2, balance);
-        preparedStatement.setLong(3, userId);
-    }
 }

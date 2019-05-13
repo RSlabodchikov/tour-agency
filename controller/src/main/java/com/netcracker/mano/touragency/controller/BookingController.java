@@ -70,11 +70,7 @@ public class BookingController {
 
     @GetMapping(value = "/category")
     public ResponseEntity getAllByCategory(@RequestParam(name = "category") String category, @RequestParam(name = "userId") Long userId) {
-        try {
-            return ResponseEntity.ok(service.findAllByCategory(userId, category));
-        } catch (EntityNotFoundException e) {
-            return new ResponseEntity<>("Cannot find bookings with this category", HttpStatus.BAD_REQUEST);
-        }
+        return ResponseEntity.ok(service.findAllByCategory(userId, category));
     }
 
 }

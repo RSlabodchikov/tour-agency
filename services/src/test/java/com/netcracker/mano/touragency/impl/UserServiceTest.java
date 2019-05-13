@@ -1,23 +1,13 @@
 package com.netcracker.mano.touragency.impl;
 
 import com.netcracker.mano.touragency.dao.UserDAO;
-import com.netcracker.mano.touragency.entity.Credentials;
-import com.netcracker.mano.touragency.entity.Role;
 import com.netcracker.mano.touragency.entity.User;
-import com.netcracker.mano.touragency.exceptions.*;
-import lombok.SneakyThrows;
-import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class UserServiceTest {
@@ -36,7 +26,7 @@ public class UserServiceTest {
         initMocks(this);
     }
 
-    @Test(expected = RegistrationException.class)
+    /*@Test(expected = RegistrationException.class)
     @SneakyThrows
     public void registrationWithExistingLogin() {
 
@@ -178,7 +168,7 @@ public class UserServiceTest {
         verify(userDAO, times(1)).getById(1L);
         verify(userDAO, times(1)).update(any());
         Assert.assertEquals(false, user.getIsBlocked());
-    }
+    }*/
 
 
 }

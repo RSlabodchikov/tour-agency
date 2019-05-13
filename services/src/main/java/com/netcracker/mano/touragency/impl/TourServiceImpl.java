@@ -1,32 +1,35 @@
 package com.netcracker.mano.touragency.impl;
 
-import com.netcracker.mano.touragency.dao.TourDAO;
 import com.netcracker.mano.touragency.entity.Tour;
 import com.netcracker.mano.touragency.exceptions.CannotCreateEntityException;
 import com.netcracker.mano.touragency.exceptions.CannotUpdateEntityException;
 import com.netcracker.mano.touragency.exceptions.EntityNotFoundException;
 import com.netcracker.mano.touragency.interfaces.TourService;
+import com.netcracker.mano.touragency.repository.TourRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
 @Service
 public class TourServiceImpl implements TourService {
 
-    private TourDAO tourDAO;
+    private TourRepository repository;
 
     @Autowired
-    public TourServiceImpl(TourDAO tourDAO) {
-        this.tourDAO = tourDAO;
+    public TourServiceImpl(TourRepository repository) {
+        this.repository = repository;
     }
 
     @Override
     public Tour getById(Long id) throws EntityNotFoundException {
         log.info("Trying to get tour by id :{}", id);
-        return tourDAO.getById(id);
+        Tour tour = repository.findOne(id);
+        if (tour == null) throw new EntityNotFoundException();
+        return tour;
     }
 
     @Override
@@ -35,20 +38,23 @@ public class TourServiceImpl implements TourService {
         if (tour.getSettlementDate().compareTo(tour.getEvictionDate()) > 0) {
             throw new CannotCreateEntityException();
         }
-        return tourDAO.add(tour);
+        if (tour.getPrice() < 0) throw new CannotCreateEntityException();
+        return repository.save(tour);
     }
 
     @Override
     public void delete(Long id) throws EntityNotFoundException {
         log.info("Trying to delete tour");
-        if (!tourDAO.checkIfExist(id)) throw new EntityNotFoundException();
-        tourDAO.delete(id);
+        if (!repository.exists(id)) throw new EntityNotFoundException();
+        repository.delete(id);
     }
 
     @Override
     public List<Tour> getAll() {
         log.info("Trying to get all tours");
-        return tourDAO.getAll();
+        List<Tour> tours = new ArrayList<>();
+        repository.findAll().forEach(tours::add);
+        return tours;
     }
 
     @Override
@@ -57,6 +63,6 @@ public class TourServiceImpl implements TourService {
         if (tour.getSettlementDate().compareTo(tour.getEvictionDate()) > 0) {
             throw new CannotUpdateEntityException();
         }
-        return tourDAO.update(tour);
+        return repository.save(tour);
     }
 }

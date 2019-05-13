@@ -1,11 +1,15 @@
 package com.netcracker.mano.touragency.impl;
 
-import com.netcracker.mano.touragency.dao.UserDAO;
 import com.netcracker.mano.touragency.entity.Credentials;
-import com.netcracker.mano.touragency.entity.Role;
 import com.netcracker.mano.touragency.entity.User;
-import com.netcracker.mano.touragency.exceptions.*;
+import com.netcracker.mano.touragency.exceptions.AuthorizationException;
+import com.netcracker.mano.touragency.exceptions.CannotUpdateEntityException;
+import com.netcracker.mano.touragency.exceptions.EntityNotFoundException;
+import com.netcracker.mano.touragency.exceptions.RegistrationException;
 import com.netcracker.mano.touragency.interfaces.UserService;
+import com.netcracker.mano.touragency.repository.CredentialsRepository;
+import com.netcracker.mano.touragency.repository.RoleRepository;
+import com.netcracker.mano.touragency.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,17 +17,24 @@ import org.springframework.stereotype.Service;
 import javax.xml.bind.DatatypeConverter;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
 @Service
 public class UserServiceImpl implements UserService {
 
-    private UserDAO userDAO;
+    private UserRepository userRepository;
+
+    private CredentialsRepository credentialsRepository;
+
+    private RoleRepository roleRepository;
 
     @Autowired
-    public UserServiceImpl(UserDAO userDAO) {
-        this.userDAO = userDAO;
+    public UserServiceImpl(UserRepository userRepository, CredentialsRepository credentialsRepository, RoleRepository roleRepository) {
+        this.userRepository = userRepository;
+        this.credentialsRepository = credentialsRepository;
+        this.roleRepository = roleRepository;
     }
 
     @Override
@@ -32,7 +43,8 @@ public class UserServiceImpl implements UserService {
         if (checkUserIfExist(user.getCredentials().getLogin()))
             throw new RegistrationException();
         try {
-            user.setRole(Role.CLIENT);
+            user.setIsBlocked(false);
+            user.setRole(roleRepository.findByName("client"));
             MessageDigest md = MessageDigest.getInstance("MD5");
             md.update(user.getCredentials().getPassword().getBytes());
             String hash = DatatypeConverter.printHexBinary(md.digest()).toUpperCase();
@@ -40,24 +52,12 @@ public class UserServiceImpl implements UserService {
         } catch (NoSuchAlgorithmException e) {
             log.error("NoSuchAlgorithmException", e);
         }
-        try {
-            user = userDAO.add(user);
-        } catch (CannotCreateEntityException e) {
-            log.error("Cannot create user ", e);
-            throw new RegistrationException();
-        }
-        return user;
-
+        return userRepository.save(user);
     }
 
     private boolean checkUserIfExist(String login) {
         log.info("Check user if exist :{}", login);
-        try {
-            userDAO.findCredentialsByLogin(login);
-            return true;
-        } catch (EntityNotFoundException e) {
-            return false;
-        }
+        return credentialsRepository.existsCredentialsByLogin(login);
     }
 
     @Override
@@ -71,7 +71,8 @@ public class UserServiceImpl implements UserService {
         } catch (NoSuchAlgorithmException e) {
             log.error("NoSuchAlgorithmException", e);
         }
-        return userDAO.findUserByCredentials(credentials);
+        return userRepository.findByCredentials_LoginAndCredentials_Password(
+                credentials.getLogin(), credentials.getPassword());
     }
 
     @Override
@@ -84,24 +85,29 @@ public class UserServiceImpl implements UserService {
         } catch (NoSuchAlgorithmException e) {
             throw new CannotUpdateEntityException();
         }
-        return userDAO.update(user);
+        return userRepository.save(user);
     }
 
     @Override
     public User findById(Long id) throws EntityNotFoundException {
         log.info("Trying to get user by id :{}", id);
-        return userDAO.getById(id);
+        User user = userRepository.findOne(id);
+        if (user == null) throw new EntityNotFoundException();
+        return user;
     }
 
     @Override
     public List<User> getAllUsers() {
         log.info("Trying to get all users");
-        return userDAO.getAll();
+        List<User> users = new ArrayList<>();
+        userRepository.findAll().forEach(users::add);
+        return users;
     }
 
     @Override
     public void blockUser(Long id) throws CannotUpdateEntityException, EntityNotFoundException {
-        User user = userDAO.getById(id);
+        User user = userRepository.findOne(id);
+        if (user == null) throw new EntityNotFoundException();
         if (user.getIsBlocked()) throw new CannotUpdateEntityException();
         user.setIsBlocked(true);
         update(user);
@@ -110,7 +116,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void unblockUser(Long id) throws CannotUpdateEntityException, EntityNotFoundException {
-        User user = userDAO.getById(id);
+        User user = userRepository.findOne(id);
+        if (user == null) throw new EntityNotFoundException();
         if (!user.getIsBlocked()) throw new CannotUpdateEntityException();
         user.setIsBlocked(false);
         update(user);
