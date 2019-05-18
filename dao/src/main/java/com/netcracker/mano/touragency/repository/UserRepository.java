@@ -8,7 +8,9 @@ import java.util.List;
 
 @Repository
 public interface UserRepository extends CrudRepository<User, Long> {
-    User findByCredentials_LoginAndCredentials_Password(String login, String password);
+    User findByCredentials_Login(String login);
 
     List<User> findAllByRole_Name(String role);
+
+    List<User> findAll();
 }

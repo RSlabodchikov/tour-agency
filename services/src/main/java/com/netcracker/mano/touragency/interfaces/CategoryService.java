@@ -1,15 +1,14 @@
 package com.netcracker.mano.touragency.interfaces;
 
 
-import com.netcracker.mano.touragency.entity.Category;
-import com.netcracker.mano.touragency.exceptions.EntityNotFoundException;
+import com.netcracker.mano.touragency.dto.CategoryDTO;
 
 import java.util.List;
 
 public interface CategoryService {
-    List<Category> getAll();
+    List<CategoryDTO> getAll();
 
-    Category getById(Long id) throws EntityNotFoundException;
+    CategoryDTO getById(Long id);
 
-    Category update(Category category);
+    CategoryDTO update(CategoryDTO category);
 }

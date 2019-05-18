@@ -1,4 +1,11 @@
 package com.netcracker.mano.touragency.exceptions;
 
-public class RegistrationException extends Exception {
+
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor
+public class RegistrationException extends RuntimeException {
+    public RegistrationException(String message) {
+        super(message);
+    }
 }

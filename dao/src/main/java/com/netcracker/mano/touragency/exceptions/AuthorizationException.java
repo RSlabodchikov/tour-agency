@@ -1,4 +1,11 @@
 package com.netcracker.mano.touragency.exceptions;
 
-public class AuthorizationException extends Exception {
+
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor
+public class AuthorizationException extends RuntimeException {
+    public AuthorizationException(String message) {
+        super(message);
+    }
 }

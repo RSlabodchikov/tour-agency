@@ -1,24 +1,21 @@
 package com.netcracker.mano.touragency.interfaces;
 
-import com.netcracker.mano.touragency.entity.CreditCard;
-import com.netcracker.mano.touragency.exceptions.CannotCreateEntityException;
-import com.netcracker.mano.touragency.exceptions.CannotUpdateEntityException;
-import com.netcracker.mano.touragency.exceptions.EntityNotFoundException;
+import com.netcracker.mano.touragency.dto.CreditCardDTO;
 
 import java.util.List;
 
 public interface CreditCardService {
-    List<CreditCard> getAllClientCards(Long userId) throws EntityNotFoundException;
+    List<CreditCardDTO> getAllClientCards(String login);
 
-    CreditCard getById(Long clientId, Long cardId) throws EntityNotFoundException;
+    CreditCardDTO getById(String login, Long id);
 
-    CreditCard create(CreditCard creditCard) throws CannotCreateEntityException;
+    CreditCardDTO create(CreditCardDTO creditCard);
 
-    void delete(Long cardId, Long clientId) throws EntityNotFoundException;
+    void delete(Long id, String login);
 
-    CreditCard updateBalance(CreditCard creditCard) throws CannotUpdateEntityException, EntityNotFoundException;
+    CreditCardDTO updateBalance(CreditCardDTO creditCard);
 
-    CreditCard getByGreatestBalance(Long userId) throws EntityNotFoundException;
+    CreditCardDTO getByGreatestBalance(String login);
 
-    List<CreditCard> getAll();
+    List<CreditCardDTO> getAll();
 }

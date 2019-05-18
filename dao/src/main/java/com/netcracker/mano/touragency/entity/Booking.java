@@ -23,11 +23,11 @@ public class Booking extends BaseEntity {
     @Column(name = "total_price")
     private double totalPrice;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name="user_id")
     private User user;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "tour_id")
     private Tour tour;
 

@@ -25,15 +25,15 @@ public class TourServiceImpl implements TourService {
     }
 
     @Override
-    public Tour getById(Long id) throws EntityNotFoundException {
+    public Tour getById(Long id) {
         log.info("Trying to get tour by id :{}", id);
         Tour tour = repository.findOne(id);
-        if (tour == null) throw new EntityNotFoundException();
+        if (tour == null) throw new EntityNotFoundException("Cannot find tour with this id");
         return tour;
     }
 
     @Override
-    public Tour create(Tour tour) throws CannotCreateEntityException {
+    public Tour create(Tour tour) {
         log.info("Trying to create tour :{}", tour);
         if (tour.getSettlementDate().compareTo(tour.getEvictionDate()) > 0) {
             throw new CannotCreateEntityException();
@@ -43,9 +43,9 @@ public class TourServiceImpl implements TourService {
     }
 
     @Override
-    public void delete(Long id) throws EntityNotFoundException {
+    public void delete(Long id) {
         log.info("Trying to delete tour");
-        if (!repository.exists(id)) throw new EntityNotFoundException();
+        if (!repository.exists(id)) throw new EntityNotFoundException("Cannot delete tour with this id");
         repository.delete(id);
     }
 
@@ -58,7 +58,7 @@ public class TourServiceImpl implements TourService {
     }
 
     @Override
-    public Tour update(Tour tour) throws CannotUpdateEntityException {
+    public Tour update(Tour tour) {
         log.info("Trying to update tour:{}", tour);
         if (tour.getSettlementDate().compareTo(tour.getEvictionDate()) > 0) {
             throw new CannotUpdateEntityException();

@@ -45,8 +45,8 @@ public class UserServiceTest {
         when(userDAO.add(any())).thenThrow(new CannotCreateEntityException());
         User user = User.builder()
                 .credentials(new Credentials("login", "password"))
-                .name("name")
-                .surname("surname")
+                .userName("userName")
+                .userSurname("userSurname")
                 .build();
         userService.register(user);
         verify(userDAO, times(1)).add(any());
@@ -58,8 +58,8 @@ public class UserServiceTest {
     public void registerUser() {
         when(userDAO.findCredentialsByLogin("simple")).thenThrow(new EntityNotFoundException());
         User user = User.builder()
-                .name("qwerty")
-                .surname("qwerty")
+                .userName("qwerty")
+                .userSurname("qwerty")
                 .isBlocked(false)
                 .credentials(new Credentials("simple", "password"))
                 .build();
@@ -76,8 +76,8 @@ public class UserServiceTest {
         Credentials credentials = new Credentials("login", "password");
         User user = User.builder()
                 .credentials(credentials)
-                .name("name")
-                .surname("surname")
+                .userName("userName")
+                .userSurname("userSurname")
                 .isBlocked(false)
                 .build();
         when(userDAO.findUserByCredentials(credentials)).thenReturn(user);
@@ -91,8 +91,8 @@ public class UserServiceTest {
     @SneakyThrows
     public void update() {
         User user = User.builder()
-                .name("name")
-                .surname("surname")
+                .userName("userName")
+                .userSurname("userSurname")
                 .credentials(new Credentials("qwerty", "qwerty"))
                 .build();
         when(userDAO.update(user)).thenReturn(user);
@@ -115,8 +115,8 @@ public class UserServiceTest {
     public void findById() {
         User user = User.builder()
                 .isBlocked(true)
-                .name("name")
-                .surname("surname")
+                .userName("userName")
+                .userSurname("userSurname")
                 .build();
         when(userDAO.getById(1L)).thenReturn(user);
         User user1 = userService.findById(1L);
@@ -144,7 +144,7 @@ public class UserServiceTest {
     @SneakyThrows
     public void blockUser() {
         User user = User.builder()
-                .name("name")
+                .userName("userName")
                 .isBlocked(false)
                 .build();
         user.setId(1L);
@@ -159,7 +159,7 @@ public class UserServiceTest {
     @SneakyThrows
     public void unblockUser() {
         User user = User.builder()
-                .name("name")
+                .userName("userName")
                 .isBlocked(true)
                 .build();
         user.setId(1L);

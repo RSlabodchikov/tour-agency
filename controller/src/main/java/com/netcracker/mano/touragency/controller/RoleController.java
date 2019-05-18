@@ -1,10 +1,10 @@
 package com.netcracker.mano.touragency.controller;
 
 
-import com.netcracker.mano.touragency.exceptions.EntityNotFoundException;
+import com.netcracker.mano.touragency.dto.RoleDTO;
 import com.netcracker.mano.touragency.interfaces.RoleService;
+import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,8 +12,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.servlet.http.HttpServletRequest;
+import java.util.List;
+
 @Controller
-@RequestMapping(value = "/tour_agency/roles")
+@RequestMapping(value = "/tour-agency/roles")
+@Api
 public class RoleController {
     private RoleService service;
 
@@ -22,26 +26,18 @@ public class RoleController {
         this.service = service;
     }
 
-    @GetMapping(value = "/all")
-    public ResponseEntity getAll() {
+    @GetMapping
+    public ResponseEntity<List<RoleDTO>> getAll(HttpServletRequest req) {
         return ResponseEntity.ok(service.findAll());
     }
 
     @GetMapping(value = "/{id}")
-    public ResponseEntity findById(@PathVariable(name = "id") Long id) {
-        try {
-            return ResponseEntity.ok(service.findById(id));
-        } catch (EntityNotFoundException e) {
-            return new ResponseEntity<>("Cannot find role with this id", HttpStatus.BAD_REQUEST);
-        }
+    public ResponseEntity<RoleDTO> findById(@PathVariable(name = "id") Long id) {
+        return ResponseEntity.ok(service.findById(id));
     }
 
-    @GetMapping
-    public ResponseEntity findByName(@RequestParam(name = "name") String name) {
-        try {
-            return ResponseEntity.ok(service.findByName(name));
-        } catch (EntityNotFoundException e) {
-            return new ResponseEntity<>("Cannot find this role", HttpStatus.BAD_REQUEST);
-        }
+    @GetMapping(value = "/name")
+    public ResponseEntity<RoleDTO> findByName(@RequestParam(name = "name") String name) {
+        return ResponseEntity.ok(service.findByName(name));
     }
 }

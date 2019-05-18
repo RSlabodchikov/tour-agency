@@ -1,6 +1,8 @@
 package com.netcracker.mano.touragency.impl;
 
-import com.netcracker.mano.touragency.entity.Credentials;
+import com.netcracker.mano.touragency.converter.RoleConverter;
+import com.netcracker.mano.touragency.converter.UserConverter;
+import com.netcracker.mano.touragency.dto.UserDTO;
 import com.netcracker.mano.touragency.entity.User;
 import com.netcracker.mano.touragency.exceptions.AuthorizationException;
 import com.netcracker.mano.touragency.exceptions.CannotUpdateEntityException;
@@ -11,50 +13,72 @@ import com.netcracker.mano.touragency.interfaces.UserService;
 import com.netcracker.mano.touragency.repository.CredentialsRepository;
 import com.netcracker.mano.touragency.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import javax.xml.bind.DatatypeConverter;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
-@Service
-public class UserServiceImpl implements UserService {
+@Service("userService")
+public class UserServiceImpl implements UserService, UserDetailsService {
 
     private UserRepository userRepository;
 
     private CredentialsRepository credentialsRepository;
 
+    private BCryptPasswordEncoder encoder;
+
+    private UserConverter userConverter;
+
     private RoleService roleService;
 
-    public UserServiceImpl(UserRepository userRepository, CredentialsRepository credentialsRepository, RoleService roleService) {
+    private RoleConverter roleConverter;
+
+    @Autowired
+    public UserServiceImpl(UserRepository userRepository, CredentialsRepository credentialsRepository, BCryptPasswordEncoder encoder, UserConverter userConverter, RoleService roleService, RoleConverter roleConverter) {
         this.userRepository = userRepository;
         this.credentialsRepository = credentialsRepository;
+        this.encoder = encoder;
+        this.userConverter = userConverter;
         this.roleService = roleService;
+        this.roleConverter = roleConverter;
     }
 
     @Override
-    public User register(User user) throws RegistrationException {
-        log.info("Trying to register new user :{}", user);
+    public UserDetails loadUserByUsername(String login) {
+        User user = userRepository.findByCredentials_Login(login);
+        if (user == null) throw new AuthorizationException("Cannot find user with this login");
+        else if (user.getIsBlocked()) throw new AuthorizationException(("This user is blocked"));
+        return new org.springframework.security.core.userdetails.User(
+                user.getCredentials().getLogin(), user.getCredentials().getPassword(), getAuthority(user));
+
+    }
+
+    private Set<GrantedAuthority> getAuthority(User user) {
+        Set<GrantedAuthority> authorities = new HashSet<GrantedAuthority>();
+        authorities.add(new SimpleGrantedAuthority(user.getRole().getName()));
+        return authorities;
+    }
+
+    @Override
+    public UserDTO register(UserDTO userDTO) {
+        log.info("Trying to register new user :{}", userDTO);
+        User user = userConverter.convertToEntity(userDTO);
         if (checkUserIfExist(user.getCredentials().getLogin()))
-            throw new RegistrationException();
-        try {
-            user.setIsBlocked(false);
-            try {
-                user.setRole(roleService.findByName("client"));
-            } catch (EntityNotFoundException e) {
-                throw new RegistrationException();
-            }
-            MessageDigest md = MessageDigest.getInstance("MD5");
-            md.update(user.getCredentials().getPassword().getBytes());
-            String hash = DatatypeConverter.printHexBinary(md.digest()).toUpperCase();
-            user.getCredentials().setPassword(hash);
-        } catch (NoSuchAlgorithmException e) {
-            log.error("NoSuchAlgorithmException", e);
-        }
-        return userRepository.save(user);
+            throw new RegistrationException("Cannot register user with already existing login");
+        user.setIsBlocked(false);
+        user.setRole(roleConverter.convertToEntity(roleService.findByName("client")));
+        String encodedPassword = encoder.encode(user.getCredentials().getPassword());
+        user.getCredentials().setPassword(encodedPassword);
+        return userConverter.convertToDTO(userRepository.save(user));
     }
 
     private boolean checkUserIfExist(String login) {
@@ -63,73 +87,63 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User signIn(Credentials credentials) throws AuthorizationException {
-        log.info("Trying to find user by credentials :{}", credentials);
-        try {
-            MessageDigest md = MessageDigest.getInstance("MD5");
-            md.update(credentials.getPassword().getBytes());
-            String hash = DatatypeConverter.printHexBinary(md.digest()).toUpperCase();
-            credentials.setPassword(hash);
-        } catch (NoSuchAlgorithmException e) {
-            log.error("NoSuchAlgorithmException", e);
-        }
-        User user = userRepository.findByCredentials_LoginAndCredentials_Password(
-                credentials.getLogin(), credentials.getPassword());
-        if (user == null) throw new AuthorizationException();
-        return user;
+    public UserDTO update(UserDTO userDTO) {
+        log.info("Trying to update user :{}", userDTO);
+        User user = userConverter.convertToEntity(userDTO);
+        String encodedPassword = encoder.encode(user.getCredentials().getPassword());
+        user.getCredentials().setPassword(encodedPassword);
+        return userConverter.convertToDTO(userRepository.save(user));
     }
 
     @Override
-    public User update(User user) throws CannotUpdateEntityException {
-        log.info("Trying to update user :{}", user);
-        try {
-            MessageDigest md = MessageDigest.getInstance("MD5");
-            md.update(user.getCredentials().getPassword().getBytes());
-            user.getCredentials().setPassword(DatatypeConverter.printHexBinary(md.digest()).toUpperCase());
-        } catch (NoSuchAlgorithmException e) {
-            throw new CannotUpdateEntityException();
-        }
-        return userRepository.save(user);
-    }
-
-    @Override
-    public User findById(Long id) throws EntityNotFoundException {
+    public UserDTO findById(Long id) {
         log.info("Trying to get user by id :{}", id);
         User user = userRepository.findOne(id);
-        if (user == null) throw new EntityNotFoundException();
-        return user;
+        if (user == null) throw new EntityNotFoundException("Cannot find user with this id");
+        return userConverter.convertToDTO(user);
     }
 
     @Override
-    public List<User> getAllUsers() {
+    public List<UserDTO> getAllUsers() {
         log.info("Trying to get all users");
-        List<User> users = new ArrayList<>();
-        userRepository.findAll().forEach(users::add);
-        return users;
+        return userRepository.findAll()
+                .stream()
+                .map(userConverter::convertToDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public void blockUser(Long id) throws CannotUpdateEntityException, EntityNotFoundException {
+    public void blockUser(Long id) {
+        log.info("Trying to block user with id :{}", id);
         User user = userRepository.findOne(id);
-        if (user == null) throw new EntityNotFoundException();
+        if (user == null) throw new EntityNotFoundException("Cannot block user with this id");
         if (user.getIsBlocked()) throw new CannotUpdateEntityException();
         user.setIsBlocked(true);
-        update(user);
+        userRepository.save(user);
 
     }
 
     @Override
     public void unblockUser(Long id) throws CannotUpdateEntityException, EntityNotFoundException {
+        log.info("trying to unblock user with id:{}", id);
         User user = userRepository.findOne(id);
-        if (user == null) throw new EntityNotFoundException();
+        if (user == null) throw new EntityNotFoundException("Cannot unblock user with this id");
         if (!user.getIsBlocked()) throw new CannotUpdateEntityException();
         user.setIsBlocked(false);
-        update(user);
+        userRepository.save(user);
 
     }
 
     @Override
-    public List<User> getAllUsersByRole(String role) {
-        return userRepository.findAllByRole_Name(role);
+    public List<UserDTO> getAllUsersByRole(String role) {
+        return userRepository.findAllByRole_Name(role)
+                .stream()
+                .map(userConverter::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public User findByLogin(String login) {
+        return userRepository.findByCredentials_Login(login);
     }
 }

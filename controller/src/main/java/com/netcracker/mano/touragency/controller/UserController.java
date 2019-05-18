@@ -1,20 +1,21 @@
 package com.netcracker.mano.touragency.controller;
 
 
-import com.netcracker.mano.touragency.entity.User;
-import com.netcracker.mano.touragency.exceptions.CannotUpdateEntityException;
-import com.netcracker.mano.touragency.exceptions.EntityNotFoundException;
-import com.netcracker.mano.touragency.exceptions.RegistrationException;
+import com.netcracker.mano.touragency.dto.UserDTO;
 import com.netcracker.mano.touragency.interfaces.UserService;
+import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+
 @RestController
 @Slf4j
-@RequestMapping(value = "/tour_agency/users")
+@RequestMapping(value = "/tour-agency/users")
+@Api
 public class UserController {
 
     private UserService service;
@@ -25,55 +26,37 @@ public class UserController {
     }
 
     @GetMapping
-    public ResponseEntity getAll(@RequestParam String role) {
+    public ResponseEntity getAll(@RequestParam(required = false) String role) {
         if (role != null) return ResponseEntity.ok(service.getAllUsersByRole(role));
         return ResponseEntity.ok(service.getAllUsers());
     }
 
     @GetMapping(value = "/{id}")
-    public ResponseEntity findById(@PathVariable(name = "id") Long id) {
-        try {
-            return ResponseEntity.ok(service.findById(id));
-        } catch (EntityNotFoundException e) {
-            return new ResponseEntity<>("Cannot find user with this id", HttpStatus.BAD_REQUEST);
-        }
+    public ResponseEntity<UserDTO> findById(@PathVariable(name = "id") Long id) {
+        return ResponseEntity.ok(service.findById(id));
     }
 
     @PostMapping
-    public ResponseEntity register(@RequestBody User user) {
-        try {
-            return ResponseEntity.ok(service.register(user));
-        } catch (RegistrationException e) {
-            return new ResponseEntity<>("Invalid login or password", HttpStatus.BAD_REQUEST);
-        }
+    public ResponseEntity<UserDTO> register(@RequestBody @Valid UserDTO user) {
+        return new ResponseEntity<>(service.register(user), HttpStatus.CREATED);
     }
 
     @PutMapping
-    ResponseEntity update(@RequestBody User user) {
-        try {
-            return ResponseEntity.ok(service.update(user));
-        } catch (CannotUpdateEntityException e) {
-            return new ResponseEntity<>("Cannot update this user", HttpStatus.BAD_REQUEST);
-        }
+    public ResponseEntity<UserDTO> update(@RequestBody @Valid UserDTO user) {
+        return ResponseEntity.ok(service.update(user));
     }
 
-    @DeleteMapping
+    @PostMapping(value = "/block")
     public ResponseEntity block(@RequestParam(name = "id") Long id) {
-        try {
-            service.blockUser(id);
-            return ResponseEntity.ok("User is blocked");
-        } catch (EntityNotFoundException | CannotUpdateEntityException e) {
-            return new ResponseEntity<>("Cannot block this user", HttpStatus.BAD_REQUEST);
-        }
+        service.blockUser(id);
+        return ResponseEntity.ok("User is blocked");
+
     }
 
-    @PutMapping(value = "/unblock")
-    ResponseEntity unblock(@RequestParam(name = "id") Long id) {
-        try {
-            service.unblockUser(id);
-            return ResponseEntity.ok("User is unblocked now");
-        } catch (EntityNotFoundException | CannotUpdateEntityException e) {
-            return new ResponseEntity<>("Cannot unblock user with this id", HttpStatus.BAD_REQUEST);
-        }
+    @PostMapping(value = "/unblock")
+    public ResponseEntity unblock(@RequestParam(name = "id") Long id) {
+        service.unblockUser(id);
+        return ResponseEntity.ok("User is unblocked now");
+
     }
 }
