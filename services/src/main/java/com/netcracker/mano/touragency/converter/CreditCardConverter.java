@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 public class CreditCardConverter {
     public CreditCard convertToEntity(CreditCardDTO creditCardDTO) {
         User user = User.builder()
+                .id(creditCardDTO.getUserId())
                 .credentials(Credentials.builder().login(creditCardDTO.getLogin()).build())
                 .build();
         return CreditCard.builder()

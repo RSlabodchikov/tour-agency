@@ -1,13 +1,16 @@
 package com.netcracker.mano.touragency.controller;
 
 
-import com.netcracker.mano.touragency.entity.Tour;
+import com.netcracker.mano.touragency.dto.TourDTO;
 import com.netcracker.mano.touragency.interfaces.TourService;
 import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequestMapping(value = "/tour-agency/tours")
@@ -21,12 +24,12 @@ public class TourController {
     }
 
     @GetMapping
-    public ResponseEntity getAll() {
+    public ResponseEntity<List<TourDTO>> getAll() {
         return ResponseEntity.ok(service.getAll());
     }
 
     @GetMapping(value = "/{id}")
-    public ResponseEntity getById(@PathVariable(name = "id") Long id) {
+    public ResponseEntity<TourDTO> getById(@PathVariable(name = "id") Long id) {
         return ResponseEntity.ok(service.getById(id));
     }
 
@@ -37,14 +40,13 @@ public class TourController {
     }
 
     @PostMapping
-    public ResponseEntity create(@RequestBody Tour tour) {
-
+    public ResponseEntity create(@RequestBody @Valid TourDTO tour) {
         return new ResponseEntity<>(service.create(tour), HttpStatus.CREATED);
 
     }
 
     @PutMapping
-    public ResponseEntity update(@RequestBody Tour tour) {
+    public ResponseEntity<TourDTO> update(@RequestBody @Valid TourDTO tour) {
         return ResponseEntity.ok(service.update(tour));
     }
 }

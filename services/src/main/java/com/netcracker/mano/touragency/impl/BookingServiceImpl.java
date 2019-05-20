@@ -1,19 +1,23 @@
 package com.netcracker.mano.touragency.impl;
 
 import com.netcracker.mano.touragency.converter.BookingConverter;
+import com.netcracker.mano.touragency.converter.TourConverter;
+import com.netcracker.mano.touragency.converter.UserConverter;
+import com.netcracker.mano.touragency.dto.BookingDTO;
+import com.netcracker.mano.touragency.dto.CreditCardDTO;
+import com.netcracker.mano.touragency.dto.TourDTO;
 import com.netcracker.mano.touragency.entity.Booking;
-import com.netcracker.mano.touragency.entity.Tour;
 import com.netcracker.mano.touragency.exceptions.CannotCreateEntityException;
-import com.netcracker.mano.touragency.exceptions.CannotUpdateEntityException;
 import com.netcracker.mano.touragency.exceptions.EntityNotFoundException;
 import com.netcracker.mano.touragency.interfaces.BookingService;
 import com.netcracker.mano.touragency.interfaces.CreditCardService;
+import com.netcracker.mano.touragency.interfaces.UserService;
 import com.netcracker.mano.touragency.repository.BookingRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -22,86 +26,93 @@ public class BookingServiceImpl implements BookingService {
 
     private CreditCardService creditCardService;
 
+    private UserConverter userConverter;
+
     private TourServiceImpl tourService;
 
     private BookingRepository repository;
 
     private BookingConverter converter;
 
-    @Autowired
-    public BookingServiceImpl(CreditCardService creditCardService, TourServiceImpl tourService, BookingRepository repository, BookingConverter converter) {
+    private TourConverter tourConverter;
+
+    private UserService userService;
+
+    public BookingServiceImpl(UserConverter userConverter, CreditCardService creditCardService, TourServiceImpl tourService, BookingRepository repository, BookingConverter converter, TourConverter tourConverter, UserService userService) {
         this.creditCardService = creditCardService;
+        this.userConverter = userConverter;
         this.tourService = tourService;
         this.repository = repository;
         this.converter = converter;
+        this.tourConverter = tourConverter;
+        this.userService = userService;
     }
 
     @Override
-    public Booking create(Booking booking) {
-        log.info("Trying to create booking :{}", booking);
-        if (booking.getNumberOfClients() < 0) throw new CannotCreateEntityException();
-        Tour tour;
-        try {
-            tour = tourService.getById(booking.getTour().getId());
-        } catch (EntityNotFoundException e) {
-            throw new CannotCreateEntityException();
+    public BookingDTO create(BookingDTO bookingDTO) {
+        log.info("Trying to create booking :{}", bookingDTO);
+        Booking booking = converter.convertToEntity(bookingDTO);
+        TourDTO tourDTO;
+        tourDTO = tourService.getById(booking.getTour().getId());
+        if (tourDTO.getNumberOfClients() < booking.getNumberOfClients()) {
+            throw new CannotCreateEntityException("Not enough vacant places in this tour");
         }
-        if (tour.getNumberOfClients() < booking.getNumberOfClients()) {
-            throw new CannotCreateEntityException();
-        }
-        double totalPrice = tour.getPrice() * booking.getNumberOfClients();
+        booking.setTour(tourConverter.convertToEntity(tourDTO));
+        booking.setUser(userConverter.convertToEntity(userService.findById(bookingDTO.getUserId())));
+        double totalPrice = tourDTO.getPrice() * booking.getNumberOfClients();
         booking.setTotalPrice(totalPrice);
-        try {
-            /*//CreditCard card = creditCardService.getById(booking.getUser().getId(), booking.getCard().getId());
-            if (card.getBalance() < totalPrice) {
-                throw new CannotCreateEntityException();
-            }
-            double remainder = card.getBalance() - booking.getTotalPrice();
-            card.setBalance(remainder);
-            creditCardService.updateBalance(card);
-            tour.setNumberOfClients(tour.getNumberOfClients() - booking.getNumberOfClients());
-            tourService.update(tour);*/
-        } catch (CannotUpdateEntityException | EntityNotFoundException e) {
-            throw new CannotCreateEntityException();
-        }
-        return repository.save(booking);
+        CreditCardDTO cardDTO = creditCardService.getById(booking.getUser().getCredentials().getLogin(), bookingDTO.getCardId());
+        if (cardDTO.getBalance() < totalPrice)
+            throw new CannotCreateEntityException("Not enough money on this card to create booking");
+        double remainder = cardDTO.getBalance() - booking.getTotalPrice();
+        cardDTO.setBalance(remainder);
+        creditCardService.updateBalance(cardDTO);
+        tourDTO.setNumberOfClients(tourDTO.getNumberOfClients() - booking.getNumberOfClients());
+        tourService.update(tourDTO);
+        return converter.convertToDTO(repository.save(booking));
     }
 
     @Override
-    public void delete(Long userId, Long bookingId) {
-        log.info("Trying to delete booking with id :{}", bookingId);
-        if (!repository.existsByIdAndUser_Id(bookingId, userId))
+    public void delete(Long id, String login) {
+        log.info("Trying to delete booking with id :{}", id);
+        if (!repository.existsByIdAndUser_Credentials_Login(id, login))
             throw new EntityNotFoundException("Cannot delete not existing entity");
-        repository.delete(bookingId);
+        repository.delete(id);
 
     }
 
     @Override
-    public List<Booking> getAll(Long userId) {
+    public List<BookingDTO> getAll(String login) {
         log.info("Trying to get all  user bookings ");
-        List<Booking> bookings = repository.findAllByUser_Id(userId);
+        List<Booking> bookings = repository.findAllByUser_Credentials_Login(login);
         if (bookings.size() == 0) {
             throw new EntityNotFoundException("User with this id have no bookings");
-        } else return bookings;
+        }
+        return bookings.stream()
+                .map(converter::convertToDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public Booking update(Booking booking) {
+    public BookingDTO update(BookingDTO booking) {
         log.info("Trying to update booking :{}", booking);
-        if (booking.getNumberOfClients() < 0 || booking.getTotalPrice() < 0) throw new CannotUpdateEntityException();
-        return repository.save(booking);
+        return converter.convertToDTO(repository.save(converter.convertToEntity(booking)));
     }
 
     @Override
-    public Booking find(Long userId, Long id) {
+    public BookingDTO findById(Long id, String login) {
         log.info("Trying go get booking by id :{}", id);
-        Booking booking = repository.findByIdAndUser_Id(id, userId);
+        Booking booking = repository.findByIdAndUser_Credentials_Login(id, login);
         if (booking == null) throw new EntityNotFoundException("Cannot find booking with this parameters");
-        return booking;
+        return converter.convertToDTO(booking);
     }
 
-    public List<Booking> findAllByCategory(Long userId, String category) {
+    @Override
+    public List<BookingDTO> findAllByCategory(String login, String category) {
         log.info("Trying to get all bookings by category :{}", category);
-        return repository.findAllByTour_Category_NameAndUser_Id(category, userId);
+        return repository.findAllByTour_Category_NameAndUser_Credentials_Login(category, login)
+                .stream()
+                .map(converter::convertToDTO)
+                .collect(Collectors.toList());
     }
 }

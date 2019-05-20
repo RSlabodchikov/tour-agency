@@ -28,7 +28,7 @@ public class UserController {
     @GetMapping
     public ResponseEntity getAll(@RequestParam(required = false) String role) {
         if (role != null) return ResponseEntity.ok(service.getAllUsersByRole(role));
-        return ResponseEntity.ok(service.getAllUsers());
+        return ResponseEntity.ok(service.getAll());
     }
 
     @GetMapping(value = "/{id}")
@@ -48,15 +48,20 @@ public class UserController {
 
     @PostMapping(value = "/block")
     public ResponseEntity block(@RequestParam(name = "id") Long id) {
-        service.blockUser(id);
+        service.block(id);
         return ResponseEntity.ok("User is blocked");
 
     }
 
     @PostMapping(value = "/unblock")
     public ResponseEntity unblock(@RequestParam(name = "id") Long id) {
-        service.unblockUser(id);
+        service.unblock(id);
         return ResponseEntity.ok("User is unblocked now");
 
+    }
+
+    @GetMapping(value = "/{login}")
+    public ResponseEntity<UserDTO> findByLogin(@PathVariable String login) {
+        return ResponseEntity.ok(service.findByLogin(login));
     }
 }

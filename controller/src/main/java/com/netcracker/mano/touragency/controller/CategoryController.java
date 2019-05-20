@@ -39,4 +39,9 @@ public class CategoryController {
     public ResponseEntity<CategoryDTO> findById(@PathVariable(name = "id") Long id) {
         return ResponseEntity.ok(service.getById(id));
     }
+
+    @GetMapping(value = "/{name}")
+    public ResponseEntity<CategoryDTO> findByName(@PathVariable(name = "name") String name) {
+        return ResponseEntity.ok(service.findByName(name));
+    }
 }

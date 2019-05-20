@@ -1,19 +1,19 @@
 package com.netcracker.mano.touragency.interfaces;
 
-import com.netcracker.mano.touragency.entity.Booking;
+import com.netcracker.mano.touragency.dto.BookingDTO;
 
 import java.util.List;
 
 public interface BookingService {
-    Booking create(Booking booking);
+    BookingDTO create(BookingDTO booking);
 
-    void delete(Long userId, Long bookingId);
+    void delete(Long id, String login);
 
-    List<Booking> getAll(Long userId);
+    List<BookingDTO> getAll(String login);
 
-    Booking update(Booking booking);
+    BookingDTO update(BookingDTO booking);
 
-    Booking find(Long userId, Long id);
+    BookingDTO findById(Long id, String login);
 
-    List<Booking> findAllByCategory(Long userId, String category);
+    List<BookingDTO> findAllByCategory(String login, String category);
 }

@@ -1,7 +1,6 @@
 package com.netcracker.mano.touragency.interfaces;
 
 import com.netcracker.mano.touragency.dto.UserDTO;
-import com.netcracker.mano.touragency.entity.User;
 
 import java.util.List;
 
@@ -13,13 +12,13 @@ public interface UserService {
 
     UserDTO findById(Long id);
 
-    List<UserDTO> getAllUsers();
+    List<UserDTO> getAll();
 
-    User findByLogin(String login);
+    UserDTO findByLogin(String login);
 
-    void blockUser(Long id);
+    void block(Long id);
 
-    void unblockUser(Long id);
+    void unblock(Long id);
 
     List<UserDTO> getAllUsersByRole(String role);
 

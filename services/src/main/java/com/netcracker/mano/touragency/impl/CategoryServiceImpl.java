@@ -46,5 +46,10 @@ public class CategoryServiceImpl implements CategoryService {
         return converter.convertToDTO(repository.save(converter.convertToEntity(categoryDTO)));
     }
 
-
+    @Override
+    public CategoryDTO findByName(String name) {
+        Category category = repository.findByName(name);
+        if (category == null) throw new EntityNotFoundException("Cannot find such category");
+        return converter.convertToDTO(category);
+    }
 }

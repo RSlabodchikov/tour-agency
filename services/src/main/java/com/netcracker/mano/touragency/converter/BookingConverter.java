@@ -44,46 +44,19 @@ public class BookingConverter {
 
     public Booking convertToEntity(BookingDTO bookingDTO) {
         Booking booking = new Booking();
-
         booking.setId(bookingDTO.getId());
         booking.setTotalPrice(bookingDTO.getTotalPrice());
         booking.setNumberOfClients(bookingDTO.getNumberOfClients());
-
         booking.setUser(User.builder()
-                .id(bookingDTO.getUserId())
-                .name(bookingDTO.getUserName())
-                .surname(bookingDTO.getUserSurname())
-                .isBlocked(bookingDTO.getIsBlocked())
-                .role(Role.builder()
-                        .id(bookingDTO.getRoleId())
-                        .name(bookingDTO.getRole())
-                        .build())
                 .credentials(Credentials.builder()
-                        .id(bookingDTO.getCredentialsId())
                         .login(bookingDTO.getLogin())
-                        .password(bookingDTO.getPassword())
                         .build())
                 .build());
-
         booking.setCard(CreditCard.builder()
                 .id(bookingDTO.getCardId())
-                .balance(bookingDTO.getBalance())
-                .number(bookingDTO.getNumber())
-                .user(booking.getUser())
                 .build());
-
         booking.setTour(Tour.builder()
-                .category(Category.builder()
-                        .id(bookingDTO.getCategoryId())
-                        .name(bookingDTO.getCategory())
-                        .build())
-                .country(bookingDTO.getCountry())
-                .description(bookingDTO.getDescription())
-                .evictionDate(bookingDTO.getEvictionDate())
-                .settlementDate(bookingDTO.getSettlementDate())
                 .id(bookingDTO.getTourId())
-                .numberOfClients(bookingDTO.getNumberOfClients())
-                .price(bookingDTO.getPrice())
                 .build());
         return booking;
     }

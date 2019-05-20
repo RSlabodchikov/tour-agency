@@ -29,7 +29,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             "/webjars/**"
     };
 
-
     @Resource(name = "userService")
     private UserDetailsService userService;
 
@@ -59,7 +58,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
 
     @Bean
-    public JwtAuthenticationFilter authenticationTokenFilterBean() throws Exception {
+    public JwtAuthenticationFilter authenticationTokenFilterBean() {
         return new JwtAuthenticationFilter();
     }
 
@@ -67,9 +66,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.cors().and().csrf().disable().authorizeRequests()
                 .antMatchers(AUTH_WHITELIST).permitAll()
+                .antMatchers(HttpMethod.GET,"/tour-agency/tours/**").permitAll()
+                .antMatchers(HttpMethod.GET).authenticated()
                 .antMatchers(HttpMethod.POST,"/tour-agency/token").permitAll()
                 .antMatchers(HttpMethod.POST,"/tour-agency/users").permitAll()
-                .anyRequest().authenticated()
+                .antMatchers("/tour-agency/cards/**").authenticated()
+                .antMatchers("/tour-agency/bookings/**").authenticated()
+                .anyRequest().hasRole("admin")
                 .and()
                 .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);

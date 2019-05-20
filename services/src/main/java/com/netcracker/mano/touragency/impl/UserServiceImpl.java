@@ -63,7 +63,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     private Set<GrantedAuthority> getAuthority(User user) {
-        Set<GrantedAuthority> authorities = new HashSet<GrantedAuthority>();
+        Set<GrantedAuthority> authorities = new HashSet<>();
         authorities.add(new SimpleGrantedAuthority(user.getRole().getName()));
         return authorities;
     }
@@ -104,7 +104,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public List<UserDTO> getAllUsers() {
+    public List<UserDTO> getAll() {
         log.info("Trying to get all users");
         return userRepository.findAll()
                 .stream()
@@ -113,7 +113,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public void blockUser(Long id) {
+    public void block(Long id) {
         log.info("Trying to block user with id :{}", id);
         User user = userRepository.findOne(id);
         if (user == null) throw new EntityNotFoundException("Cannot block user with this id");
@@ -124,7 +124,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public void unblockUser(Long id) throws CannotUpdateEntityException, EntityNotFoundException {
+    public void unblock(Long id) throws CannotUpdateEntityException, EntityNotFoundException {
         log.info("trying to unblock user with id:{}", id);
         User user = userRepository.findOne(id);
         if (user == null) throw new EntityNotFoundException("Cannot unblock user with this id");
@@ -143,7 +143,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public User findByLogin(String login) {
-        return userRepository.findByCredentials_Login(login);
+    public UserDTO findByLogin(String login) {
+        User user = userRepository.findByCredentials_Login(login);
+        if (user == null) throw new EntityNotFoundException("Cannot find user with this login");
+        return userConverter.convertToDTO(user);
     }
 }

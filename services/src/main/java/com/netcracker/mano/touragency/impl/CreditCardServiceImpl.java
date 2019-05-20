@@ -1,6 +1,7 @@
 package com.netcracker.mano.touragency.impl;
 
 import com.netcracker.mano.touragency.converter.CreditCardConverter;
+import com.netcracker.mano.touragency.converter.UserConverter;
 import com.netcracker.mano.touragency.dto.CreditCardDTO;
 import com.netcracker.mano.touragency.entity.CreditCard;
 import com.netcracker.mano.touragency.exceptions.CannotCreateEntityException;
@@ -29,8 +30,10 @@ public class CreditCardServiceImpl implements CreditCardService {
 
     private UserService service;
 
+    private UserConverter userConverter;
+
     @Autowired
-    public CreditCardServiceImpl(CreditCardRepository repository, CreditCardConverter converter, UserService service) {
+    public CreditCardServiceImpl(CreditCardRepository repository, CreditCardConverter converter, UserService service, UserConverter userConverter) {
         this.repository = repository;
         this.converter = converter;
         this.service = service;
@@ -68,7 +71,7 @@ public class CreditCardServiceImpl implements CreditCardService {
         CreditCard creditCard = converter.convertToEntity(creditCardDTO);
         if (creditCard.getBalance() < 0)
             throw new CannotCreateEntityException("Cannot create card with negative balance");
-        creditCard.setUser(service.findByLogin(creditCardDTO.getLogin()));
+        creditCard.setUser(userConverter.convertToEntity(service.findByLogin(creditCardDTO.getLogin())));
         creditCard.setNumber(BigInteger.valueOf((Math.abs(random.nextLong()))));
         creditCard = repository.save(creditCard);
         creditCard.getUser().getCredentials().setLogin(creditCardDTO.getLogin());

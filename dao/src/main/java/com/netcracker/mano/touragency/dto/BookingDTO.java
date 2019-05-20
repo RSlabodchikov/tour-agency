@@ -16,10 +16,10 @@ public class BookingDTO {
     @Min(1)
     @Max(10)
     int numberOfClients;
-    @Null
+    @Min(0)
     double totalPrice;
 
-    @NotNull
+    @Min(value = 0, message = "Id cannot be negative")
     long userId;
     @Null
     String userName;
@@ -38,20 +38,18 @@ public class BookingDTO {
     @Null
     String password;
 
-    @NotNull
+    @Min(value = 0, message = "Id cannot be negative")
     long cardId;
     @Null
     BigInteger number;
     @Null
     Double balance;
 
-    @NotNull
+    @Min(value = 0, message = "Id cannot be negative")
     long tourId;
     @Null
-    @Future
     Date settlementDate;
     @Null
-    @Future
     Date evictionDate;
     @Null
     String country;

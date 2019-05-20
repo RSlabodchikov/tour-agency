@@ -11,4 +11,6 @@ public interface CategoryService {
     CategoryDTO getById(Long id);
 
     CategoryDTO update(CategoryDTO category);
+
+    CategoryDTO findByName(String category);
 }

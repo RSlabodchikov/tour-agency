@@ -9,11 +9,11 @@ import java.util.List;
 
 @Repository
 public interface BookingRepository extends CrudRepository<Booking, Long> {
-    Boolean existsByIdAndUser_Id(Long id, Long userId);
+    Boolean existsByIdAndUser_Credentials_Login(Long id, String login);
 
-    List<Booking> findAllByUser_Id(Long userID);
+    List<Booking> findAllByUser_Credentials_Login(String login);
 
-    Booking findByIdAndUser_Id(Long bookingId, Long userId);
+    Booking findByIdAndUser_Credentials_Login(Long id, String login);
 
-    List<Booking> findAllByTour_Category_NameAndUser_Id(String category, Long userID);
+    List<Booking> findAllByTour_Category_NameAndUser_Credentials_Login(String category, String login);
 }

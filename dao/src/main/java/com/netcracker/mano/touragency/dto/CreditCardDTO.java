@@ -19,6 +19,7 @@ public class CreditCardDTO {
     @Max(value = 1000, message = "Max balance is 1000")
     double balance;
 
+    @Min(0)
     long userId;
     @Null
     String name;
