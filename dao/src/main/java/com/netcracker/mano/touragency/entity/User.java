@@ -2,9 +2,7 @@ package com.netcracker.mano.touragency.entity;
 
 import lombok.*;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import javax.persistence.*;
 
 @Data
 @AllArgsConstructor
@@ -12,27 +10,29 @@ import java.sql.SQLException;
 @Builder
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
+@Entity
+@Table(name = "users", schema = "tour_agency")
 public class User extends BaseEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private long id;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "credentials_id")
     private Credentials credentials;
+
+    @Column(name = "name")
     private String name;
+
+    @Column(name = "surname")
     private String surname;
+
+    @ManyToOne
+    @JoinColumn(name = "role_id")
     private Role role;
+
+    @Column(name = "is_blocked")
     private Boolean isBlocked;
 
-
-    public void extractResult(ResultSet resultSet) throws SQLException {
-        setId(resultSet.getLong(1));
-        setName(resultSet.getString(2));
-        setSurname(resultSet.getString(3));
-        setIsBlocked(resultSet.getBoolean(4));
-        setRole(Role.valueOf(resultSet.getString(5)));
-    }
-
-    public void setStatementParams(PreparedStatement preparedStatement) throws SQLException {
-        preparedStatement.setString(1, name);
-        preparedStatement.setString(2, surname);
-        preparedStatement.setBoolean(3, isBlocked);
-        preparedStatement.setString(4, role.toString());
-        preparedStatement.setLong(5, credentials.getId());
-    }
 }

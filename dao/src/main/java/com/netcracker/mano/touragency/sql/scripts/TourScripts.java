@@ -9,5 +9,5 @@ public class TourScripts {
     public static final String UPDATE = "UPDATE tours t SET t.price=?, t.vacant_places=? WHERE t.id=?";
     public static final String CREATE = "INSERT INTO tours (settlement_date, eviction_date, country_name, price, vacant_places, description, category_id) " +
             "VALUES (?,?,?,?,?,?,?)";
-    public static final String GET_CATEGORY_ID="SELECT id FROM category WHERE name=?";
+    public static final String GET_CATEGORY_ID="SELECT id FROM category WHERE userName=?";
 }

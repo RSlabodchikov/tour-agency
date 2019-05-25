@@ -1,22 +1,19 @@
 package com.netcracker.mano.touragency.interfaces;
 
-import com.netcracker.mano.touragency.entity.Booking;
-import com.netcracker.mano.touragency.exceptions.CannotCreateEntityException;
-import com.netcracker.mano.touragency.exceptions.CannotUpdateEntityException;
-import com.netcracker.mano.touragency.exceptions.EntityNotFoundException;
+import com.netcracker.mano.touragency.dto.BookingDTO;
 
 import java.util.List;
 
 public interface BookingService {
-    Booking create(Booking booking) throws CannotCreateEntityException;
+    BookingDTO create(BookingDTO booking);
 
-    void delete(Long userId, Long bookingId) throws EntityNotFoundException;
+    void delete(Long id, String login);
 
-    List<Booking> getAll(Long userId) throws EntityNotFoundException;
+    List<BookingDTO> getAll(String login);
 
-    Booking update(Booking booking) throws CannotUpdateEntityException;
+    BookingDTO update(BookingDTO booking);
 
-    Booking find(Long userId, Long id) throws EntityNotFoundException;
+    BookingDTO findById(Long id, String login);
 
-    List<Booking> findAllByCategory(Long userId, String category) throws EntityNotFoundException;
+    List<BookingDTO> findAllByCategory(String login, String category);
 }

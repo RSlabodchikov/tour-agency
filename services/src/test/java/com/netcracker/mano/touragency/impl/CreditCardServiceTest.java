@@ -1,12 +1,15 @@
 package com.netcracker.mano.touragency.impl;
 
-import com.netcracker.mano.touragency.dao.CreditCardDAO;
+import com.netcracker.mano.touragency.converter.CreditCardConverter;
+import com.netcracker.mano.touragency.converter.UserConverter;
+import com.netcracker.mano.touragency.dto.CreditCardDTO;
+import com.netcracker.mano.touragency.dto.UserDTO;
+import com.netcracker.mano.touragency.entity.Credentials;
 import com.netcracker.mano.touragency.entity.CreditCard;
-import com.netcracker.mano.touragency.exceptions.CannotCreateEntityException;
-import com.netcracker.mano.touragency.exceptions.CannotUpdateEntityException;
+import com.netcracker.mano.touragency.entity.User;
 import com.netcracker.mano.touragency.exceptions.EntityNotFoundException;
-import lombok.SneakyThrows;
-import org.junit.Assert;
+import com.netcracker.mano.touragency.interfaces.UserService;
+import com.netcracker.mano.touragency.repository.CreditCardRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -17,159 +20,137 @@ import org.mockito.Mock;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.mockito.Matchers.anyLong;
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-public class CreditCardServiceTest {
-    @Mock
-    private CreditCardDAO creditCardDAO;
 
+public class CreditCardServiceTest {
     @InjectMocks
     private CreditCardServiceImpl creditCardService;
+
+    @Mock
+    private CreditCardRepository repository;
 
     @Captor
     private ArgumentCaptor<CreditCard> captor;
 
+    @Mock
+    private UserService userService;
+
+    @Mock
+    private CreditCardConverter converter;
+
+    @Mock
+    private UserConverter userConverter;
+
+    private CreditCard card;
+
+    private CreditCardDTO cardDTO;
+
     @Before
     public void setUp() {
+        card = CreditCard.builder()
+                .id(1L)
+                .balance(500)
+                .user(User.builder()
+                        .credentials(Credentials
+                                .builder()
+                                .login("login")
+                                .build())
+                        .build())
+                .build();
+        cardDTO = new CreditCardDTO();
+        cardDTO.setLogin("login");
+        cardDTO.setId(1L);
+        cardDTO.setBalance(500);
         initMocks(this);
     }
 
-    @Test(expected = EntityNotFoundException.class)
-    @SneakyThrows
-    public void cannotGetCardWithWrongId() {
-        when(creditCardDAO.getClientCard(1L, 1L)).thenThrow(new EntityNotFoundException());
-        creditCardService.getById(1L, 1L);
-        verify(creditCardDAO, times(1)).getAllClientCards(anyLong());
-    }
 
     @Test
-    @SneakyThrows
-    public void getById() {
-        CreditCard card = CreditCard.builder()
-                .balance(500)
-                .userId(1L)
-                .build();
-        card.setId(1L);
-        when(creditCardDAO.getClientCard(1L, 1L)).thenReturn(card);
-        CreditCard card1 = creditCardService.getById(1L, 1L);
-        verify(creditCardDAO, times(1)).getClientCard(anyLong(), anyLong());
-        Assert.assertEquals(card, card1);
-    }
-
-    @Test
-    @SneakyThrows
-    public void createCard() {
-        CreditCard card = CreditCard.builder()
-                .balance(500)
-                .userId(1L)
-                .build();
-        when(creditCardDAO.add(card)).thenReturn(card);
-        creditCardService.create(500D, 1L);
-        verify(creditCardDAO, times(1)).add(captor.capture());
-        Assert.assertEquals(card.getBalance(), captor.getValue().getBalance(), 0);
-    }
-
-    @Test(expected = CannotCreateEntityException.class)
-    @SneakyThrows
-    public void cannotCreateCardWithNegativeBalance() {
-        CreditCard card = CreditCard.builder()
-                .balance(500)
-                .userId(1L)
-                .build();
-        when(creditCardDAO.add(card)).thenReturn(card);
-        creditCardService.create(-400D, 1L);
-        verify(creditCardDAO, times(1)).add(any());
-    }
-
-    @Test
-    @SneakyThrows
-    public void delete() {
-        CreditCard card = CreditCard.builder()
-                .balance(500)
-                .userId(1L)
-                .build();
-        card.setId(1L);
-        when(creditCardDAO.getClientCard(1L, 1L)).thenReturn(card);
-        creditCardService.delete(1L, 1L);
-        verify(creditCardDAO, times(1)).delete(1L);
-        verify(creditCardDAO, times(1)).getClientCard(1L, 1L);
+    public void getAll() {
+        List<CreditCard> cards = new ArrayList<>();
+        cards.add(card);
+        when(repository.findAll()).thenReturn(cards);
+        when(converter.convertToDTO(any())).thenReturn(cardDTO);
+        assertThat(creditCardService.getAll().get(0), is(cardDTO));
     }
 
     @Test(expected = EntityNotFoundException.class)
-    @SneakyThrows
-    public void cannotDeleteWithWrongId() {
-        when(creditCardDAO.getClientCard(2L, 1L)).thenThrow(new EntityNotFoundException());
-        creditCardService.delete(2L, 1L);
-    }
-
-    @Test(expected = EntityNotFoundException.class)
-    @SneakyThrows
-    public void cannotGetCardWithGreatestBalanceIFNoCardExisted() {
-        List<CreditCard> list = new ArrayList<>();
-        when(creditCardDAO.getAllClientCards(anyLong())).thenReturn(list);
-        creditCardService.getByGreatestBalance(1L);
-        verify(creditCardDAO, times(1)).getAllClientCards(1L);
+    public void clientHaveNoCards() {
+        when(repository.findAllByUser_Credentials_Login(anyString())).thenReturn(new ArrayList<>());
+        creditCardService.getAllClientCards("login");
     }
 
     @Test
-    @SneakyThrows
-    public void getCardWithGreatestBalance() {
-        CreditCard card = CreditCard.builder()
-                .balance(500)
-                .userId(1L)
-                .build();
-        card.setId(1L);
-        CreditCard card1 = CreditCard.builder()
-                .balance(1000)
-                .userId(1L)
-                .build();
-        card1.setId(2L);
-        List<CreditCard> list = new ArrayList<>();
-        list.add(card);
-        list.add(card1);
-        when(creditCardDAO.getAllClientCards(1L)).thenReturn(list);
-        CreditCard result = creditCardService.getByGreatestBalance(1L);
-        verify(creditCardDAO, times(1)).getAllClientCards(1L);
-        Assert.assertEquals(card1.getBalance(), result.getBalance(), 0.1);
+    public void getAllClientCards() {
+        List<CreditCard> cards = new ArrayList<>();
+        cards.add(card);
+        when(repository.findAllByUser_Credentials_Login("login")).thenReturn(cards);
+        when(converter.convertToDTO(any())).thenReturn(cardDTO);
+        assertThat(creditCardService.getAllClientCards("login").get(0), is(cardDTO));
     }
 
     @Test(expected = EntityNotFoundException.class)
-    @SneakyThrows
-    public void cannotUpdateNotExistingCard() {
-        when(creditCardDAO.getClientCard(1L, 1L)).thenThrow(new EntityNotFoundException());
-        creditCardService.updateBalance(1L, 400D, 1L);
-        verify(creditCardDAO, times(1)).getAllClientCards(1L);
-    }
-
-    @Test(expected = CannotUpdateEntityException.class)
-    @SneakyThrows
-    public void cannotUpdateCard() {
-        CreditCard card = CreditCard.builder()
-                .balance(1000D)
-                .userId(1L)
-                .build();
-        card.setId(1L);
-        when(creditCardDAO.getClientCard(1L, 1L)).thenReturn(card);
-        when(creditCardDAO.update(any())).thenThrow(new CannotUpdateEntityException());
-        creditCardService.updateBalance(1L, -2000D, 1L);
+    public void cannotFindCardById() {
+        when(repository.findByIdAndUser_Credentials_Login(anyLong(), anyString())).thenReturn(null);
+        creditCardService.getById("login", 1L);
     }
 
     @Test
-    @SneakyThrows
-    public void updateBalance() {
-        CreditCard card = CreditCard.builder()
-                .balance(1000)
-                .userId(1L)
-                .build();
-        card.setId(1L);
-        when(creditCardDAO.getClientCard(1L, 1L)).thenReturn(card);
-        when(creditCardDAO.update(card)).thenReturn(card);
-        creditCardService.updateBalance(1L, 200D, 1L);
-        verify(creditCardDAO).update(captor.capture());
-        Assert.assertEquals(card.getBalance(), captor.getValue().getBalance(), 1);
+    public void findUserCardById() {
+        when(repository.findByIdAndUser_Credentials_Login(1L, "login")).thenReturn(card);
+        when(converter.convertToDTO(card)).thenReturn(cardDTO);
+        assertThat(creditCardService.getById("login", 1L), is(cardDTO));
+    }
+
+    @Test
+    public void cannotCreate() {
+        when(converter.convertToEntity(cardDTO)).thenReturn(card);
+        when(converter.convertToDTO(card)).thenReturn(cardDTO);
+        User user = User.builder().build();
+        UserDTO userDTO = new UserDTO();
+        when(userService.findByLogin("login")).thenReturn(userDTO);
+        when(userConverter.convertToEntity(any())).thenReturn(user);
+        when(repository.save(card)).thenReturn(card);
+        assertThat(creditCardService.create(cardDTO),is(cardDTO));
+    }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void cannotDeleteNotExistingCard(){
+        when(repository.existsByIdAndUser_Credentials_Login(1L,"login")).thenReturn(FALSE);
+        creditCardService.delete(1L,"login");
+    }
+
+    @Test
+    public void deleteCard(){
+        when(repository.existsByIdAndUser_Credentials_Login(1L,"login")).thenReturn(TRUE);
+        creditCardService.delete(1L,"login");
+        verify(repository,times(1)).delete(1L);
+    }
+
+    @Test
+    public void updateCardBalance(){
+        when(repository.findByIdAndUser_Credentials_Login(1L,"login")).thenReturn(card);
+        when(converter.convertToDTO(any())).thenReturn(cardDTO);
+        when(repository.save(card)).thenReturn(card);
+        when(converter.convertToEntity(any())).thenReturn(card);
+        assertThat(creditCardService.updateBalance(cardDTO),is(cardDTO));
 
     }
+
+    @Test
+    public void getUserBestCard(){
+        List<CreditCard> cards = new ArrayList<>();
+        cards.add(card);
+        when(repository.findAllByUser_Credentials_Login("login")).thenReturn(cards);
+        when(converter.convertToDTO(any())).thenReturn(cardDTO);
+        assertThat(creditCardService.getByGreatestBalance("login"),is(cardDTO));
+    }
+
 
 }

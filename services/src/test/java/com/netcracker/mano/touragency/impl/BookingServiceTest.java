@@ -1,13 +1,16 @@
 package com.netcracker.mano.touragency.impl;
 
-import com.netcracker.mano.touragency.dao.impl.jdbc.BookingDAOImplJDBC;
-import com.netcracker.mano.touragency.entity.Booking;
-import com.netcracker.mano.touragency.entity.CreditCard;
-import com.netcracker.mano.touragency.entity.Tour;
-import com.netcracker.mano.touragency.exceptions.CannotCreateEntityException;
+import com.netcracker.mano.touragency.converter.BookingConverter;
+import com.netcracker.mano.touragency.converter.TourConverter;
+import com.netcracker.mano.touragency.converter.UserConverter;
+import com.netcracker.mano.touragency.dto.BookingDTO;
+import com.netcracker.mano.touragency.dto.CreditCardDTO;
+import com.netcracker.mano.touragency.dto.TourDTO;
+import com.netcracker.mano.touragency.dto.UserDTO;
+import com.netcracker.mano.touragency.entity.*;
 import com.netcracker.mano.touragency.exceptions.EntityNotFoundException;
-import lombok.SneakyThrows;
-import org.junit.Assert;
+import com.netcracker.mano.touragency.interfaces.UserService;
+import com.netcracker.mano.touragency.repository.BookingRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -18,7 +21,8 @@ import org.mockito.Mock;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.mockito.Matchers.anyString;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
@@ -26,210 +30,153 @@ import static org.mockito.MockitoAnnotations.initMocks;
 public class BookingServiceTest {
 
     @Mock
+    private BookingRepository repository;
+
+    @Mock
     private TourServiceImpl tourService;
 
     @Mock
     private CreditCardServiceImpl creditCardService;
 
-    @Mock
-    private BookingDAOImplJDBC bookingDAO;
-
     @Captor
     private ArgumentCaptor<Booking> captor;
-
 
     @InjectMocks
     private BookingServiceImpl bookingService;
 
+    @Mock
+    private TourConverter tourConverter;
+
+    @Mock
+    private BookingConverter converter;
+
+    @Mock
+    private UserConverter userConverter;
+
+    @Mock
+    private UserService userService;
+
+    private Booking booking;
+
+    private BookingDTO bookingDTO;
+
     @Before
     public void setUp() {
+        booking = Booking.builder()
+                .id(1L)
+                .numberOfClients(1)
+                .user(User.builder()
+                        .credentials(Credentials.builder()
+                                .login("login")
+                                .build())
+                        .build())
+                .card(CreditCard.builder()
+                        .id(1L)
+                        .balance(500)
+                        .build())
+                .tour(Tour.builder()
+                        .id(1L)
+                        .numberOfClients(2)
+                        .price(100D)
+                        .build())
+                .build();
+        bookingDTO = new BookingDTO();
+        bookingDTO.setLogin("login");
+        bookingDTO.setTourId(1L);
+        bookingDTO.setId(1L);
+        bookingDTO.setNumberOfClientsInTour(2);
+        bookingDTO.setNumberOfClients(1);
+        bookingDTO.setBalance(500D);
         initMocks(this);
     }
 
+
+    @Test
+    public void deleteBooking() {
+        when(repository.existsByIdAndUser_Credentials_Login(1L, "login")).thenReturn(true);
+        bookingService.delete(1L, "login");
+        verify(repository, times(1)).delete(1L);
+    }
+
     @Test(expected = EntityNotFoundException.class)
-    @SneakyThrows
-    public void clientHaveNoBookings() {
-        when(bookingDAO.getAll()).thenReturn(new ArrayList<>());
-        bookingService.getAll(1L);
-        verify(bookingDAO, times(1)).getAll();
+    public void cannotDeleteNotExistingBooking() {
+        when(repository.existsByIdAndUser_Credentials_Login(1L, "login")).thenReturn(false);
+        bookingService.delete(1L, "login");
     }
 
     @Test
-    @SneakyThrows
     public void getAllClientBookings() {
-        Booking booking = Booking.builder()
-                .userId(1L)
-                .build();
-        Booking booking1 = Booking.builder()
-                .userId(2L)
-                .build();
-        List<Booking> list = new ArrayList<>();
-        list.add(booking1);
-        list.add(booking);
-        when(bookingDAO.getAllClientBookings(1L)).thenReturn(list);
-        List<Booking> result = bookingService.getAll(1L);
-        verify(bookingDAO, times(1)).getAllClientBookings(1L);
-        Assert.assertEquals(2, result.size());
+        List<Booking> bookings = new ArrayList<>();
+        bookings.add(booking);
+        when(repository.findAllByUser_Credentials_Login("login")).thenReturn(bookings);
+        when(converter.convertToDTO(any())).thenReturn(bookingDTO);
+        assertThat(bookingService.getAll("login").get(0), is(bookingDTO));
     }
 
     @Test(expected = EntityNotFoundException.class)
-    @SneakyThrows
-    public void cannotGetBookingByWrongId() {
-        Booking booking = Booking.builder()
-                .userId(1L)
-                .build();
-        booking.setId(1L);
-        when(bookingDAO.findBookingByClientIdAndId(1L, 1L)).thenThrow(new EntityNotFoundException());
-        bookingService.find(1L, 1L);
-        verify(bookingDAO, times(1)).getAll();
+    public void userHaveNoBookings() {
+        when(repository.findAllByUser_Credentials_Login(anyString())).thenReturn(new ArrayList<>());
+        bookingService.getAll("login");
     }
 
     @Test
-    @SneakyThrows
-    public void getById() {
-        Booking booking = Booking.builder()
-                .userId(1L)
-                .build();
-        booking.setId(1L);
-        when(bookingDAO.findBookingByClientIdAndId(1L, 1L)).thenReturn(booking);
-        Booking booking1 = bookingService.find(1L, 1L);
-        verify(bookingDAO, times(1)).findBookingByClientIdAndId(1L, 1L);
-        Assert.assertEquals(booking, booking1);
-    }
-
-    @Test
-    @SneakyThrows
     public void updateBooking() {
-        Booking booking = Booking.builder()
-                .userId(1L)
-                .build();
-        booking.setId(1L);
-        when(bookingDAO.update(booking)).thenReturn(booking);
-        bookingService.update(booking);
-        verify(bookingDAO).update(captor.capture());
-        Assert.assertEquals(booking, captor.getValue());
+        when(repository.existsByIdAndUser_Credentials_Login(1L, "login")).thenReturn(true);
+        when(converter.convertToDTO(any())).thenReturn(bookingDTO);
+        when(converter.convertToEntity(any())).thenReturn(booking);
+        bookingService.update(bookingDTO);
+        verify(repository, times(1)).save(captor.capture());
+        assertThat(captor.getValue(), is(booking));
+
+    }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void cannotUpdateBooking() {
+        when(repository.existsByIdAndUser_Credentials_Login(1L, "login")).thenReturn(false);
+        bookingService.update(bookingDTO);
+    }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void cannotFindById() {
+        when(repository.findByIdAndUser_Credentials_Login(1L, "login")).thenReturn(null);
+        bookingService.findById(1L, "login");
     }
 
     @Test
-    @SneakyThrows
-    public void getAllBookingsByCategory() {
-        Booking booking = Booking.builder()
-                .userId(1L)
-                .build();
-        booking.setId(1L);
-        List<Booking> list = new ArrayList<>();
-        list.add(booking);
-        when(bookingDAO.getAllByCategory(anyString())).thenReturn(list);
-        bookingService.findAllByCategory(1L, "GENERAL");
-        verify(bookingDAO, times(1)).getAllByCategory("GENERAL");
+    public void findById() {
+        when(repository.findByIdAndUser_Credentials_Login(1L, "login")).thenReturn(booking);
+        when(converter.convertToDTO(booking)).thenReturn(bookingDTO);
+        assertThat(bookingService.findById(1L, "login"), is(bookingDTO));
     }
 
     @Test
-    @SneakyThrows
-    public void delete() {
-        Booking booking = Booking.builder()
-                .userId(1L)
-                .build();
-        booking.setId(1L);
-        List<Booking> list = new ArrayList<>();
-        list.add(booking);
-        when(bookingDAO.getAll()).thenReturn(list);
-        bookingService.delete(1L, 1L);
-    }
-
-    @Test(expected = CannotCreateEntityException.class)
-    @SneakyThrows
-    public void cannotCreateBookingWithNegativeNumberOfClients() {
-        Booking booking = Booking.builder()
-                .userId(1L)
-                .numberOfClients(-1)
-                .build();
-        bookingService.create(booking);
-    }
-
-    @Test(expected = CannotCreateEntityException.class)
-    @SneakyThrows
-    public void cannotCreateBookingWithNotExistingTour() {
-        Booking booking = Booking.builder()
-                .userId(1L)
-                .tourId(1L)
-                .numberOfClients(1)
-                .build();
-        when(tourService.getById(1L)).thenThrow(new EntityNotFoundException());
-        bookingService.create(booking);
-    }
-
-    @Test(expected = CannotCreateEntityException.class)
-    @SneakyThrows
-    public void cannotCreateBookingWithWrongNumberOfClients() {
-        Booking booking = Booking.builder()
-                .userId(1L)
-                .tourId(1L)
-                .numberOfClients(5)
-                .build();
-        Tour tour = Tour.builder()
-                .price(100D)
-                .numberOfClients(4)
-                .build();
-        when(tourService.getById(1L)).thenReturn(tour);
-        bookingService.create(booking);
-    }
-
-    @Test(expected = CannotCreateEntityException.class)
-    @SneakyThrows
-    public void cannotCreateTourWithoutMoney() {
-        Booking booking = Booking.builder()
-                .userId(1L)
-                .tourId(1L)
-                .numberOfClients(1)
-                .build();
-        Tour tour = Tour.builder()
-                .price(100D)
-                .numberOfClients(20)
-                .build();
-        when(tourService.getById(1L)).thenReturn(tour);
-        CreditCard creditCard = CreditCard.builder()
-                .balance(10D)
-                .build();
-        when(creditCardService.getByGreatestBalance(1L)).thenReturn(creditCard);
-        bookingService.create(booking);
-    }
-
-    @Test(expected = CannotCreateEntityException.class)
-    @SneakyThrows
-    public void cannotCreateBookingWithoutCreditCard() {
-        Booking booking = Booking.builder()
-                .userId(1L)
-                .tourId(1L)
-                .numberOfClients(1)
-                .build();
-        Tour tour = Tour.builder()
-                .price(100D)
-                .numberOfClients(20)
-                .build();
-        when(tourService.getById(1L)).thenReturn(tour);
-        when(creditCardService.getByGreatestBalance(1L)).thenThrow(new EntityNotFoundException());
-        bookingService.create(booking);
+    public void findAllByCategory() {
+        List<Booking> bookings = new ArrayList<>();
+        bookings.add(booking);
+        when(repository.findAllByTour_Category_NameAndUser_Credentials_Login(anyString(), anyString())).thenReturn(bookings);
+        when(converter.convertToDTO(any())).thenReturn(bookingDTO);
+        assertThat(bookingService.findAllByCategory("login", "sport").get(0), is(bookingDTO));
     }
 
     @Test
-    @SneakyThrows
     public void createBooking() {
-        Booking booking = Booking.builder()
-                .userId(1L)
-                .tourId(1L)
-                .numberOfClients(1)
-                .build();
-        Tour tour = Tour.builder()
-                .price(100D)
-                .numberOfClients(20)
-                .build();
-        when(tourService.getById(1L)).thenReturn(tour);
-        CreditCard creditCard = CreditCard.builder()
-                .balance(1000D)
-                .build();
-        when(creditCardService.getByGreatestBalance(1L)).thenReturn(creditCard);
-        bookingService.create(booking);
+        when(converter.convertToEntity(bookingDTO)).thenReturn(booking);
+        when(converter.convertToDTO(any())).thenReturn(bookingDTO);
+        TourDTO tourDTO = new TourDTO();
+        tourDTO.setNumberOfClients(20);
+        tourDTO.setPrice(100D);
+        Tour tour = Tour.builder().price(100D).numberOfClients(20).build();
+        when(tourService.getById(anyLong())).thenReturn(tourDTO);
+        when(tourConverter.convertToEntity(tourDTO)).thenReturn(tour);
+        User user = new User();
+        UserDTO userDTO = new UserDTO();
+        when(userService.findByLogin(any())).thenReturn(userDTO);
+        when(userConverter.convertToEntity(userDTO)).thenReturn(user);
+        CreditCardDTO creditCard = new CreditCardDTO();
+        creditCard.setBalance(500D);
+        when(creditCardService.getById(any(), anyLong())).thenReturn(creditCard);
+        assertThat(bookingService.create(bookingDTO), is(bookingDTO));
+
     }
 
 

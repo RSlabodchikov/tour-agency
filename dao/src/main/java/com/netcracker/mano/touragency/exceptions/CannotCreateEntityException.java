@@ -1,4 +1,11 @@
 package com.netcracker.mano.touragency.exceptions;
 
-public class CannotCreateEntityException extends Exception {
+
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor
+public class CannotCreateEntityException extends RuntimeException {
+    public CannotCreateEntityException(String message) {
+        super(message);
+    }
 }

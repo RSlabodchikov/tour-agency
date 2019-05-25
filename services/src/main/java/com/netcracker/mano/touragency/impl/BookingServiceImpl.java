@@ -1,16 +1,19 @@
 package com.netcracker.mano.touragency.impl;
 
-import com.netcracker.mano.touragency.dao.BookingDAO;
+import com.netcracker.mano.touragency.converter.BookingConverter;
+import com.netcracker.mano.touragency.converter.TourConverter;
+import com.netcracker.mano.touragency.converter.UserConverter;
+import com.netcracker.mano.touragency.dto.BookingDTO;
+import com.netcracker.mano.touragency.dto.CreditCardDTO;
+import com.netcracker.mano.touragency.dto.TourDTO;
 import com.netcracker.mano.touragency.entity.Booking;
-import com.netcracker.mano.touragency.entity.CreditCard;
-import com.netcracker.mano.touragency.entity.Tour;
 import com.netcracker.mano.touragency.exceptions.CannotCreateEntityException;
-import com.netcracker.mano.touragency.exceptions.CannotUpdateEntityException;
 import com.netcracker.mano.touragency.exceptions.EntityNotFoundException;
 import com.netcracker.mano.touragency.interfaces.BookingService;
 import com.netcracker.mano.touragency.interfaces.CreditCardService;
+import com.netcracker.mano.touragency.interfaces.UserService;
+import com.netcracker.mano.touragency.repository.BookingRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,86 +24,97 @@ import java.util.stream.Collectors;
 @Service
 public class BookingServiceImpl implements BookingService {
 
-
     private CreditCardService creditCardService;
 
-    private BookingDAO bookingDAO;
+    private UserConverter userConverter;
 
     private TourServiceImpl tourService;
 
-    @Autowired
-    public BookingServiceImpl(CreditCardService creditCardService, BookingDAO bookingDAO, TourServiceImpl tourService) {
+    private BookingRepository repository;
+
+    private BookingConverter converter;
+
+    private TourConverter tourConverter;
+
+    private UserService userService;
+
+    public BookingServiceImpl(UserConverter userConverter, CreditCardService creditCardService, TourServiceImpl tourService, BookingRepository repository, BookingConverter converter, TourConverter tourConverter, UserService userService) {
         this.creditCardService = creditCardService;
-        this.bookingDAO = bookingDAO;
+        this.userConverter = userConverter;
         this.tourService = tourService;
+        this.repository = repository;
+        this.converter = converter;
+        this.tourConverter = tourConverter;
+        this.userService = userService;
     }
 
-
     @Override
-    public Booking create(Booking booking) throws CannotCreateEntityException {
-        log.info("Trying to create booking :{}", booking);
-        if (booking.getNumberOfClients() < 0) throw new CannotCreateEntityException();
-        Tour tour;
-        try {
-            tour = tourService.getById(booking.getTourId());
-        } catch (EntityNotFoundException e) {
-            throw new CannotCreateEntityException();
+    public BookingDTO create(BookingDTO bookingDTO) {
+        log.info("Trying to create booking :{}", bookingDTO);
+        Booking booking = converter.convertToEntity(bookingDTO);
+        TourDTO tourDTO;
+        tourDTO = tourService.getById(booking.getTour().getId());
+        if (tourDTO.getNumberOfClients() < booking.getNumberOfClients()) {
+            throw new CannotCreateEntityException("Not enough vacant places in this tour");
         }
-        if (tour.getNumberOfClients() < booking.getNumberOfClients()) {
-            throw new CannotCreateEntityException();
-        }
-        double totalPrice = tour.getPrice() * booking.getNumberOfClients();
+        booking.setTour(tourConverter.convertToEntity(tourDTO));
+        booking.setUser(userConverter.convertToEntity(userService.findByLogin(bookingDTO.getLogin())));
+        double totalPrice = tourDTO.getPrice() * booking.getNumberOfClients();
         booking.setTotalPrice(totalPrice);
-        try {
-            CreditCard card = creditCardService.getByGreatestBalance(booking.getUserId());
-            if (card.getBalance() < totalPrice) {
-                throw new CannotCreateEntityException();
-            }
-            double remainder = card.getBalance() - booking.getTotalPrice();
-            creditCardService.updateBalance(card.getId(), remainder, booking.getUserId());
-            tour.setNumberOfClients(tour.getNumberOfClients() - booking.getNumberOfClients());
-            tourService.update(tour);
-        } catch (CannotUpdateEntityException | EntityNotFoundException e) {
-            throw new CannotCreateEntityException();
-        }
-        bookingDAO.add(booking);
-        return booking;
+        CreditCardDTO cardDTO = creditCardService.getById(bookingDTO.getLogin(), bookingDTO.getCardId());
+        if (cardDTO.getBalance() < totalPrice)
+            throw new CannotCreateEntityException("Not enough money on this card to create booking");
+        double remainder = cardDTO.getBalance() - booking.getTotalPrice();
+        cardDTO.setBalance(remainder);
+        creditCardService.updateBalance(cardDTO);
+        tourDTO.setNumberOfClients(tourDTO.getNumberOfClients() - booking.getNumberOfClients());
+        tourService.update(tourDTO);
+        return converter.convertToDTO(repository.save(booking));
     }
 
     @Override
-    public void delete(Long userId, Long bookingId) throws EntityNotFoundException {
-        log.info("Tring to delete booking with id :{}", bookingId);
-        find(userId, bookingId);
-        bookingDAO.delete(bookingId);
+    public void delete(Long id, String login) {
+        log.info("Trying to delete booking with id :{}", id);
+        if (!repository.existsByIdAndUser_Credentials_Login(id, login))
+            throw new EntityNotFoundException("Cannot delete not existing entity");
+        repository.delete(id);
 
     }
 
     @Override
-    public List<Booking> getAll(Long userId) throws EntityNotFoundException {
+    public List<BookingDTO> getAll(String login) {
         log.info("Trying to get all  user bookings ");
-        List<Booking> bookings = bookingDAO.getAllClientBookings(userId);
+        List<Booking> bookings = repository.findAllByUser_Credentials_Login(login);
         if (bookings.size() == 0) {
-            throw new EntityNotFoundException();
-        } else return bookings;
+            throw new EntityNotFoundException("User with this id have no bookings");
+        }
+        return bookings.stream()
+                .map(converter::convertToDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public Booking update(Booking booking) throws CannotUpdateEntityException {
+    public BookingDTO update(BookingDTO booking) {
         log.info("Trying to update booking :{}", booking);
-        return bookingDAO.update(booking);
+        if (!repository.existsByIdAndUser_Credentials_Login(booking.getId(), booking.getLogin()))
+            throw new EntityNotFoundException("Cannot find booking with such id");
+        return converter.convertToDTO(repository.save(converter.convertToEntity(booking)));
     }
 
     @Override
-    public Booking find(Long userId, Long id) throws EntityNotFoundException {
+    public BookingDTO findById(Long id, String login) {
         log.info("Trying go get booking by id :{}", id);
-        return bookingDAO.findBookingByClientIdAndId(id, userId);
+        Booking booking = repository.findByIdAndUser_Credentials_Login(id, login);
+        if (booking == null) throw new EntityNotFoundException("Cannot find booking with this parameters");
+        return converter.convertToDTO(booking);
     }
 
-    public List<Booking> findAllByCategory(Long userId, String category) throws EntityNotFoundException {
+    @Override
+    public List<BookingDTO> findAllByCategory(String login, String category) {
         log.info("Trying to get all bookings by category :{}", category);
-        return bookingDAO.getAllByCategory(category)
+        return repository.findAllByTour_Category_NameAndUser_Credentials_Login(category, login)
                 .stream()
-                .filter(a -> a.getUserId() == userId)
+                .map(converter::convertToDTO)
                 .collect(Collectors.toList());
     }
 }

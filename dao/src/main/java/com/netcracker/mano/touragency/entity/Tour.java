@@ -1,60 +1,43 @@
 package com.netcracker.mano.touragency.entity;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.netcracker.mano.touragency.locale.date.format.LocalDateDeserializer;
-import com.netcracker.mano.touragency.locale.date.format.LocalDateSerializer;
 import lombok.*;
 
+import javax.persistence.*;
 import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.time.LocalDate;
 
 @Data
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-@ToString(callSuper = true)
+@ToString
 @NoArgsConstructor
 @Builder
+@Entity
+@Table(name = "tours", schema = "tour_agency")
 public class Tour extends BaseEntity {
-    @JsonDeserialize(using = LocalDateDeserializer.class)
-    @JsonSerialize(using = LocalDateSerializer.class)
-    private LocalDate evictionDate;
-    @JsonDeserialize(using = LocalDateDeserializer.class)
-    @JsonSerialize(using = LocalDateSerializer.class)
-    private LocalDate settlementDate;
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private long id;
+
+    @Column(name = "eviction_date")
+    private Date evictionDate;
+
+    @Column(name = "settlement_date")
+    private Date settlementDate;
+
+    @Column(name = "country_name")
     private String country;
+
+    @ManyToOne
+    @JoinColumn(name = "category_id")
     private Category category;
+
+    @Column(name = "price")
     private Double price;
+
+    @Column(name = "description")
     private String description;
+
+    @Column(name = "vacant_places")
     private int numberOfClients;
 
-
-    public void extractResult(ResultSet resultSet) throws SQLException {
-        setId(resultSet.getLong(1));
-        setSettlementDate(resultSet.getDate(2).toLocalDate());
-        setEvictionDate(resultSet.getDate(3).toLocalDate());
-        setCountry(resultSet.getString(4));
-        setPrice(resultSet.getDouble(5));
-        setNumberOfClients(resultSet.getByte(6));
-        setDescription(resultSet.getString(7));
-        setCategory(Category.valueOf(resultSet.getString(10)));
-    }
-
-    public void setStatementParamsToChange(PreparedStatement preparedStatement) throws SQLException {
-        preparedStatement.setDouble(1, price);
-        preparedStatement.setInt(2, numberOfClients);
-        preparedStatement.setLong(3, getId());
-    }
-
-    public void setStatementParamsToCreate(PreparedStatement preparedStatement) throws SQLException {
-        preparedStatement.setDate(1, Date.valueOf(settlementDate));
-        preparedStatement.setDate(2, Date.valueOf(evictionDate));
-        preparedStatement.setString(3, country);
-        preparedStatement.setDouble(4, price);
-        preparedStatement.setInt(5, numberOfClients);
-        preparedStatement.setString(6, description);
-    }
 }

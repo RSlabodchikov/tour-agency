@@ -1,20 +1,17 @@
 package com.netcracker.mano.touragency.interfaces;
 
-import com.netcracker.mano.touragency.entity.Tour;
-import com.netcracker.mano.touragency.exceptions.CannotCreateEntityException;
-import com.netcracker.mano.touragency.exceptions.CannotUpdateEntityException;
-import com.netcracker.mano.touragency.exceptions.EntityNotFoundException;
+import com.netcracker.mano.touragency.dto.TourDTO;
 
 import java.util.List;
 
 public interface TourService {
-    Tour getById(Long id) throws EntityNotFoundException;
+    TourDTO getById(Long id);
 
-    Tour create(Tour tour) throws CannotCreateEntityException;
+    TourDTO create(TourDTO tour);
 
-    List<Tour> getAll();
+    List<TourDTO> getAll();
 
-    void delete(Long id) throws EntityNotFoundException;
+    void delete(Long id);
 
-    Tour update(Tour tour) throws CannotUpdateEntityException;
+    TourDTO update(TourDTO tour);
 }

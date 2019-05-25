@@ -1,4 +1,11 @@
 package com.netcracker.mano.touragency.exceptions;
 
-public class EntityNotFoundException extends Exception {
+
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor
+public class EntityNotFoundException extends RuntimeException {
+    public EntityNotFoundException(String message) {
+        super(message);
+    }
 }
