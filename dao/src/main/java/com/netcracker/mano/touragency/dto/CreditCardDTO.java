@@ -2,6 +2,7 @@ package com.netcracker.mano.touragency.dto;
 
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.*;
@@ -9,6 +10,7 @@ import java.math.BigInteger;
 
 @Data
 @NoArgsConstructor
+@EqualsAndHashCode
 public class CreditCardDTO {
     @Min(value = 0, message = "Id cannot be negative")
     long id;
@@ -16,7 +18,7 @@ public class CreditCardDTO {
     BigInteger number;
     @NotNull(message = "Balance of card cannot be 0")
     @Min(0)
-    @Max(value = 1000, message = "Max balance is 1000")
+    @Max(value = 10000, message = "Max balance is 10000")
     double balance;
 
     @Min(0)

@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -36,9 +36,9 @@ public class RoleServiceImplTest {
 
     @Before
     public void init() {
-        initMocks(this);
         role = new Role(1L, "admin");
         roleDTO = new RoleDTO(1L, "admin");
+        initMocks(this);
     }
 
     @Test(expected = EntityNotFoundException.class)
@@ -60,7 +60,7 @@ public class RoleServiceImplTest {
         roles.add(role);
         when(repository.findAll()).thenReturn(roles);
         when(converter.convertToDTO(any())).thenReturn(roleDTO);
-        assertThat(service.findAll().get(0), is(roleDTO));
+        assertThat(service.findAll().size(), is(1));
     }
 
     @Test(expected = EntityNotFoundException.class)

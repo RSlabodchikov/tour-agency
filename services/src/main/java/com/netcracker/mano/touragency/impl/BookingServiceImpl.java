@@ -58,10 +58,10 @@ public class BookingServiceImpl implements BookingService {
             throw new CannotCreateEntityException("Not enough vacant places in this tour");
         }
         booking.setTour(tourConverter.convertToEntity(tourDTO));
-        booking.setUser(userConverter.convertToEntity(userService.findById(bookingDTO.getUserId())));
+        booking.setUser(userConverter.convertToEntity(userService.findByLogin(bookingDTO.getLogin())));
         double totalPrice = tourDTO.getPrice() * booking.getNumberOfClients();
         booking.setTotalPrice(totalPrice);
-        CreditCardDTO cardDTO = creditCardService.getById(booking.getUser().getCredentials().getLogin(), bookingDTO.getCardId());
+        CreditCardDTO cardDTO = creditCardService.getById(bookingDTO.getLogin(), bookingDTO.getCardId());
         if (cardDTO.getBalance() < totalPrice)
             throw new CannotCreateEntityException("Not enough money on this card to create booking");
         double remainder = cardDTO.getBalance() - booking.getTotalPrice();
@@ -96,6 +96,8 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public BookingDTO update(BookingDTO booking) {
         log.info("Trying to update booking :{}", booking);
+        if (!repository.existsByIdAndUser_Credentials_Login(booking.getId(), booking.getLogin()))
+            throw new EntityNotFoundException("Cannot find booking with such id");
         return converter.convertToDTO(repository.save(converter.convertToEntity(booking)));
     }
 

@@ -36,7 +36,8 @@ public class BookingController {
     }
 
     @PostMapping
-    public ResponseEntity create(@RequestBody @Valid BookingDTO booking) {
+    public ResponseEntity create(@RequestBody @Valid BookingDTO booking, HttpServletRequest request) {
+        booking.setLogin(tokenUtil.getLoginFromRequest(request));
         return new ResponseEntity<>(service.create(booking), HttpStatus.CREATED);
     }
 
@@ -53,7 +54,8 @@ public class BookingController {
     }
 
     @PutMapping
-    public ResponseEntity<BookingDTO> update(@RequestBody @Valid BookingDTO booking) {
+    public ResponseEntity<BookingDTO> update(@RequestBody @Valid BookingDTO booking, HttpServletRequest request) {
+        booking.setLogin(tokenUtil.getLoginFromRequest(request));
         return ResponseEntity.ok(service.update(booking));
     }
 

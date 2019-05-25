@@ -17,6 +17,7 @@ public class BookingDTO {
     @Max(10)
     int numberOfClients;
     @Min(0)
+    @Max(10000)
     double totalPrice;
 
     @Min(value = 0, message = "Id cannot be negative")

@@ -4,7 +4,6 @@ import com.netcracker.mano.touragency.converter.CreditCardConverter;
 import com.netcracker.mano.touragency.converter.UserConverter;
 import com.netcracker.mano.touragency.dto.CreditCardDTO;
 import com.netcracker.mano.touragency.entity.CreditCard;
-import com.netcracker.mano.touragency.exceptions.CannotCreateEntityException;
 import com.netcracker.mano.touragency.exceptions.CannotUpdateEntityException;
 import com.netcracker.mano.touragency.exceptions.EntityNotFoundException;
 import com.netcracker.mano.touragency.interfaces.CreditCardService;
@@ -15,7 +14,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 
@@ -37,6 +39,7 @@ public class CreditCardServiceImpl implements CreditCardService {
         this.repository = repository;
         this.converter = converter;
         this.service = service;
+        this.userConverter = userConverter;
     }
 
     @Override
@@ -54,7 +57,10 @@ public class CreditCardServiceImpl implements CreditCardService {
         List<CreditCard> creditCards = repository.findAllByUser_Credentials_Login(login);
         if (creditCards.isEmpty()) {
             throw new EntityNotFoundException("User with this login have no credit cards");
-        } else return creditCards.stream().map(converter::convertToDTO).collect(Collectors.toList());
+        }
+        return creditCards.stream()
+                .map(converter::convertToDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -69,12 +75,9 @@ public class CreditCardServiceImpl implements CreditCardService {
     public CreditCardDTO create(CreditCardDTO creditCardDTO) {
         log.debug("Trying to create credit card with balance :{}", creditCardDTO.getBalance());
         CreditCard creditCard = converter.convertToEntity(creditCardDTO);
-        if (creditCard.getBalance() < 0)
-            throw new CannotCreateEntityException("Cannot create card with negative balance");
         creditCard.setUser(userConverter.convertToEntity(service.findByLogin(creditCardDTO.getLogin())));
         creditCard.setNumber(BigInteger.valueOf((Math.abs(random.nextLong()))));
         creditCard = repository.save(creditCard);
-        creditCard.getUser().getCredentials().setLogin(creditCardDTO.getLogin());
         return converter.convertToDTO(creditCard);
     }
 
@@ -87,12 +90,14 @@ public class CreditCardServiceImpl implements CreditCardService {
     }
 
     @Override
-    public CreditCardDTO updateBalance(CreditCardDTO creditCard) {
+    public CreditCardDTO updateBalance(CreditCardDTO creditCardDTO) {
         log.info("Trying to change card balance");
-        if (!repository.existsByIdAndUser_Credentials_Login(creditCard.getId(), creditCard.getLogin()))
+        CreditCard creditCard;
+        if ((creditCard = (repository.findByIdAndUser_Credentials_Login(creditCardDTO.getId(), creditCardDTO.getLogin()))) == null)
             throw new EntityNotFoundException("You are trying to update not existing credit card");
+        creditCard.setBalance(creditCardDTO.getBalance());
         if (creditCard.getBalance() < 0) throw new CannotUpdateEntityException();
-        return converter.convertToDTO(repository.save(converter.convertToEntity(creditCard)));
+        return converter.convertToDTO(repository.save(creditCard));
     }
 
     @Override

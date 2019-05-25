@@ -30,7 +30,6 @@ public class WebRestControllerAdvice extends ResponseEntityExceptionHandler {
         List<String> errors = new ArrayList<>();
         ex.getBindingResult().getFieldErrors().forEach(a -> errors.add(a.getField() + ": " + a.getDefaultMessage()));
         ex.getBindingResult().getGlobalErrors().forEach(error -> errors.add(error.getObjectName() + ": " + error.getDefaultMessage()));
-
         ApiError apiError =
                 new ApiError(HttpStatus.BAD_REQUEST, ex.getLocalizedMessage(), errors);
         return handleExceptionInternal(

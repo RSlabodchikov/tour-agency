@@ -16,6 +16,7 @@ public class UserDTO {
     @NotNull
     @Size(min = 5, max = 45)
     String surname;
+    @Min(1)
     long roleId;
     String role;
     Boolean isBlocked;
