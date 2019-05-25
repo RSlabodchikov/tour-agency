@@ -1,82 +1,83 @@
 package com.netcracker.mano.touragency.impl;
 
 import com.netcracker.mano.touragency.dao.CreditCardDAO;
-import com.netcracker.mano.touragency.dao.impl.jdbc.CreditCardDAOImplJDBC;
 import com.netcracker.mano.touragency.entity.CreditCard;
+import com.netcracker.mano.touragency.exceptions.CannotCreateEntityException;
+import com.netcracker.mano.touragency.exceptions.CannotUpdateEntityException;
+import com.netcracker.mano.touragency.exceptions.EntityNotFoundException;
 import com.netcracker.mano.touragency.interfaces.CreditCardService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
-import java.util.stream.Collectors;
 
+
+@Slf4j
+@Service
 public class CreditCardServiceImpl implements CreditCardService {
     private Random random = new Random();
-    private CreditCardDAO creditCardDAO = CreditCardDAOImplJDBC.getInstance();
 
-    private static CreditCardServiceImpl instance;
 
-    private CreditCardServiceImpl() {
-    }
+    private CreditCardDAO creditCardDAO;
 
-    public static CreditCardServiceImpl getInstance() {
-        if (instance == null) {
-            instance = new CreditCardServiceImpl();
-        }
-        return instance;
+    public CreditCardServiceImpl(CreditCardDAO creditCardDAO) {
+        this.creditCardDAO = creditCardDAO;
     }
 
     @Override
-    public List<CreditCard> getAllClientCards(Long userId) {
-        return creditCardDAO.getAll()
-                .stream()
-                .filter(a -> a.getUserId() == userId)
-                .collect(Collectors.toList());
-
+    public List<CreditCard> getAllClientCards(Long userId) throws EntityNotFoundException {
+        log.debug("Trying to get all client cards :{}", userId);
+        List<CreditCard> creditCards = creditCardDAO.getAllClientCards(userId);
+        if (creditCards.isEmpty()) {
+            throw new EntityNotFoundException();
+        } else return creditCards;
     }
 
     @Override
-    public Optional<CreditCard> getById(Long clientId, Long cardId) {
-        return getAllClientCards(clientId)
-                .stream()
-                .filter(a -> a.getId() == cardId)
-                .findFirst();
+    public CreditCard getById(Long clientId, Long cardId) throws EntityNotFoundException {
+        log.debug("Trying to get card by id :{}", cardId);
+        return creditCardDAO.getClientCard(cardId, clientId);
     }
 
     @Override
-    public void create(Double balance, Long id) {
-        if (balance < 0) return;
+    public CreditCard create(Double balance, Long id) throws CannotCreateEntityException {
+        log.debug("Trying to create credit card with balance :{}", balance);
+        if (balance < 0) throw new CannotCreateEntityException();
         CreditCard card = new CreditCard();
         card.setBalance(balance);
         card.setUserId(id);
         card.setNumber(BigInteger.valueOf((Math.abs(random.nextLong()))));
-        creditCardDAO.add(card);
+        return creditCardDAO.add(card);
     }
 
     @Override
-    public void delete(Long cardId, Long clientId) {
-        if (getById(clientId, cardId).isPresent()) {
-            creditCardDAO.delete(cardId);
-        }
+    public void delete(Long cardId, Long clientId) throws EntityNotFoundException {
+        log.info("Trying to delete card :{}", cardId);
+        getById(clientId, cardId);
+        creditCardDAO.delete(cardId);
+    }
+
+    @Override
+    public CreditCard updateBalance(Long cardId, Double balance, Long userId) throws CannotUpdateEntityException, EntityNotFoundException {
+        log.info("Trying to change card balance", balance, cardId);
+        CreditCard card = getById(userId, cardId);
+        card.setBalance(card.getBalance() + balance);
+        return creditCardDAO.update(card);
 
     }
 
     @Override
-    public CreditCard updateBalance(Long cardId, Double balance, Long userId) {
-        Optional<CreditCard> card = getById(userId, cardId);
-        if (card.isPresent()) {
-            card.get().setBalance(card.get().getBalance() + balance);
-            return creditCardDAO.update(card.get());
-        }
-        return null;
-    }
-
-    @Override
-    public Optional<CreditCard> getByGreatestBalance(Long userId) {
-        return getAllClientCards(userId)
+    public CreditCard getByGreatestBalance(Long userId) throws EntityNotFoundException {
+        log.info("Trying to get user card");
+        Optional<CreditCard> creditCard = getAllClientCards(userId)
                 .stream()
                 .max(Comparator.comparing(CreditCard::getBalance));
+        if (creditCard.isPresent()) {
+            return creditCard.get();
+        } else throw new EntityNotFoundException();
     }
 }

@@ -2,25 +2,29 @@ package com.netcracker.mano.touragency.interfaces;
 
 import com.netcracker.mano.touragency.entity.Credentials;
 import com.netcracker.mano.touragency.entity.User;
+import com.netcracker.mano.touragency.exceptions.AuthorizationException;
+import com.netcracker.mano.touragency.exceptions.CannotUpdateEntityException;
+import com.netcracker.mano.touragency.exceptions.EntityNotFoundException;
+import com.netcracker.mano.touragency.exceptions.RegistrationException;
 
 import java.util.List;
 
 public interface UserService {
 
-    User registration(User user);
+    User register(User user) throws RegistrationException;
 
-    User signIn(Credentials credentials);
+    User signIn(Credentials credentials) throws AuthorizationException;
 
-    void update(User user);
+    void update(User user) throws CannotUpdateEntityException;
 
-    User findById(Long id);
+    User findById(Long id ) throws EntityNotFoundException;
 
     List<User> getAllUsers();
 
-    void blockUser(Long id);
+    void blockUser(Long id) throws CannotUpdateEntityException, EntityNotFoundException;
 
-    void unblockUser(Long id);
+    void unblockUser(Long id) throws CannotUpdateEntityException, EntityNotFoundException;
 
-    void changePassword(String login, String oldPassword, String newPassword);
+    void changePassword(String login, String oldPassword, String newPassword) throws AuthorizationException;
 
 }

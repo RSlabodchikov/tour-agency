@@ -1,35 +1,45 @@
-package menu.client;
+package com.netcracker.mano.touragency.menu.client;
 
 import com.netcracker.mano.touragency.entity.Booking;
 import com.netcracker.mano.touragency.entity.User;
-import com.netcracker.mano.touragency.impl.BookingServiceImpl;
-import com.netcracker.mano.touragency.impl.TourServiceImpl;
+import com.netcracker.mano.touragency.exceptions.CannotCreateEntityException;
+import com.netcracker.mano.touragency.exceptions.EntityNotFoundException;
 import com.netcracker.mano.touragency.interfaces.BookingService;
 import com.netcracker.mano.touragency.interfaces.TourService;
-import menu.Menu;
+import com.netcracker.mano.touragency.menu.Menu;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
+
+@Slf4j
+@Component
+@Data
 public class ClientBookingMenu implements Menu {
 
     private User user;
 
-    private BookingService service = BookingServiceImpl.getInstance();
+    private BookingService service;
 
-    public ClientBookingMenu(User user) {
+    private TourService tourService;
 
-        this.user = user;
+    @Autowired
+    public ClientBookingMenu(BookingService service, TourService tourService) {
+        this.service = service;
+        this.tourService = tourService;
     }
 
     @Override
     public void printTextMenu() {
-        System.out.println("1)Get all bookings");
-        System.out.println("2)Get booking by id");
+        System.out.println("1)Find all bookings");
+        System.out.println("2)Find booking by id");
         System.out.println("3)Create booking");
         System.out.println("4)Delete booking");
-        System.out.println("5)Find bookings by parameter");
-        System.out.println("0)Previous menu");
+        System.out.println("0)Previous Application.menu");
     }
 
     @Override
@@ -47,23 +57,14 @@ public class ClientBookingMenu implements Menu {
                         break;
                     case 2:
                         System.out.println("Enter id of booking :");
-                        Booking booking;
-                        if ((booking = service.findBooking(user.getId(), scanner.nextLong())) != null) {
-                            System.out.println(booking);
-                        } else System.out.println("No booking with this id :(");
+                        System.out.println(service.find(user.getId(), scanner.nextLong()));
                         break;
                     case 3:
-                        if (service.create(createBooking()) == null) {
-                            System.out.println("Cannot create booking :(");
-                        }
+                        service.create(createBooking());
                         break;
                     case 4:
                         System.out.println("Enter id of booking to delete :");
                         service.delete(user.getId(), scanner.nextLong());
-                        break;
-                    case 5:
-                        System.out.println("Enter booking category :");
-                        System.out.println(service.findAllByCategory(user.getId(), scanner.nextLine()));
                         break;
                     case 0:
                         return;
@@ -73,6 +74,12 @@ public class ClientBookingMenu implements Menu {
 
             } catch (InputMismatchException e) {
                 System.out.println(e.getMessage());
+            } catch (CannotCreateEntityException e) {
+                System.out.println("Cannot create booking");
+                log.error("Can't create booking", e);
+            } catch (EntityNotFoundException e) {
+                System.out.println("Cannot find booking");
+                log.error("Cannot find booking entity", e);
             }
         }
     }
@@ -81,7 +88,6 @@ public class ClientBookingMenu implements Menu {
         Booking booking = new Booking();
         booking.setUserId(user.getId());
         Scanner scanner = new Scanner(System.in);
-        TourService tourService = TourServiceImpl.getInstance();
         tourService.getAll().forEach(System.out::println);
         System.out.println("Choose id of tour to create booking : ");
         booking.setTourId(scanner.nextInt());

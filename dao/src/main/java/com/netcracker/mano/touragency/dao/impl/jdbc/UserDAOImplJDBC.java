@@ -3,9 +3,14 @@ package com.netcracker.mano.touragency.dao.impl.jdbc;
 import com.netcracker.mano.touragency.dao.UserDAO;
 import com.netcracker.mano.touragency.entity.Credentials;
 import com.netcracker.mano.touragency.entity.User;
+import com.netcracker.mano.touragency.exceptions.AuthorizationException;
+import com.netcracker.mano.touragency.exceptions.CannotCreateEntityException;
+import com.netcracker.mano.touragency.exceptions.CannotUpdateEntityException;
+import com.netcracker.mano.touragency.exceptions.EntityNotFoundException;
 import com.netcracker.mano.touragency.sql.scripts.CredentialsScripts;
 import com.netcracker.mano.touragency.sql.scripts.UserScripts;
-import org.apache.log4j.Logger;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -13,8 +18,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 
+@Slf4j
+@Component
 public class UserDAOImplJDBC extends CrudDAOJImplJDBC implements UserDAO {
-    private final Logger logger = Logger.getLogger(UserDAOImplJDBC.class);
     private static UserDAOImplJDBC instance;
 
     private UserDAOImplJDBC() {
@@ -28,7 +34,7 @@ public class UserDAOImplJDBC extends CrudDAOJImplJDBC implements UserDAO {
     }
 
     @Override
-    public User getById(long id) {
+    public User getById(long id) throws EntityNotFoundException {
 
         User user = new User();
         Credentials credentials = new Credentials();
@@ -42,17 +48,19 @@ public class UserDAOImplJDBC extends CrudDAOJImplJDBC implements UserDAO {
                 credentials.extractResult(resultSet);
                 user.setCredentials(credentials);
 
-            } else return null;
+            } else throw new EntityNotFoundException();
         } catch (SQLException e) {
-            logger.error(e);
+            log.error("Cannot get user by id", e);
+            throw new EntityNotFoundException();
         } finally {
             closeConnection();
         }
+        log.info("Get user from database :{}", user);
         return user;
     }
 
     @Override
-    public User findUserByCredentials(Credentials credentials) {
+    public User findUserByCredentials(Credentials credentials) throws AuthorizationException {
         User user = new User();
         try {
             connection = ConnectionPool.getConnection();
@@ -63,7 +71,7 @@ public class UserDAOImplJDBC extends CrudDAOJImplJDBC implements UserDAO {
             if (resultSet.next()) {
                 user.extractResult(resultSet);
                 credentials.setId(resultSet.getLong(6));
-            } else return null;
+            } else throw new SQLException();
             user.setCredentials(credentials);
         } catch (SQLException e) {
             try {
@@ -71,33 +79,38 @@ public class UserDAOImplJDBC extends CrudDAOJImplJDBC implements UserDAO {
             } catch (SQLException exception) {
                 exception.printStackTrace();
             }
-            logger.error(e);
+            log.error("Cannot find user", e);
+            throw new AuthorizationException();
         } finally {
             closeConnection();
         }
+        log.info("Get user by credentials from db :{}", user);
         return user;
     }
 
     @Override
-    public Boolean checkUserIfExist(String login) {
+    public Credentials findCredentialsByLogin(String login) throws EntityNotFoundException {
+        Credentials credentials = new Credentials();
         try {
             connection = ConnectionPool.getConnection();
             preparedStatement = connection.prepareStatement(CredentialsScripts.SELECT_BY_LOGIN);
             preparedStatement.setString(1, login);
             resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
-                return true;
-            }
+                credentials.extractResult(resultSet);
+
+            } else throw new EntityNotFoundException();
         } catch (SQLException e) {
-            logger.error(e);
+            log.error("Cannot find credentials", e);
         } finally {
             closeConnection();
         }
-        return false;
+        log.info("Found credentials :{}", credentials);
+        return credentials;
     }
 
     @Override
-    public User add(User entity) {
+    public User add(User entity) throws CannotCreateEntityException {
         try {
             connection = ConnectionPool.getConnection();
             connection.setAutoCommit(false);
@@ -109,7 +122,7 @@ public class UserDAOImplJDBC extends CrudDAOJImplJDBC implements UserDAO {
             if (resultSet.next()) {
                 entity.getCredentials().setId(resultSet.getLong(1));
             } else {
-                return null;
+                throw new CannotCreateEntityException();
             }
             preparedStatement = connection.prepareStatement(UserScripts.INSERT,
                     Statement.RETURN_GENERATED_KEYS);
@@ -119,7 +132,7 @@ public class UserDAOImplJDBC extends CrudDAOJImplJDBC implements UserDAO {
             if (resultSet.next()) {
                 entity.setId(resultSet.getLong(1));
             } else {
-                return null;
+                throw new CannotCreateEntityException();
             }
             connection.commit();
         } catch (SQLException e) {
@@ -128,17 +141,19 @@ public class UserDAOImplJDBC extends CrudDAOJImplJDBC implements UserDAO {
                     connection.rollback();
                 }
             } catch (SQLException exception) {
-                exception.printStackTrace();
+                log.error("Cannot rollback ", exception);
             }
-            logger.error(e);
+            log.error("Cannot create user", e);
+            throw new CannotCreateEntityException();
         } finally {
             closeConnection();
         }
+        log.info("Created new user :{}", entity);
         return entity;
     }
 
     @Override
-    public User update(User entity) {
+    public User update(User entity) throws CannotUpdateEntityException {
         try {
             connection = ConnectionPool.getConnection();
             preparedStatement = connection.prepareStatement(UserScripts.UPDATE, Statement.RETURN_GENERATED_KEYS);
@@ -148,12 +163,14 @@ public class UserDAOImplJDBC extends CrudDAOJImplJDBC implements UserDAO {
             resultSet = preparedStatement.getGeneratedKeys();
             if (resultSet.next()) {
                 entity.extractResult(resultSet);
-            }
+            } else throw new SQLException();
         } catch (SQLException e) {
-            logger.error(e);
+            log.error(e.getSQLState());
+            throw new CannotUpdateEntityException();
         } finally {
             closeConnection();
         }
+        log.info("Updated user entity :{}", entity);
         return entity;
     }
 
@@ -166,10 +183,11 @@ public class UserDAOImplJDBC extends CrudDAOJImplJDBC implements UserDAO {
             preparedStatement.setString(2, login);
             preparedStatement.execute();
         } catch (SQLException e) {
-            logger.error(e);
+            log.error("Cannot change user password", e);
         } finally {
             closeConnection();
         }
+        log.info("User password changed");
     }
 
     @Override
@@ -180,17 +198,16 @@ public class UserDAOImplJDBC extends CrudDAOJImplJDBC implements UserDAO {
             preparedStatement.setLong(1, id);
             preparedStatement.execute();
         } catch (SQLException e) {
-            logger.error(e);
+            log.error("Cannot delete user", e);
         } finally {
             closeConnection();
         }
-
+        log.info("User delete from database with id :{}", id);
     }
 
     @Override
     public List<User> getAll() {
         List<User> users = new ArrayList<>();
-
         try {
             connection = ConnectionPool.getConnection();
             preparedStatement = connection.prepareStatement(UserScripts.SELECT_ALL);
@@ -201,14 +218,14 @@ public class UserDAOImplJDBC extends CrudDAOJImplJDBC implements UserDAO {
                 Credentials credentials = new Credentials();
                 credentials.extractResult(resultSet);
                 user.setCredentials(credentials);
-
                 users.add(user);
             }
         } catch (SQLException e) {
-            logger.error(e);
+            log.error("Cannot get users", e);
         } finally {
             closeConnection();
         }
+        log.info("Get all users from db :{}", users);
         return users;
     }
 }

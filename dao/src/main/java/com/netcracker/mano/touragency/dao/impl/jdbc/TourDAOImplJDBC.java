@@ -2,30 +2,26 @@ package com.netcracker.mano.touragency.dao.impl.jdbc;
 
 import com.netcracker.mano.touragency.dao.TourDAO;
 import com.netcracker.mano.touragency.entity.Tour;
+import com.netcracker.mano.touragency.exceptions.CannotCreateEntityException;
+import com.netcracker.mano.touragency.exceptions.CannotUpdateEntityException;
+import com.netcracker.mano.touragency.exceptions.EntityNotFoundException;
 import com.netcracker.mano.touragency.sql.scripts.TourScripts;
-import org.apache.log4j.Logger;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+
+@Slf4j
+@Component
 public class TourDAOImplJDBC extends CrudDAOJImplJDBC implements TourDAO {
-    private final Logger logger = Logger.getLogger(TourDAOImplJDBC.class);
-    private static TourDAOImplJDBC instance;
 
-    private TourDAOImplJDBC() {
-    }
-
-    public static TourDAOImplJDBC getInstance() {
-        if (instance == null) {
-            instance = new TourDAOImplJDBC();
-        }
-        return instance;
-    }
 
     @Override
-    public Tour getById(long id) {
+    public Tour getById(long id) throws EntityNotFoundException {
         Tour tour = new Tour();
         try {
             connection = ConnectionPool.getConnection();
@@ -34,17 +30,19 @@ public class TourDAOImplJDBC extends CrudDAOJImplJDBC implements TourDAO {
             resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
                 tour.extractResult(resultSet);
-            } else return null;
+            } else throw new EntityNotFoundException();
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Cannot get tour by id", e);
+            throw new EntityNotFoundException();
         } finally {
             closeConnection();
         }
+        log.info("Get tour from database :{}", tour);
         return tour;
     }
 
     @Override
-    public Tour add(Tour entity) {
+    public Tour add(Tour entity) throws CannotCreateEntityException {
         try {
             connection = ConnectionPool.getConnection();
             connection.setAutoCommit(false);
@@ -54,7 +52,7 @@ public class TourDAOImplJDBC extends CrudDAOJImplJDBC implements TourDAO {
             resultSet = preparedStatement.executeQuery();
             if (resultSet.next())
                 category_id = resultSet.getLong(1);
-            else throw new SQLException("Cannot find category");
+            else throw new CannotCreateEntityException();
             preparedStatement = connection.prepareStatement(TourScripts.CREATE, Statement.RETURN_GENERATED_KEYS);
             entity.setStatementParamsToCreate(preparedStatement);
             preparedStatement.setLong(7, category_id);
@@ -62,40 +60,39 @@ public class TourDAOImplJDBC extends CrudDAOJImplJDBC implements TourDAO {
             resultSet = preparedStatement.getGeneratedKeys();
             if (resultSet.next()) {
                 entity.setId(resultSet.getLong(1));
-            }
+            } else throw new CannotCreateEntityException();
             connection.commit();
         } catch (SQLException e) {
             if (connection != null) {
                 try {
                     connection.rollback();
                 } catch (SQLException e1) {
-                    logger.error(e1);
+                    log.error("Cannot rollback", e1);
                 }
             }
-            logger.error(e);
+            log.error("Cannot create tour", e);
+            throw new CannotCreateEntityException();
         } finally {
             closeConnection();
         }
+        log.info("Created new tour : {}", entity);
         return entity;
     }
 
     @Override
-    public Tour update(Tour entity) {
+    public Tour update(Tour entity) throws CannotUpdateEntityException {
         try {
             connection = ConnectionPool.getConnection();
             preparedStatement = connection.prepareStatement(TourScripts.UPDATE, Statement.RETURN_GENERATED_KEYS);
             entity.setStatementParamsToChange(preparedStatement);
             preparedStatement.execute();
-            resultSet = preparedStatement.getGeneratedKeys();
-            if (resultSet.next()) {
-                entity.extractResult(resultSet);
-            } else return null;
         } catch (SQLException e) {
-            logger.error(e);
-            return null;
+            log.error("Cannot update tour", e);
+            throw new CannotUpdateEntityException();
         } finally {
             closeConnection();
         }
+        log.info("Updated tour : {}", entity);
         return entity;
     }
 
@@ -104,12 +101,14 @@ public class TourDAOImplJDBC extends CrudDAOJImplJDBC implements TourDAO {
         try {
             connection = ConnectionPool.getConnection();
             preparedStatement = connection.prepareStatement(TourScripts.DELETE);
+            preparedStatement.setLong(1, id);
             preparedStatement.execute();
         } catch (SQLException e) {
-            logger.error(e);
+            log.error("Cannot delete tour", e);
         } finally {
             closeConnection();
         }
+        log.info("Tour delete from database with id :{}", id);
     }
 
     @Override
@@ -125,10 +124,11 @@ public class TourDAOImplJDBC extends CrudDAOJImplJDBC implements TourDAO {
                 tours.add(tour);
             }
         } catch (SQLException e) {
-            logger.error(e);
+            log.error("Cannot get all tours", e);
         } finally {
             closeConnection();
         }
+        log.info("Get all tours from database:{}", tours);
         return tours;
     }
 }

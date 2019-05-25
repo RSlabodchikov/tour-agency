@@ -8,7 +8,8 @@ import java.sql.SQLException;
 
 @Data
 @AllArgsConstructor
-@ToString
+@ToString(callSuper = true)
+@Builder
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 public class User extends BaseEntity {
@@ -17,9 +18,6 @@ public class User extends BaseEntity {
     private String surname;
     private Role role;
     private Boolean isBlocked;
-
-
-
 
 
     public void extractResult(ResultSet resultSet) throws SQLException {

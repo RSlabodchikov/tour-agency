@@ -7,7 +7,7 @@
 *.iml
 out
 gen
-Application.log
+application.log
 console/target/
 dao/target/
 services/target/

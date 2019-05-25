@@ -15,8 +15,9 @@ import java.time.LocalDate;
 @Data
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-@ToString
+@ToString(callSuper = true)
 @NoArgsConstructor
+@Builder
 public class Tour extends BaseEntity {
     @JsonDeserialize(using = LocalDateDeserializer.class)
     @JsonSerialize(using = LocalDateSerializer.class)
@@ -45,7 +46,7 @@ public class Tour extends BaseEntity {
     public void setStatementParamsToChange(PreparedStatement preparedStatement) throws SQLException {
         preparedStatement.setDouble(1, price);
         preparedStatement.setInt(2, numberOfClients);
-        preparedStatement.setLong(3, id);
+        preparedStatement.setLong(3, getId());
     }
 
     public void setStatementParamsToCreate(PreparedStatement preparedStatement) throws SQLException {

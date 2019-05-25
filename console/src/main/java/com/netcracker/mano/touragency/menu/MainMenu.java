@@ -1,14 +1,30 @@
-package menu;
+package com.netcracker.mano.touragency.menu;
 
 import com.netcracker.mano.touragency.entity.User;
-import com.netcracker.mano.touragency.impl.UserServiceImpl;
+import com.netcracker.mano.touragency.exceptions.AuthorizationException;
+import com.netcracker.mano.touragency.exceptions.RegistrationException;
 import com.netcracker.mano.touragency.interfaces.UserService;
-import utils.InputUser;
+import com.netcracker.mano.touragency.utils.InputUser;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
+@Slf4j
+@Component
 public class MainMenu implements Menu {
+
+    private MenuSearch menuSearch;
+
+    private UserService service;
+
+    @Autowired
+    public MainMenu(MenuSearch menuSearch, UserService service) {
+        this.menuSearch = menuSearch;
+        this.service = service;
+    }
 
     @Override
     public void printTextMenu() {
@@ -25,7 +41,6 @@ public class MainMenu implements Menu {
             Scanner scanner = new Scanner(System.in);
             try {
                 User user = null;
-                UserService service = UserServiceImpl.getInstance();
                 if (!scanner.hasNextInt()) {
                     throw new InputMismatchException("Enter int number, please!!!");
                 }
@@ -36,7 +51,7 @@ public class MainMenu implements Menu {
                         break;
                     case 2:
                         user = InputUser.createUser();
-                        user = service.registration(user);
+                        user = service.register(user);
                         break;
                     case 0:
                         System.exit(0);
@@ -44,20 +59,22 @@ public class MainMenu implements Menu {
                     default:
                         throw new InputMismatchException("Wrong choice! Try again, please!");
                 }
-                if (user != null && user.getIsBlocked()) {
+                if (user.getIsBlocked()) {
                     System.out.println("Your are blocked by admin  :(");
-                } else if (user != null) {
-                    Menu menu = new MenuSearch().getMenuByRole(user);
-                    menu.printMenu();
                 } else {
-                    System.out.println("Incorrect params...");
+                    Menu menu = menuSearch.getMenuByRole(user);
+                    menu.printMenu();
                 }
 
+            } catch (RegistrationException regExc) {
+                System.out.println("Cannot register user with this params ");
+                log.error("Cannot create user", regExc);
             } catch (InputMismatchException e) {
                 System.out.println(e.getMessage());
+            } catch (AuthorizationException authExc) {
+                System.out.println("Wrong login or password");
+                log.error("Authorization problem", authExc);
             }
-
-
         }
     }
 }

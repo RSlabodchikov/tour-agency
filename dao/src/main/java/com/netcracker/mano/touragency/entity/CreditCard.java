@@ -10,8 +10,9 @@ import java.sql.SQLException;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @AllArgsConstructor
-@ToString
+@ToString(callSuper = true)
 @NoArgsConstructor
+@Builder
 public class CreditCard extends BaseEntity {
     private BigInteger number;
     private double balance;
@@ -21,7 +22,7 @@ public class CreditCard extends BaseEntity {
 
 
     public void extractResult(ResultSet resultSet) throws SQLException {
-        id = resultSet.getLong(1);
+        setId(resultSet.getLong(1));
         number = new BigInteger(resultSet.getString(2));
         balance = resultSet.getDouble(3);
         userId = resultSet.getLong(4);

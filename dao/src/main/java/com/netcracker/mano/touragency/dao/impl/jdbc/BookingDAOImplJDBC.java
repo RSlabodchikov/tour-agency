@@ -2,16 +2,21 @@ package com.netcracker.mano.touragency.dao.impl.jdbc;
 
 import com.netcracker.mano.touragency.dao.BookingDAO;
 import com.netcracker.mano.touragency.entity.Booking;
+import com.netcracker.mano.touragency.exceptions.CannotCreateEntityException;
+import com.netcracker.mano.touragency.exceptions.CannotUpdateEntityException;
+import com.netcracker.mano.touragency.exceptions.EntityNotFoundException;
 import com.netcracker.mano.touragency.sql.scripts.BookingScripts;
-import org.apache.log4j.Logger;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
+@Component
 public class BookingDAOImplJDBC extends CrudDAOJImplJDBC implements BookingDAO {
-    private final Logger logger = Logger.getLogger(BookingDAOImplJDBC.class);
 
     private static BookingDAOImplJDBC instance;
 
@@ -26,7 +31,7 @@ public class BookingDAOImplJDBC extends CrudDAOJImplJDBC implements BookingDAO {
     }
 
     @Override
-    public Booking getById(long id) {
+    public Booking getById(long id) throws EntityNotFoundException {
         Booking booking = new Booking();
         try {
             connection = ConnectionPool.getConnection();
@@ -35,17 +40,19 @@ public class BookingDAOImplJDBC extends CrudDAOJImplJDBC implements BookingDAO {
             resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
                 booking.extractResult(resultSet);
-            } else return null;
+            } else throw new SQLException();
         } catch (SQLException e) {
-            logger.error(e);
+            log.error("Cannot get booking by id", e);
+            throw new EntityNotFoundException();
         } finally {
             closeConnection();
         }
+        log.info("Found booking : {}", booking);
         return booking;
     }
 
     @Override
-    public Booking add(Booking entity) {
+    public Booking add(Booking entity) throws CannotCreateEntityException {
         try {
             connection = ConnectionPool.getConnection();
             preparedStatement = connection.prepareStatement(BookingScripts.CREATE, Statement.RETURN_GENERATED_KEYS);
@@ -56,17 +63,19 @@ public class BookingDAOImplJDBC extends CrudDAOJImplJDBC implements BookingDAO {
             resultSet = preparedStatement.getGeneratedKeys();
             if (resultSet.next()) {
                 entity.setId(resultSet.getLong(1));
-            } else return null;
+            } else throw new SQLException();
         } catch (SQLException e) {
-            logger.error(e);
+            log.error("Cannot create booking", e);
+            throw new CannotCreateEntityException();
         } finally {
             closeConnection();
         }
+        log.info("Created new booking :{}", entity);
         return entity;
     }
 
     @Override
-    public Booking update(Booking entity) {
+    public Booking update(Booking entity) throws CannotUpdateEntityException {
         try {
             connection = ConnectionPool.getConnection();
             preparedStatement = connection.prepareStatement(BookingScripts.UPDATE, Statement.RETURN_GENERATED_KEYS);
@@ -76,12 +85,14 @@ public class BookingDAOImplJDBC extends CrudDAOJImplJDBC implements BookingDAO {
             resultSet = preparedStatement.getGeneratedKeys();
             if (resultSet.next()) {
                 entity.extractResult(resultSet);
-            } else return null;
+            } else throw new SQLException();
         } catch (SQLException e) {
-            logger.error(e);
+            log.error("Cannot update booking", e);
+            throw new CannotUpdateEntityException();
         } finally {
             closeConnection();
         }
+        log.info("Booking updated :{}", entity);
         return entity;
     }
 
@@ -93,11 +104,11 @@ public class BookingDAOImplJDBC extends CrudDAOJImplJDBC implements BookingDAO {
             preparedStatement.setLong(1, id);
             preparedStatement.execute();
         } catch (SQLException e) {
-            logger.error(e);
+            log.error("Cannot delete booking", e);
         } finally {
             closeConnection();
         }
-
+        log.info("Booking deleted from db with id :{}", id);
     }
 
     @Override
@@ -113,10 +124,11 @@ public class BookingDAOImplJDBC extends CrudDAOJImplJDBC implements BookingDAO {
                 bookings.add(booking);
             }
         } catch (SQLException e) {
-            logger.error(e);
+            log.error("Cannot get all bookings", e);
         } finally {
             closeConnection();
         }
+        log.info("Get all bookings :{}", bookings);
         return bookings;
     }
 
@@ -134,10 +146,53 @@ public class BookingDAOImplJDBC extends CrudDAOJImplJDBC implements BookingDAO {
                 bookings.add(booking);
             }
         } catch (SQLException e) {
-            logger.error(e);
+            log.error("Cannot get bookings", e);
+        } finally {
+            closeConnection();
+        }
+        log.info("Get all bookings by category :{}", bookings);
+        return bookings;
+    }
+
+    @Override
+    public List<Booking> getAllClientBookings(long clientId) {
+        List<Booking> bookings = new ArrayList<>();
+        try {
+            connection = ConnectionPool.getConnection();
+            preparedStatement = connection.prepareStatement(BookingScripts.SELECT_BY_USER_ID);
+            preparedStatement.setLong(1, clientId);
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                Booking booking = new Booking();
+                booking.extractResult(resultSet);
+                bookings.add(booking);
+            }
+        } catch (SQLException e) {
+            log.error("Cannot get client bookings", e);
         } finally {
             closeConnection();
         }
         return bookings;
     }
+
+    @Override
+    public Booking findBookingByClientIdAndId(long id, long userId) throws EntityNotFoundException {
+        Booking booking = new Booking();
+        try {
+            connection = ConnectionPool.getConnection();
+            preparedStatement = connection.prepareStatement(BookingScripts.SELECT_BY_USER_ID_AND_ID);
+            preparedStatement.setLong(1, id);
+            preparedStatement.setLong(2, userId);
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                booking.extractResult(resultSet);
+            } else throw new EntityNotFoundException();
+        } catch (SQLException e) {
+            log.error("Cannot find booking", e);
+        } finally {
+            closeConnection();
+        }
+        return booking;
+    }
+
 }

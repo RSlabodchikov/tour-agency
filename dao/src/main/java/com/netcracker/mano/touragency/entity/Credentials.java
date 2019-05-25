@@ -12,9 +12,9 @@ import java.sql.SQLException;
 @EqualsAndHashCode
 @NoArgsConstructor
 public class Credentials {
-    Long id;
-    String login;
-    String password;
+    private Long id;
+    private String login;
+    private String password;
 
     public Credentials(String login, String password) {
         this.login = login;

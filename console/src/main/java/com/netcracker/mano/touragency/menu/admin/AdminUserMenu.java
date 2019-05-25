@@ -1,17 +1,30 @@
-package menu.admin;
+package com.netcracker.mano.touragency.menu.admin;
 
 import com.netcracker.mano.touragency.entity.User;
-import com.netcracker.mano.touragency.impl.UserServiceImpl;
+import com.netcracker.mano.touragency.exceptions.CannotUpdateEntityException;
+import com.netcracker.mano.touragency.exceptions.EntityNotFoundException;
+import com.netcracker.mano.touragency.exceptions.RegistrationException;
 import com.netcracker.mano.touragency.interfaces.UserService;
-import menu.Menu;
-import utils.InputUser;
+import com.netcracker.mano.touragency.menu.Menu;
+import com.netcracker.mano.touragency.utils.InputUser;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
+
+@Slf4j
+@Component
 public class AdminUserMenu implements Menu {
 
-    private UserService service = UserServiceImpl.getInstance();
+    private UserService service;
+
+    @Autowired
+    public AdminUserMenu(UserService service) {
+        this.service = service;
+    }
 
     @Override
     public void printTextMenu() {
@@ -20,7 +33,7 @@ public class AdminUserMenu implements Menu {
         System.out.println("3)Unblock user");
         System.out.println("4)Create user");
         System.out.println("5)Get user by id");
-        System.out.println("0)Move to previous menu");
+        System.out.println("0)Move to previous Application.menu");
     }
 
     @Override
@@ -46,7 +59,7 @@ public class AdminUserMenu implements Menu {
                         break;
                     case 4:
                         User user = InputUser.createUser();
-                        service.registration(user);
+                        service.register(user);
                         break;
                     case 5:
                         System.out.println("Enter id of user :");
@@ -57,8 +70,17 @@ public class AdminUserMenu implements Menu {
                     default:
                         System.out.println("Incorrect choice, try again, please!!!");
                 }
+            } catch (RegistrationException regExc) {
+                log.error("Cannot register user with this credentials :", regExc);
+                System.out.println("Cannot register user with this login");
             } catch (InputMismatchException e) {
                 System.out.println(e.getMessage());
+            } catch (CannotUpdateEntityException e) {
+                System.out.println("Cannot update entity ");
+                log.error("Cannot update user entity", e);
+            } catch (EntityNotFoundException e) {
+                System.out.println("Cannot find user");
+                log.error("Cannot find user", e);
             }
         }
     }

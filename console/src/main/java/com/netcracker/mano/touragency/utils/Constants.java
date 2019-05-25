@@ -1,4 +1,4 @@
-package utils;
+package com.netcracker.mano.touragency.utils;
 
 public class Constants {
     public static final String BOOKING = "booking";
