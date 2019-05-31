@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 public class UserConverter {
     public User convertToEntity(UserDTO userDTO) {
         Credentials credentials = Credentials.builder()
-                //.id(userDTO.getCredentialsId())
                 .login(userDTO.getLogin())
                 .password(userDTO.getPassword())
                 .build();

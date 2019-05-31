@@ -37,7 +37,6 @@ public class BookingConverter {
         bookingDTO.setIsBlocked(booking.getUser().getIsBlocked());
         bookingDTO.setLogin(booking.getUser().getCredentials().getLogin());
         bookingDTO.setPassword(booking.getUser().getCredentials().getPassword());
-        bookingDTO.setCredentialsId(booking.getUser().getCredentials().getId());
 
         return bookingDTO;
     }

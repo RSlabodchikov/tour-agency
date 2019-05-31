@@ -26,7 +26,7 @@ public class CreditCard extends BaseEntity {
     private double balance;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
 }

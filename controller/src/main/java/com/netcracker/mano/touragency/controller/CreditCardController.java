@@ -3,7 +3,6 @@ package com.netcracker.mano.touragency.controller;
 
 import com.netcracker.mano.touragency.dto.CreditCardDTO;
 import com.netcracker.mano.touragency.interfaces.CreditCardService;
-import com.netcracker.mano.touragency.security.JwtTokenUtil;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.List;
 
@@ -22,12 +20,10 @@ import java.util.List;
 public class CreditCardController {
     private CreditCardService service;
 
-    private JwtTokenUtil tokenUtil;
 
     @Autowired
-    public CreditCardController(CreditCardService service, JwtTokenUtil tokenUtil) {
+    public CreditCardController(CreditCardService service) {
         this.service = service;
-        this.tokenUtil = tokenUtil;
     }
 
     @GetMapping
@@ -36,36 +32,34 @@ public class CreditCardController {
     }
 
     @GetMapping(value = "/user")
-    public ResponseEntity<List<CreditCardDTO>> getAllUserCards(HttpServletRequest req) {
-        return ResponseEntity.ok(service.getAllClientCards(tokenUtil.getLoginFromRequest(req)));
+    public ResponseEntity<List<CreditCardDTO>> getAllUserCards() {
+        return ResponseEntity.ok(service.getAllClientCards());
     }
 
     @PostMapping
-    public ResponseEntity<CreditCardDTO> create(@RequestBody @Valid CreditCardDTO creditCard, HttpServletRequest req) {
-        creditCard.setLogin(tokenUtil.getLoginFromRequest(req));
+    public ResponseEntity<CreditCardDTO> create(@RequestBody @Valid CreditCardDTO creditCard) {
         return new ResponseEntity<>(service.create(creditCard), HttpStatus.CREATED);
 
     }
 
     @PutMapping
-    public ResponseEntity<CreditCardDTO> update(@RequestBody @Valid CreditCardDTO creditCard, HttpServletRequest req) {
-        creditCard.setLogin(tokenUtil.getLoginFromRequest(req));
+    public ResponseEntity<CreditCardDTO> update(@RequestBody @Valid CreditCardDTO creditCard) {
         return ResponseEntity.ok(service.updateBalance(creditCard));
     }
 
     @DeleteMapping
-    public ResponseEntity delete(@RequestParam(name = "id") Long id, HttpServletRequest req) {
-        service.delete(id, tokenUtil.getLoginFromRequest(req));
+    public ResponseEntity delete(@RequestParam(name = "id") Long id) {
+        service.delete(id);
         return ResponseEntity.ok("Card is deleted");
     }
 
     @GetMapping(value = "/best")
-    public ResponseEntity<CreditCardDTO> getBestCard(HttpServletRequest req) {
-        return ResponseEntity.ok(service.getByGreatestBalance(tokenUtil.getLoginFromRequest(req)));
+    public ResponseEntity<CreditCardDTO> getBestCard() {
+        return ResponseEntity.ok(service.getByGreatestBalance());
     }
 
     @GetMapping(value = "/{id}")
-    public ResponseEntity<CreditCardDTO> getById(@PathVariable(name = "id") Long id, HttpServletRequest req) {
-        return ResponseEntity.ok(service.getById(tokenUtil.getLoginFromRequest(req), id));
+    public ResponseEntity<CreditCardDTO> getById(@PathVariable(name = "id") Long id) {
+        return ResponseEntity.ok(service.getById(id));
     }
 }

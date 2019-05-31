@@ -33,6 +33,8 @@ public class TourDTO {
     @Min(value = 2, message = "Number of clients cannot be less then 2")
     @Max(value = 128, message = "Number of clients cannot be more then 128")
     int numberOfClients;
+    @Min(1)
+    @Max(5)
     long categoryId;
     @Null(message = "You should pass on only id of category")
     String category;

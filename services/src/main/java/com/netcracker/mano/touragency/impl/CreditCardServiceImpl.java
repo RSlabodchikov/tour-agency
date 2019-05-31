@@ -11,6 +11,7 @@ import com.netcracker.mano.touragency.interfaces.UserService;
 import com.netcracker.mano.touragency.repository.CreditCardRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
@@ -52,7 +53,8 @@ public class CreditCardServiceImpl implements CreditCardService {
     }
 
     @Override
-    public List<CreditCardDTO> getAllClientCards(String login) {
+    public List<CreditCardDTO> getAllClientCards() {
+        String login = (String) SecurityContextHolder.getContext().getAuthentication().getCredentials();
         log.debug("Trying to get all client cards :{}", login);
         List<CreditCard> creditCards = repository.findAllByUser_Credentials_Login(login);
         if (creditCards.isEmpty()) {
@@ -64,7 +66,8 @@ public class CreditCardServiceImpl implements CreditCardService {
     }
 
     @Override
-    public CreditCardDTO getById(String login, Long id) {
+    public CreditCardDTO getById(Long id) {
+        String login = (String) SecurityContextHolder.getContext().getAuthentication().getCredentials();
         log.debug("Trying to get card by id :{}", id);
         CreditCard creditCard = repository.findByIdAndUser_Credentials_Login(id, login);
         if (creditCard == null) throw new EntityNotFoundException("Cannot find credit card by this parameters");
@@ -73,16 +76,18 @@ public class CreditCardServiceImpl implements CreditCardService {
 
     @Override
     public CreditCardDTO create(CreditCardDTO creditCardDTO) {
+        String login = (String) SecurityContextHolder.getContext().getAuthentication().getCredentials();
         log.debug("Trying to create credit card with balance :{}", creditCardDTO.getBalance());
         CreditCard creditCard = converter.convertToEntity(creditCardDTO);
-        creditCard.setUser(userConverter.convertToEntity(service.findByLogin(creditCardDTO.getLogin())));
+        creditCard.setUser(userConverter.convertToEntity(service.findByLogin(login)));
         creditCard.setNumber(BigInteger.valueOf((Math.abs(random.nextLong()))));
         creditCard = repository.save(creditCard);
         return converter.convertToDTO(creditCard);
     }
 
     @Override
-    public void delete(Long id, String login) {
+    public void delete(Long id) {
+        String login = (String) SecurityContextHolder.getContext().getAuthentication().getCredentials();
         log.info("Trying to delete card... id :{}", id);
         if (!repository.existsByIdAndUser_Credentials_Login(id, login))
             throw new EntityNotFoundException("You are trying to delete not existing card");
@@ -92,8 +97,9 @@ public class CreditCardServiceImpl implements CreditCardService {
     @Override
     public CreditCardDTO updateBalance(CreditCardDTO creditCardDTO) {
         log.info("Trying to change card balance");
+        String login = (String) SecurityContextHolder.getContext().getAuthentication().getCredentials();
         CreditCard creditCard;
-        if ((creditCard = (repository.findByIdAndUser_Credentials_Login(creditCardDTO.getId(), creditCardDTO.getLogin()))) == null)
+        if ((creditCard = (repository.findByIdAndUser_Credentials_Login(creditCardDTO.getId(), login))) == null)
             throw new EntityNotFoundException("You are trying to update not existing credit card");
         creditCard.setBalance(creditCardDTO.getBalance());
         if (creditCard.getBalance() < 0) throw new CannotUpdateEntityException();
@@ -101,9 +107,9 @@ public class CreditCardServiceImpl implements CreditCardService {
     }
 
     @Override
-    public CreditCardDTO getByGreatestBalance(String login) {
-        log.info("Trying to get user card");
-        Optional<CreditCardDTO> creditCard = getAllClientCards(login)
+    public CreditCardDTO getByGreatestBalance() {
+        log.info("Trying to get best user card");
+        Optional<CreditCardDTO> creditCard = getAllClientCards()
                 .stream()
                 .max(Comparator.comparing(CreditCardDTO::getBalance));
         if (creditCard.isPresent()) {

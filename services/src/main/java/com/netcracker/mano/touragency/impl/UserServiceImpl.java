@@ -75,7 +75,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         if (checkUserIfExist(user.getCredentials().getLogin()))
             throw new RegistrationException("Cannot register user with already existing login");
         user.setIsBlocked(false);
-        user.setRole(roleConverter.convertToEntity(roleService.findByName("client")));
+        user.setRole(roleConverter.convertToEntity(roleService.findByName("ROLE_CLIENT")));
         String encodedPassword = encoder.encode(user.getCredentials().getPassword());
         user.getCredentials().setPassword(encodedPassword);
         return userConverter.convertToDTO(userRepository.save(user));

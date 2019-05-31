@@ -5,17 +5,17 @@ import com.netcracker.mano.touragency.dto.CreditCardDTO;
 import java.util.List;
 
 public interface CreditCardService {
-    List<CreditCardDTO> getAllClientCards(String login);
+    List<CreditCardDTO> getAllClientCards();
 
-    CreditCardDTO getById(String login, Long id);
+    CreditCardDTO getById(Long id);
 
     CreditCardDTO create(CreditCardDTO creditCard);
 
-    void delete(Long id, String login);
+    void delete(Long id);
 
     CreditCardDTO updateBalance(CreditCardDTO creditCard);
 
-    CreditCardDTO getByGreatestBalance(String login);
+    CreditCardDTO getByGreatestBalance();
 
     List<CreditCardDTO> getAll();
 }

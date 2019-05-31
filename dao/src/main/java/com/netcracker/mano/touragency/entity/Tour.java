@@ -28,7 +28,7 @@ public class Tour extends BaseEntity {
     private String country;
 
     @ManyToOne
-    @JoinColumn(name = "category_id")
+    @JoinColumn(name = "category_id", referencedColumnName = "id")
     private Category category;
 
     @Column(name = "price")

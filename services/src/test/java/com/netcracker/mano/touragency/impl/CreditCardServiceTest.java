@@ -16,6 +16,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +26,7 @@ import java.util.List;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
@@ -68,6 +71,11 @@ public class CreditCardServiceTest {
         cardDTO.setId(1L);
         cardDTO.setBalance(500);
         initMocks(this);
+        Authentication authentication = mock(Authentication.class);
+        SecurityContext securityContext = mock(SecurityContext.class);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(authentication.getCredentials()).thenReturn("login");
     }
 
 
@@ -83,7 +91,7 @@ public class CreditCardServiceTest {
     @Test(expected = EntityNotFoundException.class)
     public void clientHaveNoCards() {
         when(repository.findAllByUser_Credentials_Login(anyString())).thenReturn(new ArrayList<>());
-        creditCardService.getAllClientCards("login");
+        creditCardService.getAllClientCards();
     }
 
     @Test
@@ -92,20 +100,20 @@ public class CreditCardServiceTest {
         cards.add(card);
         when(repository.findAllByUser_Credentials_Login("login")).thenReturn(cards);
         when(converter.convertToDTO(any())).thenReturn(cardDTO);
-        assertThat(creditCardService.getAllClientCards("login").get(0), is(cardDTO));
+        assertThat(creditCardService.getAllClientCards().get(0), is(cardDTO));
     }
 
     @Test(expected = EntityNotFoundException.class)
     public void cannotFindCardById() {
         when(repository.findByIdAndUser_Credentials_Login(anyLong(), anyString())).thenReturn(null);
-        creditCardService.getById("login", 1L);
+        creditCardService.getById(1L);
     }
 
     @Test
     public void findUserCardById() {
         when(repository.findByIdAndUser_Credentials_Login(1L, "login")).thenReturn(card);
         when(converter.convertToDTO(card)).thenReturn(cardDTO);
-        assertThat(creditCardService.getById("login", 1L), is(cardDTO));
+        assertThat(creditCardService.getById(1L), is(cardDTO));
     }
 
     @Test
@@ -117,39 +125,39 @@ public class CreditCardServiceTest {
         when(userService.findByLogin("login")).thenReturn(userDTO);
         when(userConverter.convertToEntity(any())).thenReturn(user);
         when(repository.save(card)).thenReturn(card);
-        assertThat(creditCardService.create(cardDTO),is(cardDTO));
+        assertThat(creditCardService.create(cardDTO), is(cardDTO));
     }
 
     @Test(expected = EntityNotFoundException.class)
-    public void cannotDeleteNotExistingCard(){
-        when(repository.existsByIdAndUser_Credentials_Login(1L,"login")).thenReturn(FALSE);
-        creditCardService.delete(1L,"login");
+    public void cannotDeleteNotExistingCard() {
+        when(repository.existsByIdAndUser_Credentials_Login(1L, "login")).thenReturn(FALSE);
+        creditCardService.delete(1L);
     }
 
     @Test
-    public void deleteCard(){
-        when(repository.existsByIdAndUser_Credentials_Login(1L,"login")).thenReturn(TRUE);
-        creditCardService.delete(1L,"login");
-        verify(repository,times(1)).delete(1L);
+    public void deleteCard() {
+        when(repository.existsByIdAndUser_Credentials_Login(1L, "login")).thenReturn(TRUE);
+        creditCardService.delete(1L);
+        verify(repository, times(1)).delete(1L);
     }
 
     @Test
-    public void updateCardBalance(){
-        when(repository.findByIdAndUser_Credentials_Login(1L,"login")).thenReturn(card);
+    public void updateCardBalance() {
+        when(repository.findByIdAndUser_Credentials_Login(1L, "login")).thenReturn(card);
         when(converter.convertToDTO(any())).thenReturn(cardDTO);
         when(repository.save(card)).thenReturn(card);
         when(converter.convertToEntity(any())).thenReturn(card);
-        assertThat(creditCardService.updateBalance(cardDTO),is(cardDTO));
+        assertThat(creditCardService.updateBalance(cardDTO), is(cardDTO));
 
     }
 
     @Test
-    public void getUserBestCard(){
+    public void getUserBestCard() {
         List<CreditCard> cards = new ArrayList<>();
         cards.add(card);
         when(repository.findAllByUser_Credentials_Login("login")).thenReturn(cards);
         when(converter.convertToDTO(any())).thenReturn(cardDTO);
-        assertThat(creditCardService.getByGreatestBalance("login"),is(cardDTO));
+        assertThat(creditCardService.getByGreatestBalance(), is(cardDTO));
     }
 
 

@@ -19,7 +19,7 @@ public class User extends BaseEntity {
     private long id;
 
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "credentials_id")
+    @JoinColumn(name = "credentials_id", referencedColumnName = "id")
     private Credentials credentials;
 
     @Column(name = "name")
@@ -29,7 +29,7 @@ public class User extends BaseEntity {
     private String surname;
 
     @ManyToOne
-    @JoinColumn(name = "role_id")
+    @JoinColumn(name = "role_id", referencedColumnName = "id")
     private Role role;
 
     @Column(name = "is_blocked")

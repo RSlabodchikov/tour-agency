@@ -17,6 +17,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -88,20 +91,25 @@ public class BookingServiceTest {
         bookingDTO.setNumberOfClients(1);
         bookingDTO.setBalance(500D);
         initMocks(this);
+        Authentication authentication = mock(Authentication.class);
+        SecurityContext securityContext = mock(SecurityContext.class);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(authentication.getCredentials()).thenReturn("login");
     }
 
 
     @Test
     public void deleteBooking() {
         when(repository.existsByIdAndUser_Credentials_Login(1L, "login")).thenReturn(true);
-        bookingService.delete(1L, "login");
+        bookingService.delete(1L);
         verify(repository, times(1)).delete(1L);
     }
 
     @Test(expected = EntityNotFoundException.class)
     public void cannotDeleteNotExistingBooking() {
         when(repository.existsByIdAndUser_Credentials_Login(1L, "login")).thenReturn(false);
-        bookingService.delete(1L, "login");
+        bookingService.delete(1L);
     }
 
     @Test
@@ -110,13 +118,13 @@ public class BookingServiceTest {
         bookings.add(booking);
         when(repository.findAllByUser_Credentials_Login("login")).thenReturn(bookings);
         when(converter.convertToDTO(any())).thenReturn(bookingDTO);
-        assertThat(bookingService.getAll("login").get(0), is(bookingDTO));
+        assertThat(bookingService.getAll().get(0), is(bookingDTO));
     }
 
     @Test(expected = EntityNotFoundException.class)
     public void userHaveNoBookings() {
         when(repository.findAllByUser_Credentials_Login(anyString())).thenReturn(new ArrayList<>());
-        bookingService.getAll("login");
+        bookingService.getAll();
     }
 
     @Test
@@ -139,14 +147,14 @@ public class BookingServiceTest {
     @Test(expected = EntityNotFoundException.class)
     public void cannotFindById() {
         when(repository.findByIdAndUser_Credentials_Login(1L, "login")).thenReturn(null);
-        bookingService.findById(1L, "login");
+        bookingService.findById(1L);
     }
 
     @Test
     public void findById() {
         when(repository.findByIdAndUser_Credentials_Login(1L, "login")).thenReturn(booking);
         when(converter.convertToDTO(booking)).thenReturn(bookingDTO);
-        assertThat(bookingService.findById(1L, "login"), is(bookingDTO));
+        assertThat(bookingService.findById(1L), is(bookingDTO));
     }
 
     @Test
@@ -155,7 +163,7 @@ public class BookingServiceTest {
         bookings.add(booking);
         when(repository.findAllByTour_Category_NameAndUser_Credentials_Login(anyString(), anyString())).thenReturn(bookings);
         when(converter.convertToDTO(any())).thenReturn(bookingDTO);
-        assertThat(bookingService.findAllByCategory("login", "sport").get(0), is(bookingDTO));
+        assertThat(bookingService.findAllByCategory("sport").get(0), is(bookingDTO));
     }
 
     @Test
@@ -174,7 +182,7 @@ public class BookingServiceTest {
         when(userConverter.convertToEntity(userDTO)).thenReturn(user);
         CreditCardDTO creditCard = new CreditCardDTO();
         creditCard.setBalance(500D);
-        when(creditCardService.getById(any(), anyLong())).thenReturn(creditCard);
+        when(creditCardService.getById(anyLong())).thenReturn(creditCard);
         assertThat(bookingService.create(bookingDTO), is(bookingDTO));
 
     }

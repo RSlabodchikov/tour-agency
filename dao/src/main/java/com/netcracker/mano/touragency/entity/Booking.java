@@ -23,15 +23,15 @@ public class Booking extends BaseEntity {
     @Column(name = "total_price")
     private double totalPrice;
 
-    @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name="user_id")
+    @ManyToOne(cascade = CascadeType.MERGE)
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
-    @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "tour_id")
+    @ManyToOne(cascade = CascadeType.MERGE)
+    @JoinColumn(name = "tour_id", referencedColumnName = "id")
     private Tour tour;
 
     @ManyToOne
-    @JoinColumn(name = "card_id")
+    @JoinColumn(name = "card_id", referencedColumnName = "id")
     private CreditCard card;
 }

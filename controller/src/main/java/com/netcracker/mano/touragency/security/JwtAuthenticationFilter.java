@@ -47,7 +47,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             try {
                 login = jwtTokenUtil.getUsernameFromToken(authToken);
             } catch (IllegalArgumentException e) {
-                log.error("An error occured during getting login from token", e);
+                log.error("An error ocured during getting login from token", e);
             } catch (ExpiredJwtException e) {
                 log.error("The token is expired and not valid anymore", e);
             } catch (SignatureException e) {
@@ -61,11 +61,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             UserDetails userDetails = service.loadUserByUsername(login);
             if (jwtTokenUtil.validateToken(authToken, userDetails)) {
                 UsernamePasswordAuthenticationToken authenticationToken = new
-                        UsernamePasswordAuthenticationToken(userDetails, null,
+                        UsernamePasswordAuthenticationToken(userDetails, login,
                         userDetails.getAuthorities());
                 authenticationToken.setDetails(new WebAuthenticationDetailsSource()
                         .buildDetails(request));
-                log.info("Authenticated user " + login + ",setting security context");
+                log.info("Authenticated user with role : " + userDetails.getAuthorities()+ ",setting security context");
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
             }
         }
